@@ -1,3 +1,10 @@
+:root{
+    --shadePrimary: #7d0a0a;
+    --shadePrimaryLight: #bf3131;
+    --dark: #161616;
+    --white: #f5f5f5;
+}
+
 .iti {
     width: 100%;
     --iti-path-flags-1x: url('/intl-tel-input-23.1.0/img/flags.png');
@@ -35,9 +42,10 @@
     padding: 24px 40px;
 }
 .bg-sidebar {
-    background-image: url("../assets/images/bg-sidebar.svg");
-    background-repeat: no-repeat;
-    background-size: cover;
+    /* background-image: url("../assets/images/bg-sidebar.svg"); */
+    /* background-repeat: no-repeat;
+    background-size: cover; */
+    background: var(--white);
     height: 100%;
     -webkit-box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.16);
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.16);
@@ -47,13 +55,13 @@
 }
 
 table.rowAlternate tr:nth-child(odd) {
-    background: #fff;
+    background: var(--white);
 }
 table.rowAlternate tr:nth-child(even) {
-    background: #fffefa;
+    background: var(--white);
 }
 .text-sidebar {
-    color: #d94430;
+    color: var(--shadePrimary);
     font-family: "Outfit";
     font-style: normal;
     font-weight: 400;
@@ -61,18 +69,18 @@ table.rowAlternate tr:nth-child(even) {
     line-height: 24px;
 }
 .text-sidebar:hover {
-    color: #d94430;
+    color: var(--shadePrimary);
 }
 .active-navbar {
     color: #585857;
-    background-color: #ffffff;
+    background-color: var(--white);
 }
 .add-button {
-    color: #ffffff;
+    color: var(--white);
     background: radial-gradient(
         72.55% 72.55% at 80.25% 14.9%,
-        #fb815b 0%,
-        #d94430 100%
+        var(--shadePrimary) 0%,
+        var(--shadePrimaryLight) 100%
     );
     border-radius: 8px;
 }
@@ -105,7 +113,7 @@ table.rowAlternate tr:nth-child(even) {
     gap: 8px;
 }
 .goBack-text {
-    color: #D94430;
+    color: var(--shadePrimary);
     font-family: "Outfit";
     font-size: 16px;
     font-weight: 700;
@@ -115,7 +123,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .text-sidebar-title1 {
-    color: var(--sunrise-orange-v-2, #d94430);
+    color: var(--shadePrimary);
     font-family: Outfit;
     font-size: 18px;
     font-style: normal;
@@ -156,7 +164,7 @@ table.rowAlternate tr:nth-child(even) {
 
 .welcome-name-circle {
     border-radius: 24px;
-    background: var(--sunrise-orange-v-2, #d94430);
+    background:var(--shadePrimary);
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -185,11 +193,11 @@ table.rowAlternate tr:nth-child(even) {
     font-weight: 700;
     font-size: 16px;
     line-height: 16px;
-    color: #d94430;
+    color: var(--shadePrimary);
 }
 
 .need-help:hover {
-    color: #d94430;
+    color: var(--shadePrimary);
 }
 
 .table {
@@ -265,7 +273,12 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .bg-login {
-    background-image: url("../assets/images/bg-login.svg");
+    background: linear-gradient(-5deg, var(--shadePrimary) 0%, var(--white) 90%);
+    /* background: radial-gradient(
+        72.55% 72.55% at 80.25% 14.9%,
+        var(--shadePrimary) 0%,
+        var(--white) 100%
+    ); */
     height: 100%;
     background-attachment: local;
     background-repeat: no-repeat;
@@ -323,7 +336,7 @@ table.rowAlternate tr:nth-child(even) {
     line-height: 24px;
 
     /* Brown */
-    color: #947a75;
+    color: var(--dark);
 }
 
 .bg-button {
@@ -331,13 +344,13 @@ table.rowAlternate tr:nth-child(even) {
     background: radial-gradient(
         72.55% 72.55% at 80.25% 14.9%,
         #fb815b 0%,
-        #d94430 100%
+        var(--shadePrimary) 100%
     );
     border-radius: 8px;
 }
 
 .center-image-login {
-    width: 50%;
+    width: 80%;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -362,7 +375,7 @@ table.rowAlternate tr:nth-child(even) {
             radial-gradient(
                 95.08% 95.08% at 80.25% 14.9%,
                 #fb815b 0%,
-                #d94430 100%
+                var(--shadePrimary) 100%
             )
         ),
         url("../assets/images/bg-modal.svg");
@@ -399,7 +412,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .label-modal-device {
-    color: var(--sunrise-orange-v-2, #d94430);
+    color:var(--shadePrimary);
     /* Table/Column title */
     font-size: 14px;
     font-family: Outfit;
@@ -497,11 +510,11 @@ table.rowAlternate tr:nth-child(even) {
     line-height: 16px;
 
     /* Sunrise Orange v2 */
-    color: #d94430;
+    color: var(--shadePrimary);
 }
 
 .go-back:hover {
-    color: #d94430;
+    color: var(--shadePrimary);
 }
 
 .facility-name {
@@ -580,7 +593,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 .nav-header > .nav-link {
     /* Sunrise Orange */
-    color: #f2664b;
+    color: var(--shadePrimaryLight);
 }
 
 .hidden-content-main {
@@ -592,7 +605,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .cancel-button {
-    color: var(--sunrise-orange-v-2, #d94430);
+    color: var(--shadePrimary);
     /* Table/Column title */
     font-size: 14px;
     font-family: Outfit;
@@ -604,7 +617,7 @@ table.rowAlternate tr:nth-child(even) {
     border-radius: 8px;
     background: var(--white, #fff) !important;
     border-color: var(--white, #fff) !important;
-    color: var(--sunrise-orange, #f2664b) !important;
+    color:var(--shadePrimary) !important;
     text-align: center;
     /* Button/CTA */
     font-size: 20px;
@@ -622,7 +635,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .input-file {
-    //color: var(--placeholder, #ccc);
+    color: var(--placeholder, #ccc);
     /* Input/Placeholder */
     color: var(--placeholder, #ccc) !important;
     /* Input/Placeholder */
@@ -727,7 +740,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .card-plans-amount {
-    color: var(--sunrise-orange-v-2, #d94430);
+    color: var(--shadePrimary);
     font-family: Outfit;
     font-size: 20px;
     font-style: normal;
@@ -757,7 +770,7 @@ table.rowAlternate tr:nth-child(even) {
     line-height: 16px;
 }
 .card-package-plan {
-    color: var(--sunrise-orange-v-2, #d94430);
+    color:var(--shadePrimary);
     font-family: Outfit;
     font-size: 12px;
     font-style: normal;
@@ -779,7 +792,7 @@ table.rowAlternate tr:nth-child(even) {
 .card-package-button {
     border-radius: 8px;
     border: 1px solid var(--borderline, #ddd);
-    color: var(--sunrise-orange-v-2, #d94430);
+    color: var(--shadePrimary);
 
     /* Button/CTA */
     font-family: Outfit;
@@ -791,7 +804,7 @@ table.rowAlternate tr:nth-child(even) {
 
 .card-package-button_active {
     border-radius: 8px;
-    border: 2px solid var(--sunrise-orange, #f2664b);
+    border: 2px solid var(--sunrise-orange, var(--shadePrimaryLight));
 }
 
 .client-non-package {
@@ -808,7 +821,7 @@ table.rowAlternate tr:nth-child(even) {
     background: radial-gradient(
         72.55% 72.55% at 80.25% 14.9%,
         #fb815b 0%,
-        #d94430 100%
+        var(--shadePrimary) 100%
     );
     border-radius: 8px;
 }
@@ -816,7 +829,7 @@ table.rowAlternate tr:nth-child(even) {
     border-radius: 8px;
     background: var(--white, #fff);
     border-color: var(--white, #fff);
-    color: var(--sunrise-orange, #f2664b);
+    color: var(--sunrise-orange, var(--shadePrimaryLight));
     text-align: center;
     /* Button/CTA */
     font-size: 20px;
@@ -831,7 +844,7 @@ table.rowAlternate tr:nth-child(even) {
             radial-gradient(
                 95.08% 95.08% at 80.25% 14.9%,
                 #fb815b 0%,
-                #d94430 100%
+                var(--shadePrimary) 100%
             )
         ),
         url("../assets/images/bg-modal.svg");
@@ -876,11 +889,11 @@ table.rowAlternate tr:nth-child(even) {
     width: 64px;
     height: 64px;
     margin: 8px;
-    border: 8px solid #d94430;
+    border: 8px solid var(--shadePrimary);
     border-radius: 50%;
     -webkit-animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
     animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: #d94430 transparent transparent transparent;
+    border-color: var(--shadePrimary) transparent transparent transparent;
 }
 .lds-ring div:nth-child(1) {
     -webkit-animation-delay: -0.45s;
@@ -924,7 +937,7 @@ table.rowAlternate tr:nth-child(even) {
     border-radius: 8px;
     background: var(
         --Rad,
-        radial-gradient(95.08% 95.08% at 80.25% 14.9%, #fb815b 0%, #d94430 100%)
+        radial-gradient(95.08% 95.08% at 80.25% 14.9%, #fb815b 0%, var(--shadePrimary) 100%)
     );
     color: var(--White, #fff);
 
@@ -941,7 +954,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .export-csv-button {
-    color: #f2664b;
+    color: var(--shadePrimaryLight);
     font-family: "Outfit";
     font-size: 20px;
     font-weight: 600;
@@ -949,15 +962,15 @@ table.rowAlternate tr:nth-child(even) {
     line-height: 20px;
     padding: 14px 32px;
     border-radius: 8px;
-    border: 1px solid #f2664b;
+    border: 1px solid var(--shadePrimaryLight);
     background-color: #fff;
 }
 
 .title-facility-table {
-    color: var(--Sunrise-Orange-v2, #d94430);
+    color: var(--shadePrimary);
 }
 .title-client-table {
-    color: var(--Sunrise-Orange-v2, #d94430);
+    color:var(--shadePrimary);
 }
 .content {
     padding: 40px;
@@ -1125,7 +1138,7 @@ table.rowAlternate tr:nth-child(even) {
     font-style: normal;
 }
 .card-contact-subtitle {
-    color: var(--Sunrise-Orange, #f2664b);
+    color: var(--shadePrimaryLight);
     font-family: Outfit;
     font-size: 12px;
     font-style: normal;
@@ -1135,7 +1148,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .table-content-device {
-    color: var(--Sunrise-Orange-v2, #d94430);
+    color:var(--shadePrimary);
 
     font-family: Outfit;
     font-size: 14px;
@@ -1145,7 +1158,7 @@ table.rowAlternate tr:nth-child(even) {
 }
 
 .table-content-device > a {
-    color: var(--Sunrise-Orange-v2, #d94430) !important;
+    color:var(--shadePrimary) !important;
 
     font-family: Outfit;
     font-size: 14px;
@@ -1156,9 +1169,9 @@ table.rowAlternate tr:nth-child(even) {
 }
 .button-qr-code {
     border-radius: 8px;
-    border: 1px solid var(--Sunrise-Orange-v2, #d94430);
+    border: 1px solid var(--shadePrimary);
     background: var(--White, #fff);
-    color: var(--Sunrise-Orange-v2, #d94430);
+    color:var(--shadePrimary);
     text-align: center;
     font-family: Outfit;
     font-size: 16px;
