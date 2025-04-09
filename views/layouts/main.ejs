@@ -1,0 +1,306 @@
+<!doctype html>
+<html class="h-100">
+
+<head>
+  <base href="/">
+  <script src="/dmxAppConnect/dmxAppConnect.js"></script>
+  <meta charset="UTF-8">
+  <title>Enyrgy</title>
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="/bootstrap/5/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js" integrity="sha256-CutOzxCRucUsn6C6TcEYsauvvYilEniTXldPa6/wu0k=" crossorigin="anonymous"></script>
+  <script src="/dmxAppConnect/dmxRouting/dmxRouting.js" defer></script>
+  <script src="/dmxAppConnect/dmxTyped/dmxTyped.js" defer></script>
+  <script src="/dmxAppConnect/dmxTyped/typed.min.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootstrap5Modal/dmxBootstrap5Modal.js" defer></script>
+  <link rel="stylesheet" href="/dmxAppConnect/dmxValidator/dmxValidator.css" />
+  <script src="/dmxAppConnect/dmxValidator/dmxValidator.js" defer></script>
+  <script src="/dmxAppConnect/dmxDataTraversal/dmxDataTraversal.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootstrap5Alert/dmxBootstrap5Alert.js" defer></script>
+  <script src="/dmxAppConnect/dmxStateManagement/dmxStateManagement.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootstrap5Navigation/dmxBootstrap5Navigation.js" defer></script>
+  <script src="/dmxAppConnect/dmxBrowser/dmxBrowser.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootstrap5PagingGenerator/dmxBootstrap5PagingGenerator.js" defer></script>
+  <script src="/dmxAppConnect/dmxS3Upload/dmxS3Upload.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootstrap5Popovers/dmxBootstrap5Popovers.js" defer></script>
+  <link rel="stylesheet" href="/dmxAppConnect/dmxNotifications/dmxNotifications.css" />
+  <script src="/dmxAppConnect/dmxNotifications/dmxNotifications.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootbox5/bootstrap-modbox.min.js" defer></script>
+  <script src="/dmxAppConnect/dmxBootbox5/dmxBootbox5.js" defer></script>
+  <script src="/dmxAppConnect/dmxScheduler/dmxScheduler.js" defer></script>
+  <link rel="stylesheet" href="/dmxAppConnect/dmxDatePicker/daterangepicker.min.css" />
+  <script src="/dmxAppConnect/dmxDatePicker/daterangepicker.min.js" defer></script>
+  <link rel="stylesheet" href="/dmxAppConnect/dmxDatePicker/dmxDatePicker.css" />
+  <script src="/dmxAppConnect/dmxDatePicker/dmxDatePicker.js" defer></script>
+
+
+  <script src="/dmxAppConnect/dmxFormatter/dmxFormatter.js" defer></script>
+  <script src="/dmxAppConnect/dmxSmoothScroll/dmxSmoothScroll.js" defer></script>
+  <script src="/js/function.js" defer></script>
+  <link rel="stylesheet" href="/intl-tel-input-23.1.0/css/intlTelInput.min.css">
+  <script src="/intl-tel-input-23.1.0/js/intlTelInput.min.js"></script>
+</head>
+
+<body is="dmx-app" id="main" class="h-100">
+  <dmx-notifications id="notifies" position="bottom" timeout="3000"></dmx-notifications>
+  <div is="dmx-browser" id="browser"></div>
+  <dmx-session-manager id="session"></dmx-session-manager>
+  <dmx-serverconnect id="validateSession" url="/api/auth/validateSession" dmx-on:success="session.set('jwt',validateSession.data.token)"></dmx-serverconnect>
+  <dmx-api-datasource id="getMe" is="dmx-fetch" url="/api/user/getMe" dmx-header:authorization="'Bearer '+session.data.jwt"></dmx-api-datasource>
+
+
+  <div class="wappler-block h-100">
+    <div class="row h-100">
+      <div class="col-12 col-lg-2 bg-sidebar col-sm-2 row" id="sidebar">
+        <div class="col-12">
+          <img class="p-4" src="/assets/images/logo.svg">
+          <br>
+          <span class="text-sidebar-title1 p-4">Fuel your immunity</span>
+          <p class="text-sidebar-title2 ps-4">Naturally</p>
+
+
+          <div id="adminSidebar" class="nav w-100 flex-column" dmx-show="getMe.data.user.adminView">
+            <br>
+            <a id="facilities" class="nav-item nav-link text-sidebar ps-4" href="/facilities/">Locations</a>
+            <a id="users" class="nav-item nav-link text-sidebar ps-4" href="/users/">Users</a>
+            <a id="packages" class="nav-item nav-link text-sidebar ps-4" href="/packages/">Plans</a>
+            <a id="devices" class="nav-item nav-link text-sidebar ps-4" href="/devices/">Devices</a>
+            <a id="reports" class="nav-item nav-link text-sidebar ps-4" href="/reports/">Reports</a>
+          </div>
+          <div id="facilitiesSidebar" class="nav w-100 flex-column" dmx-show="getMe.data.user.facilityView">
+            <br>
+            <div class="p-auto" dmx-on:click="browser.goto('/facility/'+query.id+'/profile/')">
+              <p class="text-sidebar-title2 ps-4">{{getMe.data.facility.name}}</p>
+            </div>
+            <div class="ps-4 p-auto mb-5" dmx-on:click="browser.goto('/facility/'+query.id+'/profile/')">
+              <img id="logoFacility" class="max-size-logo" dmx-bind:src="getMe.data.facility.logo">
+            </div>
+            <a id="clientsFacility" class="nav-item nav-link text-sidebar ps-4" dmx-on:click="browser.goto('/facility/'+query.id+'/clients/')" href="./../clients">Clients</a>
+
+            <a id="usersFacility" class="nav-item nav-link text-sidebar ps-4" href="./../users/" dmx-on:click="browser.goto('/facility/'+query.id+'/users/')">Users</a>
+            <a id="packagesFacility" class="nav-item nav-link text-sidebar ps-4" href="./../packages/" dmx-on:click="browser.goto('/facility/'+query.id+'/packages/')">Packages</a>
+            <a id="devicesFacility" class="nav-item nav-link text-sidebar ps-4" href="./../devices/" dmx-on:click="browser.goto('/facility/'+query.id+'/devices/')">Devices</a>
+            <a id="reportsFacility" class="nav-item nav-link text-sidebar ps-4" href="./../reports/" dmx-on:click="browser.goto('/facility/'+query.id+'/reports/')">Reports</a>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="nav w-100 flex-column ps-2 line-sidebar">
+
+            <div class="d-flex">
+              <div class="welcome-name-circle">
+                {{getMe.data.initials}}
+              </div>
+              <div class="nav-item dropdown">
+                <form id="logoutForm" is="dmx-api-form" method="post" dmx-header:authorization="'Bearer '+session.data.jwt" action="/api/auth/logout" dmx-on:success="session.remove('jwt');browser.goto('/')"></form>
+                <a class="nav-link dropdown-toggle welcome-name" data-bs-toggle="dropdown" href="#" id="submenu" role="button" aria-haspopup="true" aria-expanded="false">Hi, {{getMe.data.user.firstName}}</a>
+                <div class="dropdown-menu" aria-labelledby="submenu" id="submenuDropdown">
+                  <a class="dropdown-item welcome-name" href="#" id="logoutItem" dmx-on:click="logoutForm.submit()">Log out</a>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="nav w-100 flex-column ps-2 pb-3 pt-3">
+            <a class="nav-item nav-link need-help" onclick="needHelp()" target="_self" data-bs-toggle="button">Need Help?</a>
+          </div>
+        </div>
+
+
+
+
+
+
+
+
+      </div>
+      <div id="showContent" class="col-12 col-lg-10 col-sm-10">
+        <div is="dmx-view" id="content" class="h-100">
+          <%- await include(content, locals); %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/bootstrap/5/js/bootstrap.bundle.min.js"></script>
+  <!-- change "Reports" menu item to include month and year -->
+  <script>
+    const month = new Date().getMonth()+1
+    const currentMonth = month < 10 ? `0${month}` : month;
+    const currentYear = new Date().getFullYear();
+    const $reportsMenuItem = $('#adminSidebar #reports');
+    const currentHref = $reportsMenuItem.attr('href');
+    const newHref = `${currentHref}${currentMonth}/${currentYear}`;
+    $reportsMenuItem.attr('href', newHref);
+  </script>
+  <script>
+    //get the current path
+      var url = window.location.pathname.split("/")[1] == "facility" ? "facilities" : window.location.pathname.split("/")[1]
+      //validation to hidden the main view
+      if(url=='message'||url==''||url=='welcome'||url=='delete-request'){
+        document.getElementById('sidebar').classList.add("hidden-content-main")
+        document.getElementById('showContent').classList.add("col-12","col-lg-12","col-sm-12")
+      }else{
+        document.getElementById('showContent').classList.add("col-12","col-lg-9","col-sm-8")
+      }
+      //adding background to active navbar
+      var element = document.getElementById(url);
+      element.classList.add("active-navbar");
+  
+      //open mail
+      function needHelp(){
+        window.location = 'mailto:support@eynrgy.com?subject=Help Needed'
+      }
+  </script>
+  <script>
+    function redirect(elem) {
+          let parentNode = elem.parentNode;
+          let id =
+          parentNode.children[parentNode.children.length - 1].children[1]
+              .children[0].value;
+          window.location.href = "/facility/" + id + "/";
+      }
+      function validatePhone(elem) {
+          let phone = elem.value;
+          var cleaned = ('' + phone).replace(/\D/g, '');
+          if(/^[0-9]+$/.test(cleaned)){
+              //normalize string and remove all unnecessary characters
+              phone = phone.replace(/[^\d]/g, "");
+              //check if number length equals to 10
+              if (phone.length == 10) {
+                  //reformat and return phone number
+                  elem.value = phone.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3");
+              }
+              if(phone.length > 10)
+                  elem.value = elem.value.substring(0, elem.value.length - 1);
+          }else{
+              elem.value = elem.value.substring(0, elem.value.length - 1);
+          }
+      }
+  </script>
+  <script>
+    //get the current path facility view
+      var urlFacility = window.location.pathname.split("/")[3] == "client" ? "clientsFacility" : window.location.pathname.split("/")[3]
+      // console.log("urlFacility",urlFacility)
+      //adding background to active navbar facility view
+      var elementFacility = document.getElementById(urlFacility+"Facility");
+      elementFacility.classList.add("active-navbar");
+  </script>
+  <script>
+    function validateNumber(elem,limit){
+              let phone = elem.value;
+              //normalize string and remove all unnecessary characters
+              phone = phone.replace(/[^\d]/g, "");
+              let size = phone.length
+              //check if number length equals to limit
+              if (size == limit) {
+                  //reformat and return zip code
+                  elem.value = phone.replace(/(\d{5})(\d{4})/, "$1-$2");
+              }else if(size < limit){
+                  elem.value = phone
+              }
+              else{
+                  elem.value = elem.value.substring(0, elem.value.length - 1);
+              }
+      }
+  </script>
+  <script>
+    function isNumberPrice(evt)
+      {
+          var charCode = (evt.which) ? evt.which : evt.keyCode;
+          if (charCode != 46 && charCode > 31
+          && (charCode < 48 || charCode> 57))
+              return false;
+          
+              return true;
+      }
+  </script>
+  <script>
+    $(document).ready(function() {
+      initIntlTelInput()
+    });
+
+    function initIntlTelInput() {
+      const inputs = document.querySelectorAll(".intl-phone");
+      
+      inputs.forEach(input => {
+        // const isInitialized = $(input).hasClass('iti__tel-input');
+
+        let iti = null;
+
+        // get inputs custom names if they have
+        const $input = $(input);
+        const telInputName = $input.data('phone-name') || 'phone';
+        const countryInputName = $input.data('countrycode-name') || 'countryCode';
+
+        // delete fields to avoid bug where they duplicate
+        $(input).siblings(`input[name="${telInputName}"]`).remove();
+        $(input).siblings(`input[name="${countryInputName}"]`).remove();
+
+        const init = () => {
+          iti = intlTelInput(input, {
+            initialCountry: "auto",
+            geoIpLookup: callback => {
+              fetch("https://ipapi.co/json")
+                .then(res => res.json())
+                .then(data => callback(data.country_code))
+                .catch(() => callback("us"));
+            },
+            strictMode: true,
+            hiddenInput: function() {
+              return {
+                phone: telInputName,
+                country: countryInputName,
+              };
+            },
+            utilsScript: "/intl-tel-input-23.1.0/js/utils.js",
+          });
+        };
+
+        setTimeout(() => {
+          init();
+
+          // when handling pre-filled fields
+          const value = $(input).val();
+          if (value !== '') {
+            const countryCode = `+${iti.getSelectedCountryData().dialCode}`;
+            $(input).siblings(`input[name="${countryInputName}"]`).val(countryCode);
+            iti.setNumber(value);
+          }
+
+          input.addEventListener('countrychange', function() {
+            const countryCode = `+${iti.getSelectedCountryData().dialCode}`;
+            $(input).siblings(`input[name="${countryInputName}"]`).val(countryCode);
+            validateNumber();
+          })
+          
+          input.addEventListener('input', function() {
+            const countryCode = `+${iti.getSelectedCountryData().dialCode}`;
+            const number = iti.getNumber();
+            
+            const escapedCountryCode = countryCode.replace(/\+/g, '\\+');
+            const phoneNumber = number.replace(new RegExp('^' + escapedCountryCode), '');
+            
+            validateNumber();
+            
+            $(input).siblings(`input[name="${telInputName}"]`).val(phoneNumber);
+          });
+          
+          const validateNumber = () => {
+            const bool = iti.isValidNumber();
+            $(input).closest('.form-group').find('input.validate-input').val(+bool);
+          };
+        }, 100);
+        
+      });
+    }
+  </script>
+</body>
+
+</html>

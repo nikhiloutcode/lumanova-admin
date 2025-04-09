@@ -1,0 +1,527 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "role",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    }
+                  ],
+                  "table": {
+                    "name": "roles"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "roles.id",
+                        "field": "roles.id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}",
+                        "data": {
+                          "table": "roles",
+                          "column": "id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "increments",
+                            "default": "",
+                            "primary": true,
+                            "unique": true,
+                            "nullable": false,
+                            "name": "id"
+                          }
+                        },
+                        "operation": "=",
+                        "table": "roles"
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "select * from \"roles\" where \"roles\".\"id\" = ?"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "boolean",
+                  "name": "sendEmail"
+                },
+                {
+                  "type": "boolean",
+                  "name": "sendSMS"
+                },
+                {
+                  "type": "boolean",
+                  "name": "users"
+                },
+                {
+                  "type": "boolean",
+                  "name": "packages"
+                },
+                {
+                  "type": "boolean",
+                  "name": "devices"
+                },
+                {
+                  "type": "boolean",
+                  "name": "clients"
+                },
+                {
+                  "type": "boolean",
+                  "name": "adminView"
+                },
+                {
+                  "type": "text",
+                  "name": "description"
+                },
+                {
+                  "type": "boolean",
+                  "name": "facilities"
+                },
+                {
+                  "type": "boolean",
+                  "name": "profile"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": {
+                    "name": "roles",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "SELECT",
+                        "distinct": false,
+                        "columns": [
+                          {
+                            "table": "roles",
+                            "column": "*",
+                            "field": "*"
+                          }
+                        ],
+                        "table": {
+                          "name": "roles"
+                        },
+                        "joins": [],
+                        "wheres": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "id": "roles.name",
+                              "field": "roles.name",
+                              "type": "string",
+                              "operator": "contains",
+                              "value": "{{$_GET.sort}}",
+                              "data": {
+                                "table": "roles",
+                                "column": "name",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "name"
+                                }
+                              },
+                              "operation": "LIKE"
+                            },
+                            {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "id": "roles.name",
+                                  "field": "roles.name",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "adminFacility",
+                                  "data": {
+                                    "table": "roles",
+                                    "column": "name",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "name"
+                                    }
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "roles.name",
+                                  "field": "roles.name",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "ownerFacility",
+                                  "data": {
+                                    "table": "roles",
+                                    "column": "name",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "name"
+                                    }
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "roles.name",
+                                  "field": "roles.name",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "facilitatorFacility",
+                                  "data": {
+                                    "table": "roles",
+                                    "column": "name",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "name"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        },
+                        "orders": [],
+                        "params": [
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P1",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          }
+                        ],
+                        "primary": "id",
+                        "query": "select * from \"roles\" where \"roles\".\"name\" like ? and (\"roles\".\"name\" = ? or \"roles\".\"name\" = ? or \"roles\".\"name\" = ?)"
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "sendEmail"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "sendSMS"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "users"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "packages"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "devices"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "clients"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "adminView"
+                      },
+                      {
+                        "type": "text",
+                        "name": "description"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "facilities"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "profile"
+                      }
+                    ],
+                    "outputType": "array",
+                    "type": "dbconnector_select"
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "roles",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "select",
+                        "columns": [],
+                        "params": [],
+                        "table": {
+                          "name": "roles"
+                        },
+                        "primary": "id",
+                        "joins": [],
+                        "query": "select * from \"roles\" where \"roles\".\"name\" = ? or \"roles\".\"name\" = ? or \"roles\".\"name\" = ?",
+                        "wheres": {
+                          "condition": "OR",
+                          "rules": [
+                            {
+                              "id": "roles.name",
+                              "field": "roles.name",
+                              "type": "string",
+                              "operator": "equal",
+                              "value": "adminFacility",
+                              "data": {
+                                "table": "roles",
+                                "column": "name",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "name"
+                                }
+                              },
+                              "operation": "="
+                            },
+                            {
+                              "id": "roles.name",
+                              "field": "roles.name",
+                              "type": "string",
+                              "operator": "equal",
+                              "value": "ownerFacility",
+                              "data": {
+                                "table": "roles",
+                                "column": "name",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "name"
+                                }
+                              },
+                              "operation": "="
+                            },
+                            {
+                              "id": "roles.name",
+                              "field": "roles.name",
+                              "type": "string",
+                              "operator": "equal",
+                              "value": "facilitatorFacility",
+                              "data": {
+                                "table": "roles",
+                                "column": "name",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "name"
+                                }
+                              },
+                              "operation": "="
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        }
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "sendEmail"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "sendSMS"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "users"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "packages"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "devices"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "clients"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "adminView"
+                      },
+                      {
+                        "type": "text",
+                        "name": "description"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "facilities"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "profile"
+                      }
+                    ],
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,327 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "client",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "SELECT",
+            "distinct": false,
+            "columns": [
+              {
+                "table": "user",
+                "column": "*",
+                "field": "user.*"
+              },
+              {
+                "table": "s",
+                "column": "*",
+                "field": "s.*"
+              },
+              {
+                "table": "user",
+                "column": "id",
+                "alias": "userId",
+                "aggregate": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "joins": [
+              {
+                "table": "client",
+                "column": "*",
+                "alias": "c",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "c",
+                      "column": "userId",
+                      "field": "c.userId",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "user",
+                        "column": "id",
+                        "field": "user.id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "detailsClient",
+                "column": "*",
+                "alias": "dc",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "dc",
+                      "column": "clientId",
+                      "field": "dc.clientId",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "c",
+                        "column": "id",
+                        "field": "c.id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "subscriptions",
+                "column": "*",
+                "alias": "s",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "s",
+                      "column": "id",
+                      "field": "s.id",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "dc",
+                        "column": "subscriptionId",
+                        "field": "dc.subscriptionId"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "table": "user",
+                  "column": "id",
+                  "field": "user.id",
+                  "operation": "=",
+                  "operator": "equal",
+                  "value": "{{$_GET.id}}"
+                }
+              ]
+            },
+            "orders": [
+              {
+                "table": "dc",
+                "column": "createdAt",
+                "field": "dc.createdAt",
+                "direction": "desc",
+                "recid": 1
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.id}}",
+                "test": "84"
+              }
+            ],
+            "primary": "id",
+            "query": "select \"user\".*, \"s\".*, \"user\".\"id\" as \"userId\" from \"user\" left join \"client\" as \"c\" on \"c\".\"userId\" = \"user\".\"id\" left join \"detailsClient\" as \"dc\" on \"dc\".\"clientId\" = \"c\".\"id\" left join \"subscriptions\" as \"s\" on \"s\".\"id\" = \"dc\".\"subscriptionId\" where \"user\".\"id\" = ? order by \"dc\".\"createdAt\" desc"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "firstName"
+          },
+          {
+            "type": "text",
+            "name": "lastName"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "verificationCode"
+          },
+          {
+            "type": "datetime",
+            "name": "verificationCodeExpire"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "number",
+            "name": "userIdInvited"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "description"
+          },
+          {
+            "type": "text",
+            "name": "duration"
+          },
+          {
+            "type": "number",
+            "name": "numberDuration"
+          },
+          {
+            "type": "number",
+            "name": "userId"
+          }
+        ],
+        "outputType": "object",
+        "type": "dbconnector_single"
+      },
+      {
+        "name": "historyClient",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT s.*,TO_CHAR(dc.\"createdAt\"::date, 'mm/dd/yyyy') as purchase, p.\"name\" as plan, dc.id as \"subscriptionId\", TO_CHAR(dc.\"expirationAt\"::date, 'mm/dd/yyyy') as expiration,dc.status\nFROM client AS c\nINNER JOIN \"detailsClient\" AS dc ON dc.\"clientId\" = c.id \nINNER JOIN subscriptions AS s ON s.id = dc.\"subscriptionId\"\nleft join \"detailsSubscription\" ds on s.id = ds.\"subscriptionId\" \nleft join \"plans\" p on p.id = ds.\"plansId\" \nWHERE c.\"userId\" = :P1 /* {{$_GET.id}} */ and dc.status != 'Deleted' order by dc.\"createdAt\" desc",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{$_GET.id}}",
+                "test": "130"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "updatedAt",
+            "type": "datetime"
+          },
+          {
+            "name": "description",
+            "type": "text"
+          },
+          {
+            "name": "duration",
+            "type": "text"
+          },
+          {
+            "name": "numberDuration",
+            "type": "number"
+          },
+          {
+            "name": "purchase",
+            "type": "text"
+          },
+          {
+            "name": "plan",
+            "type": "text"
+          },
+          {
+            "name": "subscriptionId",
+            "type": "number"
+          },
+          {
+            "name": "expiration",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          }
+        ],
+        "type": "dbcustom_query"
+      }
+    ]
+  }
+}

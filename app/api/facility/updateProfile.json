@@ -1,0 +1,616 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "logo"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 10,
+              "message": "Please enter at least {0} characters in phone number."
+            }
+          }
+        },
+        "name": "phone"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in facility name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in facility name."
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:email": {}
+          }
+        },
+        "name": "email"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "city"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "state"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 5,
+              "message": "Please enter at least {0} characters in zip code."
+            }
+          }
+        },
+        "name": "zip"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "address1"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "address2"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messages",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "exists",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "facility"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "facility.id",
+                  "field": "facility.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "facility",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"facility\" where \"facility\".\"id\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "logo"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "city"
+          },
+          {
+            "type": "text",
+            "name": "state"
+          },
+          {
+            "type": "text",
+            "name": "zip"
+          },
+          {
+            "type": "text",
+            "name": "address1"
+          },
+          {
+            "type": "text",
+            "name": "address2"
+          },
+          {
+            "type": "text",
+            "name": "salesFirstName"
+          },
+          {
+            "type": "text",
+            "name": "salesLastName"
+          },
+          {
+            "type": "text",
+            "name": "salesEmail"
+          },
+          {
+            "type": "text",
+            "name": "salesPhone"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "phone",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.phone.replace(/\\D+/g,'')}}"
+        },
+        "meta": [],
+        "output": false,
+        "outputType": "text"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exists.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateFacility",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "facility",
+                        "column": "phone",
+                        "type": "text",
+                        "value": "{{phone}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "name",
+                        "type": "text",
+                        "value": "{{$_POST.name}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "email",
+                        "type": "text",
+                        "value": "{{$_POST.email}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "city",
+                        "type": "text",
+                        "value": "{{$_POST.city}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "state",
+                        "type": "text",
+                        "value": "{{$_POST.state}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "zip",
+                        "type": "text",
+                        "value": "{{$_POST.zip}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "address1",
+                        "type": "text",
+                        "value": "{{$_POST.address1}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "address2",
+                        "type": "text",
+                        "value": "{{$_POST.address2}}"
+                      }
+                    ],
+                    "table": "facility",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ]
+                    },
+                    "returning": "id",
+                    "query": "update \"facility\" set \"phone\" = ?, \"updatedAt\" = ?, \"name\" = ?, \"email\" = ?, \"city\" = ?, \"state\" = ?, \"zip\" = ?, \"address1\" = ?, \"address2\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{phone}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.name}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.email}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_POST.city}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.state}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_POST.zip}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{$_POST.address1}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{$_POST.address2}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P10",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.logo}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "upload",
+                        "module": "upload",
+                        "action": "upload",
+                        "options": {
+                          "fields": "{{$_POST.logo}}",
+                          "path": "/public/assets/facilities/{{$_POST.id}}/",
+                          "template": "{name}_{guid}{ext}",
+                          "replaceSpace": true,
+                          "overwrite": true,
+                          "throwErrors": true
+                        },
+                        "meta": [
+                          {
+                            "name": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "path",
+                            "type": "text"
+                          },
+                          {
+                            "name": "url",
+                            "type": "text"
+                          },
+                          {
+                            "name": "type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "size",
+                            "type": "text"
+                          },
+                          {
+                            "name": "error",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "array",
+                        "output": true
+                      },
+                      {
+                        "name": "putFile",
+                        "module": "s3",
+                        "action": "putFile",
+                        "options": {
+                          "provider": "s3",
+                          "bucket": "{{$_ENV.AWS_BUCKET}}",
+                          "key": "{{upload.name}}",
+                          "path": "{{upload.path}}",
+                          "acl": "public-read"
+                        },
+                        "outputType": "boolean",
+                        "output": true
+                      },
+                      {
+                        "name": "updateFacilityLogo",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "facility",
+                                "column": "updatedAt",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "facility",
+                                "column": "logo",
+                                "type": "text",
+                                "value": "{{putFile.Location}}"
+                              }
+                            ],
+                            "table": "facility",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ]
+                            },
+                            "returning": "id",
+                            "query": "update \"facility\" set \"updatedAt\" = ?, \"logo\" = ? where \"id\" = ? returning \"id\"",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{NOW}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{putFile.Location}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P3",
+                                "value": "{{$_POST.id}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ],
+                        "output": true
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messagesHandler.FACILITY_CREATE}}"
+                },
+                "disabled": true
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messages.ERROR_FACILITY}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

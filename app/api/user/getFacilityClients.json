@@ -1,0 +1,737 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "user",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "SELECT",
+                  "distinct": false,
+                  "columns": [
+                    {
+                      "table": "user",
+                      "column": "firstName",
+                      "field": "user.firstName"
+                    },
+                    {
+                      "table": "user",
+                      "column": "lastName",
+                      "field": "user.lastName"
+                    },
+                    {
+                      "table": "user",
+                      "column": "email",
+                      "field": "user.email"
+                    },
+                    {
+                      "table": "user",
+                      "column": "phone",
+                      "field": "user.phone"
+                    },
+                    {
+                      "table": "user",
+                      "column": "userIdInvited",
+                      "field": "user.userIdInvited"
+                    },
+                    {
+                      "table": "r",
+                      "column": "name",
+                      "field": "r.name"
+                    },
+                    {
+                      "table": "user",
+                      "column": "id",
+                      "field": "user.id",
+                      "alias": "id"
+                    },
+                    {
+                      "table": "r",
+                      "column": "id",
+                      "field": "r.id",
+                      "alias": "roleId"
+                    }
+                  ],
+                  "table": {
+                    "name": "user"
+                  },
+                  "joins": [
+                    {
+                      "table": "detailsUser",
+                      "column": "*",
+                      "alias": "du",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "du",
+                            "column": "userId",
+                            "field": "du.userId",
+                            "operation": "=",
+                            "operator": "equal",
+                            "value": {
+                              "table": "user",
+                              "column": "id",
+                              "field": "user.id"
+                            }
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    },
+                    {
+                      "table": "roles",
+                      "column": "*",
+                      "alias": "r",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "r",
+                            "column": "id",
+                            "field": "r.id",
+                            "operation": "=",
+                            "operator": "equal",
+                            "value": {
+                              "table": "du",
+                              "column": "rolesId",
+                              "field": "du.rolesId"
+                            }
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "user",
+                            "column": "id",
+                            "field": "id",
+                            "operation": "=",
+                            "operator": "equal",
+                            "value": "{{$_POST.id}}",
+                            "id": "user.id"
+                          }
+                        ],
+                        "table": "user",
+                        "id": "user.undefined"
+                      },
+                      {
+                        "condition": "OR",
+                        "rules": [
+                          {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "table": "r",
+                                "column": "name",
+                                "field": "r.name",
+                                "operation": "=",
+                                "operator": "equal",
+                                "value": "ownerFacility",
+                                "id": "r.name"
+                              }
+                            ],
+                            "table": "user",
+                            "id": "user.undefined"
+                          },
+                          {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "table": "r",
+                                "column": "name",
+                                "field": "r.name",
+                                "operation": "=",
+                                "operator": "equal",
+                                "value": "adminFacility",
+                                "id": "r.name"
+                              }
+                            ],
+                            "table": "user",
+                            "id": "user.undefined"
+                          },
+                          {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "table": "r",
+                                "column": "name",
+                                "field": "r.name",
+                                "operation": "=",
+                                "operator": "equal",
+                                "value": "salesFacility",
+                                "id": "r.name"
+                              }
+                            ],
+                            "table": "user",
+                            "id": "user.undefined"
+                          }
+                        ],
+                        "table": "user",
+                        "id": "user.undefined"
+                      }
+                    ]
+                  },
+                  "orders": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": "1"
+                    }
+                  ],
+                  "primary": "id",
+                  "query": "select \"user\".\"firstName\", \"user\".\"lastName\", \"user\".\"email\", \"user\".\"phone\", \"user\".\"userIdInvited\", \"r\".\"name\", \"user\".\"id\" as \"id\", \"r\".\"id\" as \"roleId\" from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where (\"user\".\"id\" = ?) and ((\"r\".\"name\" = ?) or (\"r\".\"name\" = ?) or (\"r\".\"name\" = ?))"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "text",
+                  "name": "firstName"
+                },
+                {
+                  "type": "text",
+                  "name": "lastName"
+                },
+                {
+                  "type": "text",
+                  "name": "email"
+                },
+                {
+                  "type": "text",
+                  "name": "phone"
+                },
+                {
+                  "type": "number",
+                  "name": "userIdInvited"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "number",
+                  "name": "roleId"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": {
+                    "name": "users",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "SELECT",
+                        "distinct": false,
+                        "columns": [
+                          {
+                            "table": "user",
+                            "column": "firstName",
+                            "field": "user.firstName"
+                          },
+                          {
+                            "table": "user",
+                            "column": "lastName",
+                            "field": "user.lastName"
+                          },
+                          {
+                            "table": "user",
+                            "column": "email",
+                            "field": "user.email"
+                          },
+                          {
+                            "table": "user",
+                            "column": "phone",
+                            "field": "user.phone"
+                          },
+                          {
+                            "table": "user",
+                            "column": "userIdInvited",
+                            "field": "user.userIdInvited"
+                          },
+                          {
+                            "table": "r",
+                            "column": "name",
+                            "field": "r.name"
+                          },
+                          {
+                            "table": "user",
+                            "column": "id",
+                            "field": "user.id",
+                            "alias": "id"
+                          },
+                          {
+                            "table": "r",
+                            "column": "id",
+                            "field": "r.id",
+                            "alias": "roleId"
+                          }
+                        ],
+                        "table": {
+                          "name": "user",
+                          "full": "user"
+                        },
+                        "joins": [
+                          {
+                            "type": "LEFT",
+                            "table": "detailsUser",
+                            "alias": "du",
+                            "clauses": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "du",
+                                  "column": "userId",
+                                  "field": "du.userId",
+                                  "operation": "=",
+                                  "operator": "equal",
+                                  "value": {
+                                    "table": "user",
+                                    "column": "id",
+                                    "field": "user.id"
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "type": "LEFT",
+                            "table": "roles",
+                            "alias": "r",
+                            "clauses": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "r",
+                                  "column": "id",
+                                  "field": "r.id",
+                                  "operation": "=",
+                                  "operator": "equal",
+                                  "value": {
+                                    "table": "du",
+                                    "column": "rolesId",
+                                    "field": "du.rolesId"
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "wheres": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "user",
+                                      "column": "firstName",
+                                      "field": "user.firstName",
+                                      "operation": "LIKE",
+                                      "operator": "contains",
+                                      "value": "{{$_GET.sort}}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "user",
+                                      "column": "lastName",
+                                      "field": "user.lastName",
+                                      "operation": "LIKE",
+                                      "operator": "contains",
+                                      "value": "{{$_GET.sort}}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "user",
+                                      "column": "email",
+                                      "field": "user.email",
+                                      "operation": "LIKE",
+                                      "operator": "contains",
+                                      "value": "{{$_GET.sort}}"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "user",
+                                      "column": "phone",
+                                      "field": "user.phone",
+                                      "operation": "LIKE",
+                                      "operator": "contains",
+                                      "value": "{{$_GET.sort}}"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "r",
+                                      "column": "name",
+                                      "field": "r.name",
+                                      "operation": "=",
+                                      "operator": "equal",
+                                      "value": "ownerFacility"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "r",
+                                      "column": "name",
+                                      "field": "r.name",
+                                      "operation": "=",
+                                      "operator": "equal",
+                                      "value": "adminFacility"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "r",
+                                      "column": "name",
+                                      "field": "r.name",
+                                      "operation": "=",
+                                      "operator": "equal",
+                                      "value": "salesFacility"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "groupBy": [],
+                        "orders": [],
+                        "params": [
+                          {
+                            "name": ":P1",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          },
+                          {
+                            "name": ":P2",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          },
+                          {
+                            "name": ":P3",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          },
+                          {
+                            "name": ":P4",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          }
+                        ]
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "text",
+                        "name": "firstName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "lastName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "email"
+                      },
+                      {
+                        "type": "text",
+                        "name": "phone"
+                      },
+                      {
+                        "type": "number",
+                        "name": "userIdInvited"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "number",
+                        "name": "roleId"
+                      }
+                    ],
+                    "outputType": "array",
+                    "type": "dbconnector_select"
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "users",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "select",
+                        "columns": [
+                          {
+                            "table": "user",
+                            "column": "firstName"
+                          },
+                          {
+                            "table": "user",
+                            "column": "lastName"
+                          },
+                          {
+                            "table": "user",
+                            "column": "email"
+                          },
+                          {
+                            "table": "user",
+                            "column": "phone"
+                          },
+                          {
+                            "table": "user",
+                            "column": "userIdInvited"
+                          },
+                          {
+                            "table": "r",
+                            "column": "name"
+                          },
+                          {
+                            "table": "user",
+                            "column": "id",
+                            "alias": "id"
+                          },
+                          {
+                            "table": "r",
+                            "column": "id",
+                            "alias": "roleId"
+                          }
+                        ],
+                        "params": [],
+                        "table": {
+                          "name": "user"
+                        },
+                        "primary": "id",
+                        "joins": [
+                          {
+                            "table": "detailsUser",
+                            "column": "*",
+                            "alias": "du",
+                            "type": "LEFT",
+                            "clauses": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "du",
+                                  "column": "userId",
+                                  "operator": "equal",
+                                  "operation": "=",
+                                  "value": {
+                                    "table": "user",
+                                    "column": "id"
+                                  }
+                                }
+                              ]
+                            },
+                            "primary": "id"
+                          },
+                          {
+                            "table": "roles",
+                            "column": "*",
+                            "alias": "r",
+                            "type": "LEFT",
+                            "clauses": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "r",
+                                  "column": "id",
+                                  "operator": "equal",
+                                  "operation": "=",
+                                  "value": {
+                                    "table": "du",
+                                    "column": "rolesId"
+                                  }
+                                }
+                              ]
+                            },
+                            "primary": "id"
+                          }
+                        ],
+                        "query": "select \"user\".\"firstName\", \"user\".\"lastName\", \"user\".\"email\", \"user\".\"phone\", \"user\".\"userIdInvited\", \"r\".\"name\", \"user\".\"id\" as \"id\", \"r\".\"id\" as \"roleId\" from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"r\".\"name\" = ?",
+                        "wheres": {
+                          "condition": "OR",
+                          "rules": [
+                            {
+                              "id": "r.name",
+                              "field": "r.name",
+                              "type": "string",
+                              "operator": "equal",
+                              "value": "clients",
+                              "data": {
+                                "table": "r",
+                                "column": "name",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "name"
+                                }
+                              },
+                              "operation": "="
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        }
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "text",
+                        "name": "firstName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "lastName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "email"
+                      },
+                      {
+                        "type": "text",
+                        "name": "phone"
+                      },
+                      {
+                        "type": "number",
+                        "name": "userIdInvited"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "number",
+                        "name": "roleId"
+                      }
+                    ],
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

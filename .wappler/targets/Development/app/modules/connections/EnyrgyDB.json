@@ -1,0 +1,19 @@
+{
+  "name": "EnyrgyDB",
+  "module": "dbconnector",
+  "action": "connect",
+  "options": {
+    "client": "postgres",
+    "connection": {
+      "host": "{{$_ENV.DB_HOST}}",
+      "port": "{{$_ENV.DB_PORT}}",
+      "user": "{{$_ENV.DB_USER}}",
+      "password": "{{$_ENV.DB_PASS}}",
+      "database": "{{$_ENV.DB_NAME}}"
+    },
+    "meta": {}
+  },
+  "fileName": "EnyrgyDB.json",
+  "serverType": "node",
+  "actionFilePath": "file:///Users/gustavo/Documents/Repos/enyrgy-admin/app/modules/connections/EnyrgyDB.json"
+}

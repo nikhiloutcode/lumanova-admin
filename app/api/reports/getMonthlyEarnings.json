@@ -1,0 +1,1618 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "month"
+      },
+      {
+        "type": "text",
+        "name": "year"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "month"
+      },
+      {
+        "type": "text",
+        "name": "year"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "SILVER_TREATMENT_PRICE",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 4.13
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "GOLD_TREATMENT_PRICE",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 2.63
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "PLATINUM_TREATMENT_PRICE",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 2.1
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "STRIPE_FEE_PERCENT",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0.029
+        },
+        "meta": [],
+        "outputType": "number",
+        "output": false
+      },
+      {
+        "name": "STRIPE_FEE_FIXED",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0.3
+        },
+        "meta": [],
+        "outputType": "number",
+        "output": false
+      },
+      {
+        "name": "COMMISSION_PERCENT",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0.05
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "get plans' limit sessions and cost"
+        }
+      },
+      {
+        "name": "silverPlan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              },
+              {
+                "table": "plans",
+                "column": "amount"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.name",
+                  "field": "plans.name",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "Silver",
+                  "data": {
+                    "table": "plans",
+                    "column": "name",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "name"
+                    }
+                  },
+                  "operation": "=",
+                  "table": "plans"
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"limitSessions\", \"amount\" from \"plans\" where \"plans\".\"name\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "limitSessions"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "goldPlan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              },
+              {
+                "table": "plans",
+                "column": "amount"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.name",
+                  "field": "plans.name",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "Gold",
+                  "data": {
+                    "table": "plans",
+                    "column": "name",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "name"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"limitSessions\", \"amount\" from \"plans\" where \"plans\".\"name\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "limitSessions"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "platinumPlan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              },
+              {
+                "table": "plans",
+                "column": "amount"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.name",
+                  "field": "plans.name",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "Platinum",
+                  "data": {
+                    "table": "plans",
+                    "column": "name",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "name"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"limitSessions\", \"amount\" from \"plans\" where \"plans\".\"name\" = ?",
+            "orders": []
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "limitSessions"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "month",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.month||$_GET.month}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "year",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.year||$_GET.year}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "grand totals globals"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandTreatmentsTotal",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandFacilityTotal",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandEnyrgyBalance",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandEnyrgyProfit",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "get facilities with completed treatments on the selected month"
+        }
+      },
+      {
+        "name": "facilities",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT f.*\nFROM facility f\nINNER JOIN treatments t ON t.\"facilityId\" = f.id\nINNER JOIN \"detailsPayment\" dp ON dp.id = t.\"paymentId\"\nWHERE t.complete = TRUE AND TO_CHAR(t.\"createdAt\", 'MM') = :P1 AND TO_CHAR(t.\"createdAt\", 'YYYY') = :P2 AND t.\"paymentId\" IS NOT NULL AND dp.\"freeTrialEndAt\" IS NULL\nGROUP BY f.id\nORDER BY f.id ASC",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{month}}",
+                "test": "11"
+              },
+              {
+                "name": ":P2",
+                "value": "{{year}}",
+                "test": "2023"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "logo",
+            "type": "text"
+          },
+          {
+            "name": "phone",
+            "type": "text"
+          },
+          {
+            "name": "disabled",
+            "type": "boolean"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "updatedAt",
+            "type": "datetime"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "type": "text"
+          },
+          {
+            "name": "city",
+            "type": "text"
+          },
+          {
+            "name": "state",
+            "type": "text"
+          },
+          {
+            "name": "zip",
+            "type": "text"
+          },
+          {
+            "name": "address1",
+            "type": "text"
+          },
+          {
+            "name": "address2",
+            "type": "text"
+          },
+          {
+            "name": "salesFirstName",
+            "type": "text"
+          },
+          {
+            "name": "salesLastName",
+            "type": "text"
+          },
+          {
+            "name": "salesEmail",
+            "type": "text"
+          },
+          {
+            "name": "salesPhone",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "facilitiesLoop",
+        "module": "core",
+        "action": "repeat",
+        "options": {
+          "repeat": "{{facilities}}",
+          "outputFields": [],
+          "exec": {
+            "steps": [
+              {
+                "name": "facility",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$value}}"
+                },
+                "meta": [],
+                "outputType": "object",
+                "output": false
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "== GET ENYRGY RELATED TOTALS =="
+                }
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "silverEnyrgyBalance",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "silverEnyrgyProfit",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "goldEnyrgyBalance",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "goldEnyrgyProfit",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "platinumEnyrgyBalance",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "platinumEnyrgyProfit",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "get subscriptions"
+                }
+              },
+              {
+                "name": "groupedSubscriptions",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT\nCOUNT(t.id) AS \"totalTreatments\",\nt.\"paymentId\",\ndp.\"planId\", dp.\"freeTrialEndAt\",\np.name AS \"planName\"\nFROM treatments t\nINNER JOIN \"detailsPayment\" dp ON dp.id = t.\"paymentId\"\nINNER JOIN plans p ON p.id = dp.\"planId\"\nWHERE \"facilityId\" = :P1 AND t.complete = TRUE AND TO_CHAR(t.\"createdAt\", 'MM') = :P2 AND TO_CHAR(t.\"createdAt\", 'YYYY') = :P3 AND dp.\"freeTrialEndAt\" IS NULL\nGROUP BY t.\"paymentId\", dp.\"planId\", dp.\"freeTrialEndAt\", p.name\nORDER BY dp.\"planId\" ASC",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{facility.id}}",
+                        "test": "26"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{month}}",
+                        "test": "11"
+                      },
+                      {
+                        "name": ":P3",
+                        "value": "{{year}}",
+                        "test": "2023"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "totalTreatments",
+                    "type": "number"
+                  },
+                  {
+                    "name": "paymentId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "freeTrialEndAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text"
+                  }
+                ],
+                "output": false
+              },
+              {
+                "name": "groupedSubscriptionsLoop",
+                "module": "core",
+                "action": "repeat",
+                "options": {
+                  "repeat": "{{groupedSubscriptions}}",
+                  "outputFields": [],
+                  "exec": {
+                    "steps": [
+                      {
+                        "name": "group",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$value}}"
+                        },
+                        "meta": [],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{group.planName=='Silver'}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "facilityTotal",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{group.totalTreatments.toNumber()*SILVER_TREATMENT_PRICE}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "stripeFees",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{(((silverPlan.amount.toNumber()*STRIPE_FEE_PERCENT)+STRIPE_FEE_FIXED).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "commissions",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((silverPlan.amount.toNumber() * COMMISSION_PERCENT).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "netSubscriptionAmount",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{silverPlan.amount.toNumber()-stripeFees-commissions}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyTreatmentAmount",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((netSubscriptionAmount/silverPlan.limitSessions.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyBalance",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((enyrgyTreatmentAmount*group.totalTreatments.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyProfit",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((enyrgyBalance-facilityTotal).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "silverEnyrgyBalance",
+                                  "value": "{{silverEnyrgyBalance+enyrgyBalance}}"
+                                },
+                                "meta": [],
+                                "outputType": "number"
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "silverEnyrgyProfit",
+                                  "value": "{{silverEnyrgyProfit+enyrgyProfit}}"
+                                },
+                                "meta": [],
+                                "outputType": "number"
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{group.planName=='Gold'}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "facilityTotal",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{group.totalTreatments.toNumber()*GOLD_TREATMENT_PRICE}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "stripeFees",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{(((goldPlan.amount.toNumber()*STRIPE_FEE_PERCENT)+STRIPE_FEE_FIXED).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "commissions",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((goldPlan.amount.toNumber() * COMMISSION_PERCENT).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "netSubscriptionAmount",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{goldPlan.amount.toNumber()-stripeFees-commissions}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyTreatmentAmount",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((netSubscriptionAmount/goldPlan.limitSessions.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyBalance",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((enyrgyTreatmentAmount*group.totalTreatments.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyProfit",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((enyrgyBalance-facilityTotal).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "goldEnyrgyBalance",
+                                  "value": "{{goldEnyrgyBalance+enyrgyBalance}}"
+                                },
+                                "meta": [],
+                                "outputType": "number"
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "goldEnyrgyProfit",
+                                  "value": "{{goldEnyrgyProfit+enyrgyProfit}}"
+                                },
+                                "meta": [],
+                                "outputType": "number"
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{group.planName=='Platinum'}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "facilityTotal",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{group.totalTreatments.toNumber()*PLATINUM_TREATMENT_PRICE}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "stripeFees",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{(((platinumPlan.amount.toNumber()*STRIPE_FEE_PERCENT)+STRIPE_FEE_FIXED).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "commissions",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((platinumPlan.amount.toNumber() * COMMISSION_PERCENT).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "netSubscriptionAmount",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{platinumPlan.amount.toNumber()-stripeFees-commissions}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyTreatmentAmount",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((netSubscriptionAmount/platinumPlan.limitSessions.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyBalance",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((enyrgyTreatmentAmount*group.totalTreatments.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "enyrgyProfit",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{((enyrgyBalance-facilityTotal).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "platinumEnyrgyBalance",
+                                  "value": "{{platinumEnyrgyBalance+enyrgyBalance}}"
+                                },
+                                "meta": [],
+                                "outputType": "number"
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "platinumEnyrgyProfit",
+                                  "value": "{{platinumEnyrgyProfit+enyrgyProfit}}"
+                                },
+                                "meta": [],
+                                "outputType": "number"
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "grandEnyrgyBalance",
+                          "value": "{{((grandEnyrgyBalance + enyrgyBalance).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "grandEnyrgyProfit",
+                          "value": "{{((grandEnyrgyProfit+enyrgyProfit).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "$index",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$number",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "$value",
+                    "type": "object"
+                  },
+                  {
+                    "name": "totalTreatments",
+                    "type": "number"
+                  },
+                  {
+                    "name": "paymentId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "freeTrialEndAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "facilityTotal",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "stripeFees",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "commissions",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "netSubscriptionAmount",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "enyrgyTreatmentAmount",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "enyrgyBalance",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "enyrgyProfit",
+                    "type": "number",
+                    "sub": []
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "== GET FACILITY RELATED TOTALS =="
+                }
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "get total treatments grouped by plans"
+                }
+              },
+              {
+                "name": "groupedTreatments",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT\ncount(t.id) as \"totalTreatments\",\ndp.\"planId\",\np.name as \"planName\"\nFROM treatments t\nINNER JOIN \"detailsPayment\" dp ON dp.id = t.\"paymentId\"\nINNER JOIN plans p ON p.id = dp.\"planId\"\nWHERE t.\"facilityId\" = :P1 AND complete = TRUE AND TO_CHAR(t.\"createdAt\", 'MM') = :P2 AND TO_CHAR(t.\"createdAt\", 'YYYY') = :P3 AND t.\"paymentId\" IS NOT NULL AND dp.\"freeTrialEndAt\" IS NULL\nGROUP BY dp.\"planId\", p.name",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{facility.id}}",
+                        "test": "26"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{month}}",
+                        "test": "11"
+                      },
+                      {
+                        "name": ":P3",
+                        "value": "{{year}}",
+                        "test": "2023"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "totalTreatments",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "sumTreatments",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "totalEarnings",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "groupedTreatmentsLoop",
+                "module": "core",
+                "action": "repeat",
+                "options": {
+                  "repeat": "{{groupedTreatments}}",
+                  "outputFields": [],
+                  "exec": {
+                    "steps": [
+                      {
+                        "name": "group",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$value}}"
+                        },
+                        "meta": [],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "sumTreatments",
+                          "value": "{{sumTreatments+group.totalTreatments.toNumber()}}"
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{group.planName=='Silver'}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "totalEarnings",
+                                  "value": "{{totalEarnings+(group.totalTreatments.toNumber()*SILVER_TREATMENT_PRICE)}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false
+                              },
+                              {
+                                "name": "currentEarning",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{group.totalTreatments.toNumber()*SILVER_TREATMENT_PRICE}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false,
+                                "disabled": true
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{group.planName=='Gold'}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "totalEarnings",
+                                  "value": "{{totalEarnings+(group.totalTreatments.toNumber()*GOLD_TREATMENT_PRICE)}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false
+                              },
+                              {
+                                "name": "currentEarnings",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{group.totalTreatments.toNumber()*GOLD_TREATMENT_PRICE}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false,
+                                "disabled": true
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{group.planName=='Platinum'}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "key": "totalEarnings",
+                                  "value": "{{totalEarnings+(group.totalTreatments.toNumber()*PLATINUM_TREATMENT_PRICE)}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false
+                              },
+                              {
+                                "name": "currentEarnings",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{group.totalTreatments.toNumber()*PLATINUM_TREATMENT_PRICE}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false,
+                                "disabled": true
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "$index",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$number",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "$value",
+                    "type": "object"
+                  },
+                  {
+                    "name": "totalTreatments",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "grandTreatmentsTotal",
+                  "value": "{{grandTreatmentsTotal+sumTreatments}}"
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "grandFacilityTotal",
+                  "value": "{{grandFacilityTotal+totalEarnings}}"
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "facilities outputs"
+                }
+              },
+              {
+                "name": "id",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{facility.id}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "name",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{facility.name}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "totalTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{sumTreatments}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "totalFacility",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{(totalEarnings.formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "enyrgyBalance",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{((silverEnyrgyBalance + goldEnyrgyBalance + platinumEnyrgyBalance).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                },
+                "meta": [],
+                "output": true,
+                "outputType": "number"
+              },
+              {
+                "name": "enyrgyProfit",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{((silverEnyrgyProfit+goldEnyrgyProfit+platinumEnyrgyProfit).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "$index",
+            "type": "number"
+          },
+          {
+            "name": "$number",
+            "type": "number"
+          },
+          {
+            "name": "$name",
+            "type": "text"
+          },
+          {
+            "name": "$value",
+            "type": "object"
+          },
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "logo",
+            "type": "text"
+          },
+          {
+            "name": "phone",
+            "type": "text"
+          },
+          {
+            "name": "disabled",
+            "type": "boolean"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "updatedAt",
+            "type": "datetime"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "type": "text"
+          },
+          {
+            "name": "city",
+            "type": "text"
+          },
+          {
+            "name": "state",
+            "type": "text"
+          },
+          {
+            "name": "zip",
+            "type": "text"
+          },
+          {
+            "name": "address1",
+            "type": "text"
+          },
+          {
+            "name": "address2",
+            "type": "text"
+          },
+          {
+            "name": "salesFirstName",
+            "type": "text"
+          },
+          {
+            "name": "salesLastName",
+            "type": "text"
+          },
+          {
+            "name": "salesEmail",
+            "type": "text"
+          },
+          {
+            "name": "salesPhone",
+            "type": "text"
+          },
+          {
+            "name": "id",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "name",
+            "type": "text",
+            "sub": []
+          },
+          {
+            "name": "totalTreatments",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "totalFacility",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "enyrgyBalance",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "enyrgyProfit",
+            "type": "number",
+            "sub": []
+          }
+        ],
+        "outputType": "array",
+        "output": true
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "grand totals outputs"
+        }
+      },
+      {
+        "name": "grandTreatmentsTotal",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandTreatmentsTotal}}"
+        },
+        "meta": [],
+        "outputType": "number",
+        "output": true
+      },
+      {
+        "name": "grandFacilityTotal",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandFacilityTotal}}"
+        },
+        "meta": [],
+        "outputType": "number",
+        "output": true
+      },
+      {
+        "name": "grandEnyrgyBalance",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandEnyrgyBalance}}"
+        },
+        "meta": [],
+        "outputType": "number",
+        "output": true
+      },
+      {
+        "name": "grandEnyrgyProfit",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandEnyrgyProfit}}"
+        },
+        "meta": [],
+        "outputType": "number",
+        "output": true
+      }
+    ]
+  }
+}

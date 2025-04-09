@@ -1,0 +1,651 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "object",
+        "name": "data",
+        "sub": [
+          {
+            "type": "object",
+            "ref": "stripe_subscription",
+            "name": "object"
+          }
+        ]
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "subscriptionId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.id}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "customerId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.customer}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "status",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.status}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "livemode",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.livemode}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "client",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "SELECT",
+            "distinct": false,
+            "columns": [
+              {
+                "table": "client",
+                "column": "id",
+                "field": "id"
+              },
+              {
+                "table": "client",
+                "column": "treatments",
+                "field": "treatments"
+              }
+            ],
+            "table": {
+              "name": "client"
+            },
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "table": "client",
+                  "column": "customerId",
+                  "field": "customerId",
+                  "operation": "=",
+                  "operator": "equal",
+                  "value": "{{customerId}}"
+                }
+              ]
+            },
+            "orders": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{customerId}}",
+                "test": "cus_OuvUmSJpLlhNmd"
+              }
+            ],
+            "primary": "id",
+            "query": "select \"id\", \"treatments\" from \"client\" where \"client\".\"customerId\" = ?"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "number",
+            "name": "treatments"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "subscription",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "detailsPayment",
+                "column": "id"
+              },
+              {
+                "table": "detailsPayment",
+                "column": "planId"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{subscriptionId}}",
+                "test": "sub_1O764jJBEsF0e79Vms8cYWPa"
+              }
+            ],
+            "table": {
+              "name": "detailsPayment"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "detailsPayment.subscriptionStripeId",
+                  "field": "detailsPayment.subscriptionStripeId",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{subscriptionId}}",
+                  "data": {
+                    "table": "detailsPayment",
+                    "column": "subscriptionStripeId",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "text",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "subscriptionStripeId"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"id\", \"planId\" from \"detailsPayment\" where \"detailsPayment\".\"subscriptionStripeId\" = ?"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "number",
+            "name": "planId"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{client.id&&subscription.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "plan",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [
+                      {
+                        "table": "plans",
+                        "column": "id"
+                      },
+                      {
+                        "table": "plans",
+                        "column": "limitSessions"
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{subscription.planId}}",
+                        "test": "21"
+                      }
+                    ],
+                    "table": {
+                      "name": "plans"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "plans.id",
+                          "field": "plans.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{subscription.planId}}",
+                          "data": {
+                            "table": "plans",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select \"id\", \"limitSessions\" from \"plans\" where \"plans\".\"id\" = ?"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "limitSessions"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "treatmentsCount",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [
+                      {
+                        "table": "treatments",
+                        "column": "id",
+                        "alias": "count",
+                        "aggregate": "COUNT"
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{subscription.id}}",
+                        "test": "114"
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{true}}",
+                        "test": "true"
+                      }
+                    ],
+                    "table": {
+                      "name": "treatments"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "treatments.paymentId",
+                          "field": "treatments.paymentId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{subscription.id}}",
+                          "data": {
+                            "table": "treatments",
+                            "column": "paymentId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "detailsPayment",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "paymentId"
+                            }
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "treatments.complete",
+                          "field": "treatments.complete",
+                          "type": "boolean",
+                          "operator": "equal",
+                          "value": "{{true}}",
+                          "data": {
+                            "table": "treatments",
+                            "column": "complete",
+                            "type": "boolean",
+                            "columnObj": {
+                              "type": "boolean",
+                              "default": "false",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "name": "complete"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select count(\"id\") as \"count\" from \"treatments\" where \"treatments\".\"paymentId\" = ? and \"treatments\".\"complete\" = ?",
+                    "groupBy": []
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "count"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "clientTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{client.treatments.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "totalTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{treatmentsCount.count.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "planTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{plan.limitSessions.toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "treatmentsToRemove",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{planTreatments-totalTreatments}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "newClientTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{clientTreatments-treatmentsToRemove}}",
+                  "key": "newClientTreatments"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{newClientTreatments<0}}",
+                  "then": {
+                    "steps": {
+                      "name": "",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "key": "newClientTreatments",
+                        "value": 0
+                      },
+                      "meta": [],
+                      "outputType": "number",
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "update client treatments"
+                }
+              },
+              {
+                "name": "updateTreatments",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "client",
+                        "column": "treatments",
+                        "type": "number",
+                        "value": "{{newClientTreatments}}"
+                      }
+                    ],
+                    "table": "client",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{client.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"client\" set \"treatments\" = ? where \"id\" = ?",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{newClientTreatments}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{client.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "update subscription status"
+                }
+              },
+              {
+                "name": "updateSubscription",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "detailsPayment",
+                        "column": "status",
+                        "type": "text",
+                        "value": "{{'canceled'}}"
+                      },
+                      {
+                        "table": "detailsPayment",
+                        "column": "canceledAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "detailsPayment",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{subscription.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"detailsPayment\" set \"status\" = ?, \"canceledAt\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{'canceled'}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P3",
+                        "value": "{{subscription.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ],
+                "output": true
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "error",
+              "module": "core",
+              "action": "setvalue",
+              "options": {
+                "value": "Client or Subscription not found"
+              },
+              "meta": [],
+              "output": true,
+              "outputType": "text"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

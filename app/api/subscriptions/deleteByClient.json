@@ -1,0 +1,250 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "exists",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "detailsClient"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "select * from \"detailsClient\" where \"detailsClient\".\"id\" = ?",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "detailsClient.id",
+                  "field": "detailsClient.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "detailsClient",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "number",
+            "name": "clientId"
+          },
+          {
+            "type": "number",
+            "name": "subscriptionId"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "status"
+          },
+          {
+            "type": "datetime",
+            "name": "expirationAt"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exists.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateDetailsClient",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "detailsClient",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "detailsClient",
+                        "column": "status",
+                        "type": "text",
+                        "value": "Deleted"
+                      },
+                      {
+                        "table": "detailsClient",
+                        "column": "expirationAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "detailsClient",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ]
+                    },
+                    "returning": "id",
+                    "query": "update \"detailsClient\" set \"updatedAt\" = ?, \"status\" = ?, \"expirationAt\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P3",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messagesHandler.SUBSCRIPTION_SAVE}}"
+                }
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_SUBSCRIPTION}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

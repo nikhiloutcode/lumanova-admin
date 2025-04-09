@@ -1,0 +1,151 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" -->
+<dmx-api-datasource id="getMonthlyConsumedTreatmentsByFacility" is="dmx-fetch" url="/api/reports/getMonthlyConsumedTreatmentsByFacility" dmx-param:month="query.month" dmx-param:year="query.year" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:facilityid="query.facilityId"></dmx-api-datasource>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/reports/getInformation" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value"></dmx-api-datasource>
+<meta name="ac:route" content="/reports/facility/:facilityId/:month/:year">
+
+<style>
+    .result-box {
+        margin-top: 8px;
+        padding-top: 4px;
+        border-top: 1px solid #ddd;
+    }
+
+    .result-box span {
+        color: #999;
+    }
+</style>
+
+<div class="">
+    <div class="row position-relative" style="height: 100vh;">
+        <div class="col">
+            <div class="bg-header bg-header--padding reports-header d-flex justify-content-between align-items-center">
+                <h1 class="title-section">
+                    Reports
+                </h1>
+
+                <div class="d-flex" style="gap: 16px;">
+                    <input id="search" name="search" class="search-input" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+                    <div class="d-flex position-relative">
+                        <select id="monthSelector" class="form-select input-select-date" dmx-bind:value="query.month">
+                            <option value="0" disabled>Select month</option>
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <img id="uploadMonth" class="image-upload" src="/assets/images/down.svg" width="20px">
+                    </div>
+                    <div class="d-flex position-relative">
+                        <select id="yearSelector" class="form-select input-select-date" dmx-bind:value="query.year">
+                            <option value="0" disabled>Select year</option>
+                        </select>
+                        <img id="uploadYear" class="image-upload" src="/assets/images/down.svg" width="20px">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="goBack-bar p-auto" dmx-on:click="browser.back()">
+                    <img src="/assets/images/back.png">
+                    <p class="goBack-text">Go back</p>
+                </div>
+                <div class="d-flex align-items-center justify-content-between" style="padding-right: 40px;">
+                    <h2 class="subtitle-section">{{getMonthlyConsumedTreatmentsByFacility.data.facility.name}}</h2>
+                    <img dmx-bind:src="getMonthlyConsumedTreatmentsByFacility.data.facility.logo" width="140" dmx-bind:alt="getMonthlyConsumedTreatmentsByFacility.data.facility.name">
+                </div>
+            </div>
+            <div class="content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p style="" class="results-data">Showing <b class="results-data-bold">{{getMonthlyConsumedTreatmentsByFacility.data.treatmentsLoop.length || 0}}</b> consumed treatments</p>
+                    <!-- <button id="csv" class="btn export-csv-button">Export CSV</button> -->
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table class="table rowAlternate">
+                            <thead>
+                                <tr>
+
+                                    <th scope="col" class="table-header" style="width: 20%">Client name</th>
+                                    <th scope="col" class="table-header text-start" style="width: 20%">Related Plan</th>
+                                    <th scope="col" class="table-header text-start" style="width: 15%">Date</th>
+                                    <th scope="col" class="table-header text-center" style="width: 15%">Location</th>
+                                    <th scope="col" class="table-header text-center" style="width: 15%">Enyrgy balance</th>
+                                    <th scope="col" class="table-header text-center" style="width: 15%">Enyrgy profit</th>
+                                </tr>
+                            </thead>
+                            <tbody is="dmx-repeat" key="id" dmx-bind:repeat="getMonthlyConsumedTreatmentsByFacility.data.treatmentsLoop" id="monthlyFacility">
+                                <tr>
+
+                                    <td class="table-content title-facility-table">{{userName}}</td>
+                                    <td class="table-content text-start">
+                                        {{planName}} ({{limitSessions}} per month)
+                                    </td>
+                                    <td class="table-content text-start">
+                                        {{date}}
+                                    </td>
+                                    <td class="table-content text-center">
+                                        ${{facilityTotal||0}}
+                                    </td>
+                                    <td class="table-content text-center">
+                                        ${{enyrgyBalance}}
+                                    </td>
+                                    <td class="table-content text-center">
+                                        ${{enyrgyProfit}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-reports-container">
+            <div class="row footer-reports d-flex justify-content-between" style="background-color: #fbfbfb;">
+                <div style="flex-basis: 55%;">
+                    <h3 class="footer-reports-total">Subtotal</h3>
+                </div>
+                <div style="flex-basis: 15%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyConsumedTreatmentsByFacility.data.grandFacilityTotal||0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 15%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyConsumedTreatmentsByFacility.data.grandEnyrgyBalance||0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 15%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyConsumedTreatmentsByFacility.data.grandEnyrgyProfit||0}}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- dynamic years -->
+<script>
+    const MIN_YEAR = 2023;
+    const MAX_YEAR = new Date().getFullYear();
+    const $yearSelector = $('#yearSelector');
+    for (i = MIN_YEAR; i <= MAX_YEAR; i++) {
+        $yearSelector.append(`<option value="${i}">${i}</option>`);
+    }
+</script>
+<!-- dynamic month and year selector -->
+<script>
+    const facilityId = window.location.pathname.split('/')[3];
+    $('#monthSelector, #yearSelector').on('change', function() {
+        const selectedMonth = $('#monthSelector').find('option:selected').val();
+        const selectedYear = $('#yearSelector').find('option:selected').val();
+        window.location.href = `/reports/facility/${facilityId}/${selectedMonth}/${selectedYear}`;
+    });
+</script>

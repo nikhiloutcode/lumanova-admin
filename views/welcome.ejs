@@ -1,0 +1,45 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appconnect="local" components="{dmxTyped:{},dmxBrowser:{},dmxStateManagement:{},dmxScheduler:{},dmxBootbox5:{}}" style="" dmx-on:ready="redirect.load({})" dmx-on:load="redirect.load({})" -->
+
+
+
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="validateSession" is="dmx-fetch" dmx-on:success="run([{'api.send':{url:'/api/auth/redirect',method:'POST',headers:{authorization:`\'Bearer \'+validateSession.data.token`},name:'getRedirect',output:true}},{run:{action:`browser.goto(getRedirect.data.redirect)`,name:'redirect',outputType:'text'}}])" url="/api/auth/validateSession" dmx-on:unauthorized="browser.goto('/')"></dmx-api-datasource>
+
+<div class="bg-login h-100">
+    <div class="container center-login">
+        <div class="row d-flex justify-content-center">
+            <img class="center-image-login" src="/assets/images/logo.svg">
+        </div>
+        <br>
+        <div class="row">
+            <span class="text-sidebar-title1">Fuel your immunity</span>
+            <span class="text-sidebar-title2">Naturally</span>
+        </div>
+        <br>
+        <div class="row">
+            <p class="text-login">Boost Your Wellness with Enyrgy's Light Therapy Device and Mobile App</p>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-12">
+                <p class="text-sidebar-title1">Welcome</p>
+            </div>
+            <div class="col-12">
+                <div class="lds-ring">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <meta name="ac:route" content="/welcome/">
+</div>
+<!--<script>
+    dmx.Formatter('object', 'stringify', function stingfy(val) {
+        return JSON.stringify(val);
+    })
+</script>-->

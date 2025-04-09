@@ -1,0 +1,473 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "device",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "SELECT",
+                  "distinct": false,
+                  "columns": [
+                    {
+                      "table": "device",
+                      "column": "id",
+                      "field": "device.id"
+                    },
+                    {
+                      "table": "device",
+                      "column": "serial",
+                      "field": "device.serial"
+                    },
+                    {
+                      "table": "device",
+                      "column": "createdAt",
+                      "field": "device.createdAt"
+                    },
+                    {
+                      "table": "f",
+                      "column": "name",
+                      "field": "f.name"
+                    },
+                    {
+                      "table": "f",
+                      "column": "phone",
+                      "field": "f.phone"
+                    },
+                    {
+                      "table": "device",
+                      "column": "contactName"
+                    },
+                    {
+                      "table": "device",
+                      "column": "contactPhone"
+                    },
+                    {
+                      "table": "device",
+                      "column": "contactEmail"
+                    }
+                  ],
+                  "table": {
+                    "name": "device"
+                  },
+                  "joins": [
+                    {
+                      "table": "facility",
+                      "column": "*",
+                      "alias": "f",
+                      "type": "LEFT",
+                      "clauses": {
+                        "condition": "AND",
+                        "rules": [
+                          {
+                            "table": "f",
+                            "column": "id",
+                            "field": "f.id",
+                            "operation": "=",
+                            "operator": "equal",
+                            "value": {
+                              "table": "device",
+                              "column": "facilityId",
+                              "field": "device.facilityId"
+                            }
+                          }
+                        ]
+                      },
+                      "primary": "id"
+                    }
+                  ],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "table": "device",
+                        "column": "id",
+                        "field": "device.id",
+                        "operation": "=",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}"
+                      }
+                    ]
+                  },
+                  "orders": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": "1"
+                    }
+                  ],
+                  "primary": "id",
+                  "query": "select \"device\".\"id\", \"device\".\"serial\", \"device\".\"createdAt\", \"f\".\"name\", \"f\".\"phone\", \"device\".\"contactName\", \"device\".\"contactPhone\", \"device\".\"contactEmail\" from \"device\" left join \"facility\" as \"f\" on \"f\".\"id\" = \"device\".\"facilityId\" where \"device\".\"id\" = ?"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "serial"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "phone"
+                },
+                {
+                  "type": "text",
+                  "name": "contactName"
+                },
+                {
+                  "type": "text",
+                  "name": "contactPhone"
+                },
+                {
+                  "type": "text",
+                  "name": "contactEmail"
+                }
+              ],
+              "type": "dbconnector_select",
+              "outputType": "array"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": {
+                    "name": "devices",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "SELECT",
+                        "distinct": false,
+                        "columns": [
+                          {
+                            "table": "device",
+                            "column": "id",
+                            "field": "device.id"
+                          },
+                          {
+                            "table": "device",
+                            "column": "serial",
+                            "field": "device.serial"
+                          },
+                          {
+                            "table": "device",
+                            "column": "createdAt",
+                            "field": "device.createdAt"
+                          },
+                          {
+                            "table": "f",
+                            "column": "name",
+                            "field": "f.name"
+                          },
+                          {
+                            "table": "f",
+                            "column": "phone",
+                            "field": "f.phone"
+                          },
+                          {
+                            "table": "device",
+                            "column": "contactName"
+                          },
+                          {
+                            "table": "device",
+                            "column": "contactPhone"
+                          },
+                          {
+                            "table": "device",
+                            "column": "contactEmail"
+                          }
+                        ],
+                        "table": {
+                          "name": "device"
+                        },
+                        "joins": [
+                          {
+                            "table": "facility",
+                            "column": "*",
+                            "alias": "f",
+                            "type": "LEFT",
+                            "clauses": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "f",
+                                  "column": "id",
+                                  "field": "f.id",
+                                  "operation": "=",
+                                  "operator": "equal",
+                                  "value": {
+                                    "table": "device",
+                                    "column": "facilityId",
+                                    "field": "device.facilityId"
+                                  }
+                                }
+                              ]
+                            },
+                            "primary": "id"
+                          }
+                        ],
+                        "wheres": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "id": "device.serial",
+                              "field": "device.serial",
+                              "type": "string",
+                              "operator": "contains",
+                              "value": "{{$_GET.sort}}",
+                              "data": {
+                                "table": "device",
+                                "column": "serial",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "serial"
+                                }
+                              },
+                              "operation": "LIKE"
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        },
+                        "orders": [],
+                        "params": [
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P1",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          }
+                        ],
+                        "primary": "id",
+                        "query": "select \"device\".\"id\", \"device\".\"serial\", \"device\".\"createdAt\", \"f\".\"name\", \"f\".\"phone\", \"device\".\"contactName\", \"device\".\"contactPhone\", \"device\".\"contactEmail\" from \"device\" left join \"facility\" as \"f\" on \"f\".\"id\" = \"device\".\"facilityId\" where \"device\".\"serial\" like ?"
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "serial"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "phone"
+                      },
+                      {
+                        "type": "text",
+                        "name": "contactName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "contactPhone"
+                      },
+                      {
+                        "type": "text",
+                        "name": "contactEmail"
+                      }
+                    ],
+                    "type": "dbconnector_select",
+                    "outputType": "array"
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "devices",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "SELECT",
+                        "distinct": false,
+                        "columns": [
+                          {
+                            "table": "d",
+                            "column": "id"
+                          },
+                          {
+                            "table": "d",
+                            "column": "serial"
+                          },
+                          {
+                            "table": "d",
+                            "column": "createdAt"
+                          },
+                          {
+                            "table": "f",
+                            "column": "name"
+                          },
+                          {
+                            "table": "d",
+                            "column": "contactName"
+                          },
+                          {
+                            "table": "d",
+                            "column": "contactPhone"
+                          },
+                          {
+                            "table": "d",
+                            "column": "contactEmail"
+                          }
+                        ],
+                        "table": {
+                          "name": "device",
+                          "alias": "d"
+                        },
+                        "joins": [
+                          {
+                            "table": "facility",
+                            "column": "*",
+                            "alias": "f",
+                            "type": "LEFT",
+                            "clauses": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "f",
+                                  "column": "id",
+                                  "operator": "equal",
+                                  "operation": "=",
+                                  "value": {
+                                    "table": "d",
+                                    "column": "facilityId"
+                                  }
+                                }
+                              ]
+                            },
+                            "primary": "id"
+                          }
+                        ],
+                        "orders": [],
+                        "params": [],
+                        "primary": "id",
+                        "query": "select \"d\".\"id\", \"d\".\"serial\", \"d\".\"createdAt\", \"f\".\"name\", \"d\".\"contactName\", \"d\".\"contactPhone\", \"d\".\"contactEmail\" from \"device\" as \"d\" left join \"facility\" as \"f\" on \"f\".\"id\" = \"d\".\"facilityId\""
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "serial"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "contactName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "contactPhone"
+                      },
+                      {
+                        "type": "text",
+                        "name": "contactEmail"
+                      }
+                    ],
+                    "type": "dbconnector_select",
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

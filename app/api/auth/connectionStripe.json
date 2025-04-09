@@ -1,0 +1,63 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "userId"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": false
+      },
+      {
+        "name": "token",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "stripe/auth/connection"
+        },
+        "output": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "index.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  },
+  "message.ejs": {
+    "layoutPage": "main",
+    "description": ""
+  }
+}

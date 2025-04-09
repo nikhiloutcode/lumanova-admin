@@ -1,0 +1,536 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "phone"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      "lib/utils/messagesHandler",
+      {
+        "name": "message",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messageHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "trycatch",
+        "options": {
+          "try": {
+            "steps": [
+              "lib/utils/getRandomCode",
+              {
+                "name": "code",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{g_code}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": false
+              },
+              {
+                "name": "phone",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$_POST.phone.replace(\"+1\",\"\").replace(/\\D+/g, \"\")}}"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "exists",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [
+                      {
+                        "table": "user",
+                        "column": "id",
+                        "alias": "id"
+                      },
+                      {
+                        "table": "user",
+                        "column": "phone"
+                      },
+                      {
+                        "table": "r",
+                        "column": "name"
+                      },
+                      {
+                        "table": "r",
+                        "column": "adminView"
+                      },
+                      {
+                        "table": "r",
+                        "column": "mobileView"
+                      },
+                      {
+                        "table": "r",
+                        "column": "facilityView"
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{phone}}",
+                        "test": "3506660003"
+                      }
+                    ],
+                    "table": {
+                      "name": "user"
+                    },
+                    "primary": "id",
+                    "joins": [
+                      {
+                        "table": "detailsUser",
+                        "column": "*",
+                        "alias": "du",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "du",
+                              "column": "userId",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "user",
+                                "column": "id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "roles",
+                        "column": "*",
+                        "alias": "r",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "r",
+                              "column": "id",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "du",
+                                "column": "rolesId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "query": "select \"user\".\"id\" as \"id\", \"user\".\"phone\", \"r\".\"name\", \"r\".\"adminView\", \"r\".\"mobileView\", \"r\".\"facilityView\" from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"user\".\"phone\" = ? and \"r\".\"name\" = ?",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "user.phone",
+                          "field": "user.phone",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "{{phone}}",
+                          "data": {
+                            "table": "user",
+                            "column": "phone",
+                            "type": "text",
+                            "columnObj": {
+                              "type": "string",
+                              "maxLength": 255,
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "name": "phone"
+                            }
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "r.name",
+                          "field": "r.name",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "clients",
+                          "data": {
+                            "table": "r",
+                            "column": "name",
+                            "type": "text",
+                            "columnObj": {
+                              "type": "string",
+                              "maxLength": 255,
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "name": "name"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    }
+                  }
+                },
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "phone"
+                  },
+                  {
+                    "type": "text",
+                    "name": "name"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "adminView"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "mobileView"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "facilityView"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{exists.id&&exists.mobileView}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "expirationCode",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{NOW.dateAdd(\"days\",1)}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "isTesterPhone",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{phone.startsWith(\"35066600\")}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{isTesterPhone}}",
+                          "then": {
+                            "steps": {
+                              "name": "updateUser",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "user",
+                                      "column": "updatedAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "verificationCode",
+                                      "type": "text",
+                                      "value": "{{code}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "verificationCodeExpire",
+                                      "type": "datetime",
+                                      "value": "{{expirationCode}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "isTester",
+                                      "type": "boolean",
+                                      "value": "{{isTesterPhone}}"
+                                    }
+                                  ],
+                                  "table": "user",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "phone",
+                                        "field": "phone",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "{{phone}}",
+                                        "data": {
+                                          "column": "phone"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "update \"user\" set \"updatedAt\" = ?, \"verificationCode\" = ?, \"verificationCodeExpire\" = ?, \"isTester\" = ? where \"phone\" = ? returning \"id\"",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{code}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{expirationCode}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{isTesterPhone}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P5",
+                                      "value": "{{phone}}",
+                                      "test": ""
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "updateUser",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "user",
+                                      "column": "updatedAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "verificationCode",
+                                      "type": "text",
+                                      "value": "{{code}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "verificationCodeExpire",
+                                      "type": "datetime",
+                                      "value": "{{expirationCode}}"
+                                    }
+                                  ],
+                                  "table": "user",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "phone",
+                                        "field": "phone",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "{{phone}}",
+                                        "data": {
+                                          "column": "phone"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "update \"user\" set \"updatedAt\" = ?, \"verificationCode\" = ?, \"verificationCodeExpire\" = ? where \"phone\" = ? returning \"id\"",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{code}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{expirationCode}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P4",
+                                      "value": "{{phone}}",
+                                      "test": ""
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{phone.startsWith(\"35066600\")}}",
+                          "then": {
+                            "steps": {
+                              "name": "code",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "{{code}}"
+                              },
+                              "meta": [],
+                              "outputType": "text",
+                              "output": true
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "twilio",
+                              "module": "core",
+                              "action": "exec",
+                              "options": {
+                                "exec": "utils/sendSMS",
+                                "params": {
+                                  "to": "{{phone}}",
+                                  "body": "{{'Enyrgy invites you to sign in: '+$_ENV.HOST+'/sms/'+code}}"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "notExists",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "catch": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{message.ERROR_TWILIO}}"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

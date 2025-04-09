@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "removesession",
+        "options": {}
+      }
+    ]
+  }
+}

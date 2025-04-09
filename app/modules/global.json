@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "$_ENV": [
+      {
+        "type": "text",
+        "name": "JWT_PRIVATE_KEY"
+      },
+      {
+        "type": "text",
+        "name": "JWT_PUBLIC_KEY"
+      },
+      {
+        "type": "text",
+        "name": "SENDGRID_KEY"
+      },
+      {
+        "type": "text",
+        "name": "SENDGRID_EMAIL"
+      },
+      {
+        "type": "text",
+        "name": "TWILIO_AUTH_TOKEN"
+      },
+      {
+        "type": "text",
+        "name": "TWILIO_ACCOUNT_SID"
+      },
+      {
+        "type": "text",
+        "name": "TWILIO_URL"
+      },
+      {
+        "type": "text",
+        "name": "TWILIO_PHONE"
+      },
+      {
+        "type": "text",
+        "name": "HOST"
+      },
+      {
+        "type": "text",
+        "name": "PORT"
+      },
+      {
+        "type": "text",
+        "name": "DB_HOST"
+      },
+      {
+        "type": "text",
+        "name": "DB_PORT"
+      },
+      {
+        "type": "text",
+        "name": "DB_NAME"
+      },
+      {
+        "type": "text",
+        "name": "DB_USER"
+      },
+      {
+        "type": "text",
+        "name": "DB_PASS"
+      },
+      {
+        "type": "text",
+        "name": "AWS_KEY"
+      },
+      {
+        "type": "text",
+        "name": "AWS_SECRET"
+      },
+      {
+        "type": "text",
+        "name": "AWS_BUCKET"
+      },
+      {
+        "type": "text",
+        "name": "STRIPE_KEY"
+      },
+      {
+        "type": "text",
+        "name": "STRIPE_SECRET_KEY"
+      }
+    ]
+  },
+  "exec": {}
+}

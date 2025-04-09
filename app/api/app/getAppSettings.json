@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "data",
+      "module": "dbconnector",
+      "action": "select",
+      "options": {
+        "connection": "EnyrgyDB",
+        "sql": {
+          "type": "select",
+          "columns": [],
+          "params": [],
+          "table": {
+            "name": "appSettings"
+          },
+          "primary": "id",
+          "joins": [],
+          "query": "select * from \"appSettings\""
+        }
+      },
+      "output": true,
+      "meta": [
+        {
+          "type": "number",
+          "name": "id"
+        },
+        {
+          "type": "text",
+          "name": "currentVersion"
+        },
+        {
+          "type": "text",
+          "name": "minimalVersion"
+        },
+        {
+          "type": "text",
+          "name": "notes"
+        }
+      ],
+      "outputType": "array"
+    }
+  }
+}

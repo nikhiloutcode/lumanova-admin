@@ -1,0 +1,24 @@
+{
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "9897Q4TT78.com.enyrgy.app.stg",
+                "components": [
+                    {
+                        "/": "/sms/*"
+                    },
+                    {
+                        "/": "/scan/*"
+                    }
+                ],
+                "paths": [
+                    "/sms/",
+                    "/sms/*",
+                    "/scan/",
+                    "/scan/*"
+                ]
+            }
+        ]
+    }
+}

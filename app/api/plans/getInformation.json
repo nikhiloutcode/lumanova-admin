@@ -1,0 +1,467 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "package",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    }
+                  ],
+                  "table": {
+                    "name": "plans"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "query": "select * from \"plans\" where \"plans\".\"id\" = ? and \"plans\".\"active\" = ?",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "plans.id",
+                        "field": "plans.id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}",
+                        "data": {
+                          "table": "plans",
+                          "column": "id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "increments",
+                            "default": "",
+                            "primary": true,
+                            "unique": true,
+                            "nullable": false,
+                            "name": "id"
+                          }
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "plans.active",
+                        "field": "plans.active",
+                        "type": "boolean",
+                        "operator": "equal",
+                        "value": true,
+                        "data": {
+                          "table": "plans",
+                          "column": "active",
+                          "type": "boolean",
+                          "columnObj": {
+                            "type": "boolean",
+                            "default": "true",
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "active"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "limitSessions"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "text",
+                  "name": "productId"
+                },
+                {
+                  "type": "boolean",
+                  "name": "active"
+                },
+                {
+                  "type": "text",
+                  "name": "description"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.id}}",
+                "then": {
+                  "steps": {
+                    "name": "packages",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "select",
+                        "columns": [],
+                        "params": [],
+                        "table": {
+                          "name": "plans"
+                        },
+                        "primary": "id",
+                        "joins": [],
+                        "query": "select * from \"plans\" where \"plans\".\"active\" = ? and \"plans\".\"amount\" <> ?",
+                        "wheres": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "id": "plans.active",
+                              "field": "plans.active",
+                              "type": "boolean",
+                              "operator": "equal",
+                              "value": true,
+                              "data": {
+                                "table": "plans",
+                                "column": "active",
+                                "type": "boolean",
+                                "columnObj": {
+                                  "type": "boolean",
+                                  "default": "true",
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "active"
+                                }
+                              },
+                              "operation": "="
+                            },
+                            {
+                              "id": "plans.amount",
+                              "field": "plans.amount",
+                              "type": "string",
+                              "operator": "not_equal",
+                              "value": "0.00",
+                              "data": {
+                                "table": "plans",
+                                "column": "amount",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "amount"
+                                }
+                              },
+                              "operation": "<>"
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        }
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "amount"
+                      },
+                      {
+                        "type": "text",
+                        "name": "limitSessions"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      },
+                      {
+                        "type": "text",
+                        "name": "productId"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "active"
+                      },
+                      {
+                        "type": "text",
+                        "name": "description"
+                      }
+                    ],
+                    "outputType": "array"
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "",
+                    "module": "core",
+                    "action": "condition",
+                    "options": {
+                      "if": "{{$_GET.sort}}",
+                      "then": {
+                        "steps": [
+                          {
+                            "name": "sort",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": "{{$_GET.sort.lowercase()}}"
+                            },
+                            "meta": [],
+                            "outputType": "text"
+                          },
+                          {
+                            "name": "packages",
+                            "module": "dbupdater",
+                            "action": "custom",
+                            "options": {
+                              "connection": "EnyrgyDB",
+                              "sql": {
+                                "query": "SELECT *\nFROM plans\nWHERE (LOWER(name) like '%' || :P1 || '%' /* {{sort}} */ OR LOWER(amount) like '%' || :P1 || '%' /* {{sort}} */ \nOR LOWER(\"limitSessions\") like '%' || :P1 || '%' /* {{sort}} */ OR LOWER(\"description\") like '%' || :P1 || '%' /* {{sort}} */) AND active = true",
+                                "params": [
+                                  {
+                                    "name": ":P1",
+                                    "value": "{{sort}}",
+                                    "test": "a"
+                                  }
+                                ]
+                              }
+                            },
+                            "output": true,
+                            "meta": [
+                              {
+                                "name": "id",
+                                "type": "number"
+                              },
+                              {
+                                "name": "name",
+                                "type": "text"
+                              },
+                              {
+                                "name": "amount",
+                                "type": "text"
+                              },
+                              {
+                                "name": "limitSessions",
+                                "type": "text"
+                              },
+                              {
+                                "name": "createdAt",
+                                "type": "datetime"
+                              },
+                              {
+                                "name": "updatedAt",
+                                "type": "datetime"
+                              },
+                              {
+                                "name": "productId",
+                                "type": "text"
+                              },
+                              {
+                                "name": "active",
+                                "type": "boolean"
+                              },
+                              {
+                                "name": "description",
+                                "type": "text"
+                              }
+                            ],
+                            "type": "dbcustom_query"
+                          }
+                        ]
+                      },
+                      "else": {
+                        "steps": {
+                          "name": "packages",
+                          "module": "dbconnector",
+                          "action": "select",
+                          "options": {
+                            "connection": "EnyrgyDB",
+                            "sql": {
+                              "type": "select",
+                              "columns": [],
+                              "params": [],
+                              "table": {
+                                "name": "plans"
+                              },
+                              "primary": "id",
+                              "joins": [],
+                              "query": "select * from \"plans\" where \"plans\".\"active\" = ?",
+                              "wheres": {
+                                "condition": "AND",
+                                "rules": [
+                                  {
+                                    "id": "plans.active",
+                                    "field": "plans.active",
+                                    "type": "boolean",
+                                    "operator": "equal",
+                                    "value": true,
+                                    "data": {
+                                      "table": "plans",
+                                      "column": "active",
+                                      "type": "boolean",
+                                      "columnObj": {
+                                        "type": "boolean",
+                                        "default": "true",
+                                        "primary": false,
+                                        "unique": false,
+                                        "nullable": true,
+                                        "name": "active"
+                                      }
+                                    },
+                                    "operation": "="
+                                  }
+                                ],
+                                "conditional": null,
+                                "valid": true
+                              }
+                            }
+                          },
+                          "output": true,
+                          "meta": [
+                            {
+                              "type": "number",
+                              "name": "id"
+                            },
+                            {
+                              "type": "text",
+                              "name": "name"
+                            },
+                            {
+                              "type": "text",
+                              "name": "amount"
+                            },
+                            {
+                              "type": "text",
+                              "name": "limitSessions"
+                            },
+                            {
+                              "type": "datetime",
+                              "name": "createdAt"
+                            },
+                            {
+                              "type": "datetime",
+                              "name": "updatedAt"
+                            },
+                            {
+                              "type": "text",
+                              "name": "productId"
+                            },
+                            {
+                              "type": "boolean",
+                              "name": "active"
+                            },
+                            {
+                              "type": "text",
+                              "name": "description"
+                            }
+                          ],
+                          "outputType": "array"
+                        }
+                      }
+                    },
+                    "outputType": "boolean"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

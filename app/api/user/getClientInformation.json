@@ -1,0 +1,162 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "user",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [
+              {
+                "table": "client",
+                "column": "*",
+                "alias": "c",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "c",
+                      "column": "userId",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "user",
+                        "column": "id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"user\" inner join \"client\" as \"c\" on \"c\".\"userId\" = \"user\".\"id\" where \"user\".\"id\" = ?"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "firstName"
+          },
+          {
+            "type": "text",
+            "name": "lastName"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "verificationCode"
+          },
+          {
+            "type": "datetime",
+            "name": "verificationCodeExpire"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "number",
+            "name": "userIdInvited"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      }
+    ]
+  }
+}

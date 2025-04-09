@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "serial"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "facilityId"
+      },
+      {
+        "type": "text",
+        "name": "contactName"
+      },
+      {
+        "type": "text",
+        "name": "contactPhone"
+      },
+      {
+        "type": "text",
+        "name": "contactEmail"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "phone",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.contactPhone.replace(/\\D+/g,'')}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "exists",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "device"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "select * from \"device\" where \"device\".\"id\" = ?",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "device.id",
+                  "field": "device.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "device",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "serial"
+          },
+          {
+            "type": "number",
+            "name": "facilityId"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "contactName"
+          },
+          {
+            "type": "text",
+            "name": "contactPhone"
+          },
+          {
+            "type": "text",
+            "name": "contactEmail"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exists.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateDevice",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "device",
+                        "column": "serial",
+                        "type": "text",
+                        "value": "{{$_POST.serial}}"
+                      },
+                      {
+                        "table": "device",
+                        "column": "updatedAt",
+                        "type": "text",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "device",
+                        "column": "facilityId",
+                        "type": "number",
+                        "value": "{{$_POST.facilityId}}"
+                      },
+                      {
+                        "table": "device",
+                        "column": "contactName",
+                        "type": "text",
+                        "value": "{{$_POST.contactName}}"
+                      },
+                      {
+                        "table": "device",
+                        "column": "contactPhone",
+                        "type": "text",
+                        "value": "{{phone}}"
+                      },
+                      {
+                        "table": "device",
+                        "column": "contactEmail",
+                        "type": "text",
+                        "value": "{{$_POST.contactEmail}}"
+                      }
+                    ],
+                    "table": "device",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "update \"device\" set \"serial\" = ?, \"updatedAt\" = ?, \"facilityId\" = ?, \"contactName\" = ?, \"contactPhone\" = ?, \"contactEmail\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.serial}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.facilityId}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.contactName}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{phone}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.contactEmail}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P7",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ],
+                    "returning": "id"
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messagesHandler.DEVICE_UPDATED}}"
+                }
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "exists",
+              "module": "core",
+              "action": "setvalue",
+              "options": {
+                "value": false
+              },
+              "meta": [],
+              "output": true,
+              "outputType": "text"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

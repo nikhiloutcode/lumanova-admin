@@ -1,0 +1,1418 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "month"
+      },
+      {
+        "type": "text",
+        "name": "year"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "month"
+      },
+      {
+        "type": "text",
+        "name": "year"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "SILVER_TREATMENT_PRICE",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 4.13
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "GOLD_TREATMENT_PRICE",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 2.63
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "PLATINUM_TREATMENT_PRICE",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 2.1
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "STRIPE_FEE_PERCENT",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0.029
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "STRIPE_FEE_FIXED",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0.3
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "COMMISSION_PERCENT",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0.05
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "month",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.month||$_GET.month}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "year",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.year||$_GET.year}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "silverPlan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "amount"
+              },
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.name",
+                  "field": "plans.name",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "Silver",
+                  "data": {
+                    "table": "plans",
+                    "column": "name",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "name"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"amount\", \"limitSessions\" from \"plans\" where \"plans\".\"name\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "limitSessions"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "goldPlan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "amount"
+              },
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.name",
+                  "field": "plans.name",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "Gold",
+                  "data": {
+                    "table": "plans",
+                    "column": "name",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "name"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"amount\", \"limitSessions\" from \"plans\" where \"plans\".\"name\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "limitSessions"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "platinumPlan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "amount"
+              },
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              }
+            ],
+            "params": [],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.name",
+                  "field": "plans.name",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "Platinum",
+                  "data": {
+                    "table": "plans",
+                    "column": "name",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "name"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"amount\", \"limitSessions\" from \"plans\" where \"plans\".\"name\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "text",
+            "name": "limitSessions"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandTotalPendingTreatments",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandTotalFacilityPayable",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandTotalEnyrgyBalance",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "key": "grandTotalEnyrgyProfit",
+          "value": 0
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "get users who have subscriptions for the month and year"
+        }
+      },
+      {
+        "name": "users",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT u.id, u.\"firstName\", u.\"lastName\", c.id AS \"clientId\"\nFROM \"detailsPayment\" dp\nINNER JOIN client c ON c.id = dp.\"clientId\"\nINNER JOIN \"user\" u ON u.id = c.\"userId\"\nWHERE TO_CHAR(dp.\"createdAt\", 'MM') = :P1 AND TO_CHAR(dp.\"createdAt\", 'YYYY') = :P2 AND dp.\"freeTrialEndAt\" IS NULL\nGROUP BY u.id, c.id\nORDER BY u.id ASC",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{month}}",
+                "test": "11"
+              },
+              {
+                "name": ":P2",
+                "value": "{{year}}",
+                "test": "2023"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "firstName",
+            "type": "text"
+          },
+          {
+            "name": "lastName",
+            "type": "text"
+          },
+          {
+            "name": "clientId",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "name": "usersLoop",
+        "module": "core",
+        "action": "repeat",
+        "options": {
+          "repeat": "{{users}}",
+          "outputFields": [],
+          "exec": {
+            "steps": [
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "totalPendingTreatments",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "totalFacilityPayable",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "totalEnyrgyBalance",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "totalEnyrgyProfit",
+                  "value": 0
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "user",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$value}}"
+                },
+                "meta": [],
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "options": {
+                  "comment": "get user's subscriptions"
+                }
+              },
+              {
+                "name": "subscriptions",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT dp.id, dp.\"planId\", p.name AS \"planName\", p.\"limitSessions\"\nFROM \"detailsPayment\" dp\nINNER JOIN plans p ON p.id = dp.\"planId\"\nWHERE dp.\"clientId\" = :P1 AND dp.\"freeTrialEndAt\" IS NULL",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{user.clientId}}",
+                        "test": "213"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "type": "dbcustom_query",
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "limitSessions",
+                    "type": "text"
+                  }
+                ]
+              },
+              {
+                "name": "subscriptionsLoop",
+                "module": "core",
+                "action": "repeat",
+                "options": {
+                  "repeat": "{{subscriptions}}",
+                  "outputFields": [],
+                  "exec": {
+                    "steps": [
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "pendingTreatments",
+                          "value": 0
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "facilityPayable",
+                          "value": 0
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "enyrgyBalance",
+                          "value": 0
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "key": "enyrgyProfit",
+                          "value": 0
+                        },
+                        "meta": [],
+                        "outputType": "number"
+                      },
+                      {
+                        "name": "subscription",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$value}}"
+                        },
+                        "meta": [],
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "planName",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{subscription.planName}}"
+                        },
+                        "meta": [],
+                        "outputType": "text",
+                        "output": true
+                      },
+                      {
+                        "name": "limitSessions",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{subscription.limitSessions}}"
+                        },
+                        "meta": [],
+                        "outputType": "text",
+                        "output": true
+                      },
+                      {
+                        "name": "treatments",
+                        "module": "dbupdater",
+                        "action": "custom",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "query": "SELECT COUNT(id)\nFROM treatments\nWHERE \"paymentId\" = :P1 AND complete = TRUE AND TO_CHAR(\"createdAt\", 'MM') = :P2 AND TO_CHAR(\"createdAt\", 'YYYY') = :P3",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "value": "{{subscription.id}}",
+                                "test": "173"
+                              },
+                              {
+                                "name": ":P2",
+                                "value": "{{month}}",
+                                "test": "11"
+                              },
+                              {
+                                "name": ":P3",
+                                "value": "{{year}}",
+                                "test": "2023"
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "count",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "array"
+                      },
+                      {
+                        "name": "treatmentsLoop",
+                        "module": "core",
+                        "action": "repeat",
+                        "options": {
+                          "repeat": "{{treatments}}",
+                          "outputFields": [],
+                          "exec": {
+                            "steps": [
+                              {
+                                "name": "treatment",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{$value}}"
+                                },
+                                "meta": [],
+                                "outputType": "object"
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{subscription.limitSessions.toNumber()-treatment.count.toNumber()}}",
+                                  "key": "pendingTreatments"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": false
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "condition",
+                                "options": {
+                                  "if": "{{planName=='Silver'}}",
+                                  "then": {
+                                    "steps": [
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((pendingTreatments * SILVER_TREATMENT_PRICE).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "facilityPayable"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "stripeFees",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{(((silverPlan.amount.toNumber()*STRIPE_FEE_PERCENT)+STRIPE_FEE_FIXED).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "commissions",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((silverPlan.amount.toNumber() * COMMISSION_PERCENT).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "netSubscriptionAmount",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{silverPlan.amount.toNumber()-stripeFees-commissions}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "enyrgyTreatmentAmount",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((netSubscriptionAmount/silverPlan.limitSessions.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((enyrgyTreatmentAmount*pendingTreatments).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "enyrgyBalance"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((enyrgyBalance-facilityPayable).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "enyrgyProfit"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      }
+                                    ]
+                                  }
+                                },
+                                "outputType": "boolean"
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "condition",
+                                "options": {
+                                  "if": "{{planName=='Gold'}}",
+                                  "then": {
+                                    "steps": [
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((pendingTreatments * GOLD_TREATMENT_PRICE).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "facilityPayable"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "stripeFees",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{(((goldPlan.amount.toNumber()*STRIPE_FEE_PERCENT)+STRIPE_FEE_FIXED).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "commissions",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((goldPlan.amount.toNumber() * COMMISSION_PERCENT).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "netSubscriptionAmount",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{goldPlan.amount.toNumber()-stripeFees-commissions}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "enyrgyTreatmentAmount",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((netSubscriptionAmount/goldPlan.limitSessions.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((enyrgyTreatmentAmount*pendingTreatments).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "enyrgyBalance"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((enyrgyBalance-facilityPayable).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "enyrgyProfit"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      }
+                                    ]
+                                  }
+                                },
+                                "outputType": "boolean"
+                              },
+                              {
+                                "name": "",
+                                "module": "core",
+                                "action": "condition",
+                                "options": {
+                                  "if": "{{planName=='Platinum'}}",
+                                  "then": {
+                                    "steps": [
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((pendingTreatments * PLATINUM_TREATMENT_PRICE).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "facilityPayable"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "stripeFees",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{(((platinumPlan.amount.toNumber()*STRIPE_FEE_PERCENT)+STRIPE_FEE_FIXED).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "commissions",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((platinumPlan.amount.toNumber() * COMMISSION_PERCENT).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "netSubscriptionAmount",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{platinumPlan.amount.toNumber()-stripeFees-commissions}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "enyrgyTreatmentAmount",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((netSubscriptionAmount/platinumPlan.limitSessions.toNumber()).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((enyrgyTreatmentAmount*pendingTreatments).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "enyrgyBalance"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      },
+                                      {
+                                        "name": "",
+                                        "module": "core",
+                                        "action": "setvalue",
+                                        "options": {
+                                          "value": "{{((enyrgyBalance-facilityPayable).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                                          "key": "enyrgyProfit"
+                                        },
+                                        "meta": [],
+                                        "outputType": "number",
+                                        "output": false
+                                      }
+                                    ]
+                                  }
+                                },
+                                "outputType": "boolean"
+                              }
+                            ]
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "name": "$index",
+                            "type": "number"
+                          },
+                          {
+                            "name": "$number",
+                            "type": "number"
+                          },
+                          {
+                            "name": "$name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "$value",
+                            "type": "object"
+                          },
+                          {
+                            "name": "count",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "array"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{totalPendingTreatments+pendingTreatments}}",
+                          "key": "totalPendingTreatments"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": false
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{((totalFacilityPayable+facilityPayable).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                          "key": "totalFacilityPayable"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": false
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{((totalEnyrgyBalance+enyrgyBalance).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                          "key": "totalEnyrgyBalance"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": false
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{((totalEnyrgyProfit+enyrgyProfit).formatNumber(2, '.', '\\'\\'')).toNumber()}}",
+                          "key": "totalEnyrgyProfit"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": false
+                      },
+                      {
+                        "name": "pendingTreatments",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{pendingTreatments}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      },
+                      {
+                        "name": "facilityPayable",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{facilityPayable}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      },
+                      {
+                        "name": "enyrgyBalance",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{enyrgyBalance}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      },
+                      {
+                        "name": "enyrgyProfit",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{enyrgyProfit}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "$index",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$number",
+                    "type": "number"
+                  },
+                  {
+                    "name": "$name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "$value",
+                    "type": "object"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "limitSessions",
+                    "type": "text"
+                  },
+                  {
+                    "name": "planName",
+                    "type": "text",
+                    "sub": []
+                  },
+                  {
+                    "name": "limitSessions",
+                    "type": "text",
+                    "sub": []
+                  },
+                  {
+                    "name": "pendingTreatments",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "facilityPayable",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "enyrgyBalance",
+                    "type": "number",
+                    "sub": []
+                  },
+                  {
+                    "name": "enyrgyProfit",
+                    "type": "number",
+                    "sub": []
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "totalPendingTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{totalPendingTreatments}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "totalFacilityPayable",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{totalFacilityPayable}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "totalEnyrgyBalance",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{totalEnyrgyBalance}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "totalEnyrgyProfit",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{totalEnyrgyProfit}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "name",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{user.firstName+' '+user.lastName}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "grandTotalPendingTreatments",
+                  "value": "{{grandTotalPendingTreatments+totalPendingTreatments}}"
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "grandTotalFacilityPayable",
+                  "value": "{{((grandTotalFacilityPayable + totalFacilityPayable).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "grandTotalEnyrgyBalance",
+                  "value": "{{((grandTotalEnyrgyBalance + totalEnyrgyBalance).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "key": "grandTotalEnyrgyProfit",
+                  "value": "{{((grandTotalEnyrgyProfit + totalEnyrgyProfit).formatNumber(2, '.', '\\'\\'')).toNumber()}}"
+                },
+                "meta": [],
+                "outputType": "number"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "$index",
+            "type": "number"
+          },
+          {
+            "name": "$number",
+            "type": "number"
+          },
+          {
+            "name": "$name",
+            "type": "text"
+          },
+          {
+            "name": "$value",
+            "type": "object"
+          },
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "firstName",
+            "type": "text"
+          },
+          {
+            "name": "lastName",
+            "type": "text"
+          },
+          {
+            "name": "clientId",
+            "type": "number"
+          },
+          {
+            "name": "subscriptionsLoop",
+            "type": "array",
+            "sub": [
+              {
+                "name": "id",
+                "type": "number"
+              },
+              {
+                "name": "planId",
+                "type": "number"
+              },
+              {
+                "name": "planName",
+                "type": "text",
+                "sub": []
+              },
+              {
+                "name": "limitSessions",
+                "type": "text",
+                "sub": []
+              },
+              {
+                "name": "planName",
+                "type": "text",
+                "sub": []
+              },
+              {
+                "name": "limitSessions",
+                "type": "text",
+                "sub": []
+              },
+              {
+                "name": "pendingTreatments",
+                "type": "number",
+                "sub": []
+              },
+              {
+                "name": "facilityPayable",
+                "type": "number",
+                "sub": []
+              },
+              {
+                "name": "enyrgyBalance",
+                "type": "number",
+                "sub": []
+              },
+              {
+                "name": "enyrgyProfit",
+                "type": "number",
+                "sub": []
+              }
+            ]
+          },
+          {
+            "name": "totalPendingTreatments",
+            "type": "text",
+            "sub": []
+          },
+          {
+            "name": "totalFacilityPayable",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "totalEnyrgyBalance",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "totalEnyrgyProfit",
+            "type": "number",
+            "sub": []
+          },
+          {
+            "name": "name",
+            "type": "text",
+            "sub": []
+          }
+        ],
+        "outputType": "array"
+      },
+      {
+        "name": "grandTotalPendingTreatments",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandTotalPendingTreatments}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "grandTotalFacilityPayable",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandTotalFacilityPayable}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "grandTotalEnyrgyBalance",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandTotalEnyrgyBalance}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "grandTotalEnyrgyProfit",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{grandTotalEnyrgyProfit}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      }
+    ]
+  }
+}

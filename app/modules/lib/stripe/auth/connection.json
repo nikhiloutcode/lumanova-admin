@@ -1,0 +1,13 @@
+{
+  "name": "tokenStripe",
+  "module": "api",
+  "action": "send",
+  "options": {
+    "url": "https://api.stripe.com/v1/terminal/connection_tokens",
+    "method": "POST",
+    "headers": {
+      "authorization": "{{'Bearer ' + $_ENV.STRIPE_SECRET_KEY}}"
+    }
+  },
+  "output": true
+}

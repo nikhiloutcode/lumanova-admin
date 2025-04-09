@@ -1,0 +1,181 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" -->
+<dmx-api-datasource id="getMonthlyEarnings" is="dmx-fetch" url="/api/reports/getMonthlyEarnings" dmx-param:month="query.month" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:year="query.year"></dmx-api-datasource>
+<dmx-api-datasource id="getMonthlyPayableSummary" is="dmx-fetch" url="/api/reports/getMonthlyPayableSummary" dmx-param:month="query.month" dmx-param:year="query.year" dmx-header:authorization="'Bearer '+session.data.jwt"></dmx-api-datasource>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/reports/getInformation" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value"></dmx-api-datasource>
+<meta name="ac:route" content="/reports/:month/:year">
+
+<div class="">
+    <div class="row position-relative" style="height: 100vh;">
+        <div class="col">
+            <div class="bg-header bg-header--padding reports-header d-flex justify-content-between align-items-center">
+                <h1 class="title-section">
+                    Reports
+                </h1>
+
+                <div class="d-flex" style="gap: 16px;">
+                    <input id="search" name="search" class="search-input" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+                    <div class="d-flex position-relative">
+                        <select id="monthSelector" class="form-select input-select-date" dmx-bind:value="query.month">
+                            <option value="0" disabled>Select month</option>
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <img id="uploadMonth" class="image-upload" src="/assets/images/down.svg" width="20px">
+                    </div>
+                    <div class="d-flex position-relative">
+                        <select id="yearSelector" class="form-select input-select-date" dmx-bind:value="query.year">
+                            <option value="0" disabled>Select year</option>
+                        </select>
+                        <img id="uploadYear" class="image-upload" src="/assets/images/down.svg" width="20px">
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="d-flex justify-content-between align-items-center">
+                    <p style="" class="results-data">Showing <b class="results-data-bold">{{getMonthlyEarnings.data.facilitiesLoop.length || 0}}</b> locations</p>
+                    <!-- <button id="csv" class="btn export-csv-button">Export CSV</button> -->
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <table class="table rowAlternate">
+                            <thead>
+                                <tr>
+
+                                    <th scope="col" class="table-header" style="width: 30%">Location name</th>
+                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Treatments</th>
+                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Locations</th>
+                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Enyrgy balance</th>
+                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Enyrgy profit</th>
+                                </tr>
+                            </thead>
+                            <tbody is="dmx-repeat" key="id" dmx-bind:repeat="getMonthlyEarnings.data.facilitiesLoop" id="monthlyEarnings">
+                                <tr>
+
+                                    <td class="table-content title-facility-table p-auto" dmx-on:click="browser.goto('/reports/facility/'+$value.id+'/'+query.month+'/'+query.year+'/')">{{name}}</td>
+                                    <td class="table-content text-center">{{totalTreatments}}</td>
+                                    <td class="table-content text-center">{{'$'+totalFacility}}</td>
+                                    <td class="table-content text-center">{{'$'+enyrgyBalance}}</td>
+                                    <td class="table-content text-center">{{'$'+enyrgyProfit}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-reports-container">
+            <div class="row footer-reports d-flex justify-content-between">
+                <div style="flex-basis: 30%;">
+                    <h3 class="footer-reports-total">Consumed</h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        {{getMonthlyEarnings.data.grandTreatmentsTotal || 0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyEarnings.data.grandFacilityTotal || 0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyEarnings.data.grandEnyrgyBalance || 0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyEarnings.data.grandEnyrgyProfit || 0}}
+                    </h3>
+                </div>
+            </div>
+            <div class="row footer-reports d-flex justify-content-between">
+                <div style="flex-basis: 30%;">
+                    <h3 class="footer-reports-total p-auto" style="color: #D94430;" dmx-on:click="browser.goto('/reports/payable/'+query.month+'/'+query.year+'/')">Enyrgy Inc. Payable (Unconsumed)</h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        {{getMonthlyPayableSummary.data.totalPendingTreatments || 0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyPayableSummary.data.totalPayableMoney || 0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyPayableSummary.data.enyrgyBalancePayable || 0}}
+                    </h3>
+                </div>
+                <div style="flex-basis: 17.5%">
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">
+                        ${{getMonthlyPayableSummary.data.enyrgyProfitPayable || 0}}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- validate month and year exist on the URL -->
+<script>
+    const url = window.location.href;
+    const urlParts = url.split('/');
+    if (urlParts.length < 6) {
+        const month = new Date().getMonth()+1
+        const currentMonth = month < 10 ? `0${month}` : month;
+        const currentYear = new Date().getFullYear();
+        window.location.href = `/reports/${currentMonth}/${currentYear}`;
+    }
+</script>
+<!-- dynamic years -->
+<script>
+    const MIN_YEAR = 2023;
+    const MAX_YEAR = new Date().getFullYear();
+    const $yearSelector = $('#yearSelector');
+    for (i = MIN_YEAR; i <= MAX_YEAR; i++) {
+        $yearSelector.append(`<option value="${i}">${i}</option>`);
+    }
+</script>
+<!-- dynamic month and year selector -->
+<script>
+    $('#monthSelector, #yearSelector').on('change', function() {
+        const selectedMonth = $('#monthSelector').find('option:selected').val();
+        const selectedYear = $('#yearSelector').find('option:selected').val();
+        window.location.href = `/reports/${selectedMonth}/${selectedYear}`;
+    });
+</script>
+<!-- <script>
+    const fetchData = async () => {
+        const response = await fetch(
+            '/api/reports/getMonthlyEarnings',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({month: '11'})
+            }
+        );
+        return response.json();
+    };
+
+    const loadData = () => {
+        fetchData().then(data => {
+            console.log('loadData', data);
+        });
+    };
+
+    loadData();
+</script> -->

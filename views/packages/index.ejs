@@ -1,0 +1,166 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{},dmxValidator:{},dmxDataTraversal:{},dmxBootstrap5Alert:{},dmxStateManagement:{},dmxBrowser:{},dmxBootbox5:{}}" -->
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/plans/getInformation" dmx-param:sort="search.value" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error getting plans')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<meta name="ac:route" content="/packages/">
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appconnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{}}" -->
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+
+            <div class="row bg-header pt-4">
+
+                <div class="col-3">
+                    <h1 class="title-section">
+                        <p>Plans</p>
+                    </h1>
+                </div>
+                <div class="col">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+                </div>
+                <div class="col-2">
+                    <button id="createPackage" class="btn add-button" data-bs-toggle="modal" data-bs-target="#packageCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.packages">Add</button>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="col">
+                    <p style="" class="results-data">Showing <b class="results-data-bold">{{getInformation.data.packages.length}}</b> results</p>
+                </div>
+            </div>
+            <br>
+            <div class="row" is="dmx-repeat" id="packageData" dmx-bind:repeat="getInformation.data.packages">
+                <div class="col-4 pt-2">
+                    <div class="card card-plans h-100">
+                        <div class="card-body h-100">
+                            <div class="row">
+                                <div class="col-11">
+                                    <h2 class="card-title card-plans-title">{{name}}</h2>
+                                </div>
+                                <div class="col-1">
+                                    <div class="dropdown" dmx-show="getMe.data.user.packages">
+                                        <button id="actions" class="btn details-data" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdown1">
+
+                                            <a class="dropdown-item" href="#" dmx-on:click="packageUpdateModal.show();packageUpdateModal.data_package.select(id)" id="editAction">Edit</a>
+                                            <a class="dropdown-item" href="#" dmx-on:click.prevent="run({'bootbox.confirm':{message:'Are you sure you want to delete?',title:'Confirm',buttons:{confirm:{label:'Yes, confirm',className:'btn-primary'},cancel:{label:'Cancel'}},then:{steps:{run:{action:`deletePackage.submit();getInformation.load({})`,name:'submit',outputType:'text'}}},name:'Confirmation'}})" id="deleteAction" dmx-hide="amount==0">Delete</a>
+                                        </div>
+                                    </div>
+                                    <form id="deletePackage" method="post" is="dmx-api-form" action="/api/plans/delete" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="getInformation.load({});notifies.success('Plan deleted')" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error deleting plan')">
+
+                                        <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.packages[$index].id" type="hidden"><button id="delete" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                <h2 class="card-title card-package-secondary_text">{{description}}</h2>
+                            </div>
+                            <div class="d-flex align-items-baseline">
+                                <h3 class="card-text card-plans-sessions">{{limitSessions}} treatments</h3>
+                                <p class="card-text card-plans-secondary_text">&nbsp;/ Every 4 weeks</p>
+                            </div>
+                            <div class="d-flex card-plans-bg_amount mt-3">
+                                <p class="card-text card-plans-title_amount">Price</p>
+                                <p class="card-text card-plans-amount">$ {{amount.toNumber().formatNumber(2, '.', ',')}}</p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="packageCreateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Add a plan</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                    <br><br>
+                    <form id="packageForm" method="post" is="dmx-api-form" action="/api/plans/create" novalidate="" dmx-on:success="packageForm.reset();packageCreateModal.hide();getInformation.load({});notifies.success('Plan created')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error creating plan')" dmx-on:invalid="run({condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.warning(\'Please enter at least 3 characters in the tier name.\')`,outputType:'text'}}},outputType:'boolean'}})">
+
+
+                        <div class="form-group md-3" id="Form">
+                            <div class="row">
+                                <div class="col"><input type="text" class="form-control input-text" id="name" name="name" aria-describedby="nameLabel" placeholder="Tier name" is="dmx-input" value="" minlength="3" maxlength="50" required></div>
+                                <div class="col"><input type="number" class="form-control input-text" id="amount" min="0" name="amount" aria-describedby="nameLabel" placeholder="Price" is="dmx-input" value="" onkeypress="return isNumberPrice(event)" onchange="(function(el){el.value=el.value.replace(/[-,]/g, '').replace(/[+,]/g, '');el.value=parseFloat(el.value).toFixed(2);})(this)" required></div>
+                                <div class="col-12">
+                                    <textarea class="form-control input-text" id="description" name="description" aria-describedby="nameLabel" placeholder="Description" is="dmx-input" value="" required=""></textarea>
+                                </div>
+                            </div>
+
+                        </div><br>
+                        <small class="text-muted fill-inputs-modal">Indicate the number of treatments per 4 weeks:</small>
+                        <br><br>
+                        <div class="form-group md-3" id="limitSessionsForm">
+                            <div class="row">
+
+                                <div class="col-3"><input type="number" class="form-control input-text" id="limitSessions" name="limitSessions" aria-describedby="nameLabel" placeholder="#" is="dmx-input" value="" oninput="this.value = 
+ !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" required></div>
+                                <div class="col d-flex align-items-center">
+                                    <small class="text-muted secondary-label-modal">of treatments</small>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" dmx-on:click="run({condition:{if:`!packageForm.name.value||!packageForm.amount.value||!packageForm.limitSessions.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`packageForm.submit()`,outputType:'text'}},{run:{action:`packageForm.reset()`,outputType:'text'}},{run:{action:`packageCreateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Add</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="packageUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Update a plan</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container" is="dmx-data-detail" id="data_package" dmx-bind:data="getInformation.data.packages" key="id">
+                        <form id="packageForm" method="post" is="dmx-api-form" action="/api/plans/update" novalidate="" dmx-on:success="packageUpdateModal.hide();getInformation.load({});notifies.success('Plan updated')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error updating plan')" dmx-on:invalid="run({condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.warning(\'Please enter at least 3 characters in the tier name.\')`,outputType:'text'}}},outputType:'boolean'}})">
+                            <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                            <br>
+                            <br>
+                            <div class="form-group md-3" id="Form">
+                                <div class="row">
+                                    <div class="col"><input type="text" class="form-control input-text" id="name" name="name" aria-describedby="nameLabel" placeholder="Tier name" is="dmx-input" value="" minlength="3" maxlength="50" required="" dmx-bind:value="data_package.data.name" dmx-class:input-disabled="data_package.data.name=='Employee Facility'||data_package.data.name=='Employee Enyrgy'"></div>
+                                    <div class="col"><input type="number" class="form-control input-text" min="3" id="amount" name="amount" aria-describedby="nameLabel" placeholder="Price" is="dmx-input" value="" onkeypress="return isNumberPrice(event)" onchange="(function(el){el.value=el.value.replace(/[-,]/g, '').replace(/[+,]/g, '');el.value=parseFloat(el.value).toFixed(2);})(this)" required="" dmx-bind:value="data_package.data.amount" data-rule-min="3" dmx-class:input-disabled="data_package.data.amount==0"></div>
+                                    <div class="col-12">
+                                        <textarea class="form-control input-text" id="description" name="description" aria-describedby="nameLabel" placeholder="Description" is="dmx-input" value="" required="" dmx-bind:value="data_package.data.description"></textarea>
+                                    </div>
+                                </div>
+
+                            </div><br>
+                            <small class="text-muted fill-inputs-modal">Indicate the number of treatments per 4 weeks:</small>
+                            <br><br>
+                            <div class="form-group md-3" id="limitSessionsForm">
+                                <div class="row">
+
+                                    <div class="col-3"><input type="number" class="form-control input-text" id="limitSessions" name="limitSessions" aria-describedby="nameLabel" placeholder="#" is="dmx-input" value="" dmx-bind:value="data_package.data.limitSessions" oninput="this.value = 
+ !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" required></div>
+                                    <div class="col d-flex align-items-center">
+                                        <input id="id" name="id" type="hidden" class="form-control" dmx-bind:value="data_package.data.id">
+                                        <small class="text-muted secondary-label-modal">of treatments</small>
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run({condition:{if:`!data_package.packageForm.name.value||!data_package.packageForm.amount.value||!data_package.packageForm.limitSessions.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_package.packageForm.submit()`,outputType:'text'}},{run:{action:`data_package.packageForm.reset()`,outputType:'text'}},{run:{action:`packageUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Save</button></div>
+            </div>
+        </div>
+    </div>
+</div>

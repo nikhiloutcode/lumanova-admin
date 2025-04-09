@@ -1,0 +1,30 @@
+{
+  "debug": true,
+  "secret": "3fBVsZo9tEXEKoN",
+  "stripe": {
+    "secretKey": "sk_test_51NYyqeJBEsF0e79VsjLqIJ72pKRNxTA31meg2ymB52Vw80NyOCCMTlDJE7eEhOayX5SHpIz93haLBCbIg5gbTBun00qra9ZPUy",
+    "endpointSecret": "whsec_Su36EvNUtO9yqGVnVfFMV5pebNBk6b8D"
+  },
+  "env": {
+    "JWT_PRIVATE_KEY": "",
+    "JWT_PUBLIC_KEY": "",
+    "SENDGRID_KEY": "",
+    "SENDGRID_EMAIL": "",
+    "TWILIO_AUTH_TOKEN": "",
+    "TWILIO_ACCOUNT_SID": "",
+    "TWILIO_URL": "",
+    "TWILIO_PHONE": "",
+    "HOST": "",
+    "PORT": "",
+    "DB_HOST": "",
+    "DB_PORT": "",
+    "DB_NAME": "",
+    "DB_USER": "",
+    "DB_PASS": "",
+    "AWS_KEY": "",
+    "AWS_SECRET": "",
+    "AWS_BUCKET": "",
+    "STRIPE_KEY": "",
+    "STRIPE_SECRET_KEY": "sk_test_51NYyqeJBEsF0e79VsjLqIJ72pKRNxTA31meg2ymB52Vw80NyOCCMTlDJE7eEhOayX5SHpIz93haLBCbIg5gbTBun00qra9ZPUy"
+  }
+}

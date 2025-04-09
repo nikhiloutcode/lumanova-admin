@@ -1,0 +1,350 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "package",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    }
+                  ],
+                  "table": {
+                    "name": "subscriptions"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "query": "select * from \"subscriptions\" where \"subscriptions\".\"id\" = ?",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "subscriptions.id",
+                        "field": "subscriptions.id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}",
+                        "data": {
+                          "table": "subscriptions",
+                          "column": "id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "increments",
+                            "default": "",
+                            "primary": true,
+                            "unique": true,
+                            "nullable": false,
+                            "name": "id"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "frequency"
+                },
+                {
+                  "type": "number",
+                  "name": "limitSessions"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": {
+                    "name": "packages",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "select",
+                        "columns": [],
+                        "params": [
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P1",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          },
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P2",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          },
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P3",
+                            "value": "{{$_GET.sort}}",
+                            "test": ""
+                          }
+                        ],
+                        "table": {
+                          "name": "subscriptions"
+                        },
+                        "primary": "id",
+                        "joins": [],
+                        "query": "select * from \"subscriptions\" where \"subscriptions\".\"name\" like ? or \"subscriptions\".\"amount\" like ? or \"subscriptions\".\"frecuency\" like ?",
+                        "wheres": {
+                          "condition": "OR",
+                          "rules": [
+                            {
+                              "id": "subscriptions.name",
+                              "field": "subscriptions.name",
+                              "type": "string",
+                              "operator": "contains",
+                              "value": "{{$_GET.sort}}",
+                              "data": {
+                                "table": "subscriptions",
+                                "column": "name",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "name"
+                                }
+                              },
+                              "operation": "LIKE"
+                            },
+                            {
+                              "id": "subscriptions.amount",
+                              "field": "subscriptions.amount",
+                              "type": "string",
+                              "operator": "contains",
+                              "value": "{{$_GET.sort}}",
+                              "data": {
+                                "table": "subscriptions",
+                                "column": "amount",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "amount"
+                                }
+                              },
+                              "operation": "LIKE"
+                            },
+                            {
+                              "id": "subscriptions.frecuency",
+                              "field": "subscriptions.frecuency",
+                              "type": "string",
+                              "operator": "contains",
+                              "value": "{{$_GET.sort}}",
+                              "data": {
+                                "table": "subscriptions",
+                                "column": "frecuency",
+                                "type": "text",
+                                "columnObj": {
+                                  "type": "string",
+                                  "maxLength": 255,
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "frecuency"
+                                }
+                              },
+                              "operation": "LIKE"
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        }
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "amount"
+                      },
+                      {
+                        "type": "text",
+                        "name": "frequency"
+                      },
+                      {
+                        "type": "number",
+                        "name": "limitSessions"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      }
+                    ],
+                    "outputType": "array"
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "packages",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "select",
+                        "columns": [],
+                        "params": [],
+                        "table": {
+                          "name": "subscriptions"
+                        },
+                        "primary": "id",
+                        "joins": [],
+                        "query": "select * from \"subscriptions\""
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "amount"
+                      },
+                      {
+                        "type": "text",
+                        "name": "frequency"
+                      },
+                      {
+                        "type": "number",
+                        "name": "limitSessions"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      }
+                    ],
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

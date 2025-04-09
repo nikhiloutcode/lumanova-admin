@@ -1,0 +1,899 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "code"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "code"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      "lib/utils/messagesHandler",
+      {
+        "name": "message",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "exists",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "user",
+                "column": "id"
+              },
+              {
+                "table": "user",
+                "column": "verificationCode"
+              },
+              {
+                "table": "user",
+                "column": "verificationCodeExpire"
+              },
+              {
+                "table": "r",
+                "column": "name"
+              },
+              {
+                "table": "r",
+                "column": "adminView"
+              },
+              {
+                "table": "r",
+                "column": "mobileView"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.code}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [
+              {
+                "table": "detailsUser",
+                "column": "*",
+                "alias": "du",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "du",
+                      "column": "userId",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "user",
+                        "column": "id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "roles",
+                "column": "*",
+                "alias": "r",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "r",
+                      "column": "id",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "du",
+                        "column": "rolesId"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "OR",
+              "rules": [
+                {
+                  "id": "user.verificationCode",
+                  "field": "user.verificationCode",
+                  "type": "string",
+                  "operator": "equal",
+                  "value": "{{$_GET.code}}",
+                  "data": {
+                    "table": "user",
+                    "column": "verificationCode",
+                    "type": "text",
+                    "columnObj": {
+                      "type": "string",
+                      "maxLength": 255,
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "verificationCode"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"user\".\"id\", \"user\".\"verificationCode\", \"user\".\"verificationCodeExpire\", \"r\".\"name\", \"r\".\"adminView\", \"r\".\"mobileView\" from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"user\".\"verificationCode\" = ?",
+            "orders": []
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "verificationCode"
+          },
+          {
+            "type": "datetime",
+            "name": "verificationCodeExpire"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "boolean",
+            "name": "adminView"
+          },
+          {
+            "type": "boolean",
+            "name": "mobileView"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exists.id&&exists.mobileView}}",
+          "then": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{exists.verificationCodeExpire>NOW_UTC}}",
+                "then": {
+                  "steps": [
+                    {
+                      "name": "user",
+                      "module": "dbconnector",
+                      "action": "single",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{exists.id}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "user"
+                          },
+                          "primary": "id",
+                          "joins": [],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "user.id",
+                                "field": "user.id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{exists.id}}",
+                                "data": {
+                                  "table": "user",
+                                  "column": "id",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "increments",
+                                    "default": "",
+                                    "primary": true,
+                                    "unique": true,
+                                    "nullable": false,
+                                    "name": "id"
+                                  }
+                                },
+                                "operation": "=",
+                                "table": "user"
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select * from \"user\" where \"user\".\"id\" = ?"
+                        }
+                      },
+                      "output": false,
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "firstName"
+                        },
+                        {
+                          "type": "text",
+                          "name": "lastName"
+                        },
+                        {
+                          "type": "text",
+                          "name": "email"
+                        },
+                        {
+                          "type": "text",
+                          "name": "verificationCode"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "verificationCodeExpire"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "disabled"
+                        },
+                        {
+                          "type": "text",
+                          "name": "phone"
+                        },
+                        {
+                          "type": "number",
+                          "name": "userIdInvited"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "createdAt"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "updatedAt"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isTester"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isGodMode"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isDebug"
+                        },
+                        {
+                          "type": "text",
+                          "name": "countryCode"
+                        }
+                      ],
+                      "outputType": "object"
+                    },
+                    {
+                      "name": "session",
+                      "module": "dbconnector",
+                      "action": "single",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{exists.id}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "sessions"
+                          },
+                          "primary": "id",
+                          "joins": [],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "sessions.userId",
+                                "field": "sessions.userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{exists.id}}",
+                                "data": {
+                                  "table": "sessions",
+                                  "column": "userId",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "reference",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "references": "id",
+                                    "inTable": "user",
+                                    "referenceType": "integer",
+                                    "onUpdate": "CASCADE",
+                                    "onDelete": "CASCADE",
+                                    "name": "userId"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select * from \"sessions\" where \"sessions\".\"userId\" = ?"
+                        }
+                      },
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "number",
+                          "name": "userId"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "signUpDate"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "lastSignIn"
+                        },
+                        {
+                          "type": "number",
+                          "name": "count"
+                        },
+                        {
+                          "type": "text",
+                          "name": "duration"
+                        }
+                      ],
+                      "type": "dbconnector_single",
+                      "outputType": "object"
+                    },
+                    {
+                      "name": "updateSession",
+                      "module": "dbupdater",
+                      "action": "update",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "update",
+                          "values": [
+                            {
+                              "table": "sessions",
+                              "column": "lastSignIn",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "table": "sessions",
+                              "column": "count",
+                              "type": "number",
+                              "value": "{{session.count+1}}"
+                            }
+                          ],
+                          "table": "sessions",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "id",
+                                "field": "id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{exists.id}}",
+                                "data": {
+                                  "column": "id"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "update \"sessions\" set \"lastSignIn\" = ?, \"count\" = ? where \"id\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{NOW}}",
+                              "test": ""
+                            },
+                            {
+                              "name": ":P2",
+                              "type": "expression",
+                              "value": "{{session.count+1}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P3",
+                              "value": "{{exists.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "updateUser",
+                      "module": "dbupdater",
+                      "action": "update",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "update",
+                          "values": [
+                            {
+                              "table": "user",
+                              "column": "updatedAt",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "table": "user",
+                              "column": "verificationCode",
+                              "type": "text",
+                              "value": "null"
+                            }
+                          ],
+                          "table": "user",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "id",
+                                "field": "id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{exists.id}}",
+                                "data": {
+                                  "column": "id"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "update \"user\" set \"updatedAt\" = ?, \"verificationCode\" = ? where \"id\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{NOW}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P2",
+                              "value": "{{exists.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "jwt",
+                      "module": "jwt",
+                      "action": "sign",
+                      "options": {
+                        "alg": "RS256",
+                        "iss": "Enyrgy",
+                        "sub": "{{exists.id.toString()}}",
+                        "aud": "users",
+                        "jti": "{{UUID}}",
+                        "expiresIn": 99999999,
+                        "key": "{{$_ENV.JWT_PRIVATE_KEY.decodeBase64()}}"
+                      },
+                      "outputType": "text"
+                    },
+                    {
+                      "name": "response",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{jwt}}"
+                      },
+                      "meta": [],
+                      "outputType": "object"
+                    },
+                    {
+                      "name": "jwt",
+                      "module": "core",
+                      "action": "setsession",
+                      "options": {
+                        "value": "{{response}}"
+                      }
+                    },
+                    {
+                      "name": "response",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{response}}"
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    },
+                    {
+                      "name": "user",
+                      "module": "dbconnector",
+                      "action": "single",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{exists.id}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "user"
+                          },
+                          "primary": "id",
+                          "joins": [],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "user.id",
+                                "field": "user.id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{exists.id}}",
+                                "data": {
+                                  "table": "user",
+                                  "column": "id",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "increments",
+                                    "default": "",
+                                    "primary": true,
+                                    "unique": true,
+                                    "nullable": false,
+                                    "name": "id"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select * from \"user\" where \"user\".\"id\" = ?"
+                        }
+                      },
+                      "output": true,
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "firstName"
+                        },
+                        {
+                          "type": "text",
+                          "name": "lastName"
+                        },
+                        {
+                          "type": "text",
+                          "name": "email"
+                        },
+                        {
+                          "type": "text",
+                          "name": "verificationCode"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "verificationCodeExpire"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "disabled"
+                        },
+                        {
+                          "type": "text",
+                          "name": "phone"
+                        },
+                        {
+                          "type": "number",
+                          "name": "userIdInvited"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "createdAt"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "updatedAt"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isTester"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isGodMode"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isDebug"
+                        },
+                        {
+                          "type": "text",
+                          "name": "countryCode"
+                        }
+                      ],
+                      "outputType": "object",
+                      "type": "dbconnector_single"
+                    },
+                    {
+                      "name": "clientInfo",
+                      "module": "dbconnector",
+                      "action": "single",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{user.id}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "user"
+                          },
+                          "primary": "id",
+                          "joins": [
+                            {
+                              "table": "client",
+                              "column": "*",
+                              "alias": "c",
+                              "type": "LEFT",
+                              "clauses": {
+                                "condition": "AND",
+                                "rules": [
+                                  {
+                                    "table": "c",
+                                    "column": "userId",
+                                    "operator": "equal",
+                                    "operation": "=",
+                                    "value": {
+                                      "table": "user",
+                                      "column": "id"
+                                    }
+                                  }
+                                ]
+                              },
+                              "primary": "id"
+                            }
+                          ],
+                          "query": "select * from \"user\" left join \"client\" as \"c\" on \"c\".\"userId\" = \"user\".\"id\" where \"user\".\"id\" = ?",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "user.id",
+                                "field": "user.id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{user.id}}",
+                                "data": {
+                                  "table": "user",
+                                  "column": "id",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "increments",
+                                    "default": "",
+                                    "primary": true,
+                                    "unique": true,
+                                    "nullable": false,
+                                    "name": "id"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "orders": []
+                        }
+                      },
+                      "output": true,
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "firstName"
+                        },
+                        {
+                          "type": "text",
+                          "name": "lastName"
+                        },
+                        {
+                          "type": "text",
+                          "name": "email"
+                        },
+                        {
+                          "type": "text",
+                          "name": "verificationCode"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "verificationCodeExpire"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "disabled"
+                        },
+                        {
+                          "type": "text",
+                          "name": "phone"
+                        },
+                        {
+                          "type": "number",
+                          "name": "userIdInvited"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "createdAt"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "updatedAt"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isTester"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isGodMode"
+                        },
+                        {
+                          "type": "boolean",
+                          "name": "isDebug"
+                        },
+                        {
+                          "type": "text",
+                          "name": "countryCode"
+                        }
+                      ],
+                      "outputType": "object"
+                    }
+                  ]
+                },
+                "else": {
+                  "steps": {
+                    "name": "",
+                    "module": "core",
+                    "action": "response",
+                    "options": {
+                      "status": 401,
+                      "data": "{{message.ERROR_EXPIRED_CODE}}"
+                    }
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 404,
+                "data": "NOT_FOUND"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  },
+  "usedModules": {
+    "jsonwebtoken": "^8.5.1"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "to"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "body"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "twilio",
+      "module": "api",
+      "action": "send",
+      "options": {
+        "url": "{{$_ENV.TWILIO_URL}}",
+        "method": "POST",
+        "auth": "username",
+        "username": "{{$_ENV.TWILIO_ACCOUNT_SID}}",
+        "password": "{{$_ENV.TWILIO_AUTH_TOKEN}}",
+        "data": {
+          "From": "{{$_ENV.TWILIO_PHONE}}",
+          "Body": "{{$_PARAM.body}}",
+          "To": "{{$_PARAM.to}}"
+        }
+      },
+      "output": true
+    }
+  }
+}

@@ -1,0 +1,341 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{},dmxValidator:{},dmxDataTraversal:{},dmxBootstrap5Alert:{},dmxStateManagement:{},dmxS3Upload:{},dmxBootbox5:{}}" -->
+<dmx-value id="createState"></dmx-value>
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value" url="/api/facility/getInformationAdmin" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error getting facilities')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<meta name="ac:route" content="/facilities/" />
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appconnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{}}" -->
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="row bg-header pt-4">
+                <div class="col-3">
+                    <h1 class="title-section">
+                        <p>Locations</p>
+                    </h1>
+                </div>
+                <div class="col">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="" />
+                </div>
+                <div class="col-2">
+                    <button id="createFacility" class="btn add-button" data-bs-toggle="modal" data-bs-target="#facilityCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.facilities" dmx-on:click="facilityCreateModal.createFacility.reset()">
+                        Add
+                    </button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p style="" class="results-data">
+                        Showing
+                        <b class="results-data-bold">{{getInformation.data.facilities.length}}</b>
+                        results
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table rowAlternate">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="table-header">Location name</th>
+                                <th scope="col" class="table-header">Address</th>
+                                <th scope="col" class="table-header">Email</th>
+                                <th scope="col" class="table-header">Phone</th>
+                                <th scope="col" class="table-header">Sales rep.</th>
+                                <th scope="row"></th>
+                            </tr>
+                        </thead>
+                        <tbody is="dmx-repeat" id="facilitiesData" dmx-bind:repeat="getInformation.data.facilities" key="id">
+                            <tr class="p-auto">
+                                <td class="table-content" onclick="redirect(this)">{{name}}</td>
+                                <td class="table-content" onclick="redirect(this)">{{address1+' '+address2+' '+city+' '+state+' '+zip}}</td>
+                                <td class="table-content" onclick="redirect(this)">{{email}}</td>
+                                <td class="table-content" onclick="redirect(this)" dmx-show="phone">{{phone ? phone.formatPhoneNumber() : ''}}</td>
+                                <td class="table-content" onclick="redirect(this)" dmx-hide="phone">-</td>
+                                <td class="table-content" onclick="redirect(this)">
+                                    {{salesFirstName + ' ' + salesLastName}}
+                                </td>
+                                <td style="">
+                                    <div class="dropdown" dmx-show="getMe.data.user.facilities">
+                                        <button id="actions" class="btn details-data" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdown1">
+                                            <a class="dropdown-item" href="#" dmx-on:click="run([{runJS:{function:'initIntlTelInput',outputType:'text'}},{run:{action:`facilityUpdateModal.show()`,outputType:'text'}},{run:{action:`facilityUpdateModal.data_facility.select(id)`,outputType:'text'}}])" id="editAction">Edit</a>
+                                            <a class="dropdown-item" href="#" dmx-on:click="run({'bootbox.confirm':{message:'Are you sure you want to delete?',title:'Confirm',buttons:{confirm:{label:'Yes, confirm',className:'btn-primary'},cancel:{label:'Cancel'}},then:{steps:{run:{action:`deleteFacility.submit();getInformation.load({})`,name:'submit',outputType:'text'}}},name:'Confirmation'}})" id="deleteAction">Delete</a>
+                                        </div>
+                                    </div>
+                                    <form id="deleteFacility" method="post" is="dmx-api-form" action="/api/facility/delete" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:success="getInformation.load({});notifies.success('Location deleted')" dmx-on:error="notifies.danger('Error deleting facility')">
+                                        <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.facilities[$index].id" type="hidden" /><button id="delete" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+                                    <form id="getFacilityDetails" method="post" is="dmx-api-form" action="/api/facility/getInformationAdmin" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')">
+                                        <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.facilities[$index].id" type="hidden" /><button id="getDetails" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="facilityCreateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Add a location</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" id="close" dmx-on:click="createFacility.reset();facilityCreateModal.hide()"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields</small>
+                    <br />
+                    <br />
+                    <small class="text-muted label-modal">Location information</small>
+                    <form method="post" action="/api/facility/create" novalidate="" dmx-on:success="facilityCreateModal.hide();getInformation.load({});notifies.success('Location created')" dmx-header:authorization="'Bearer '+session.data.jwt" is="dmx-api-form" id="createFacility" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error creating location')" dmx-on:invalid="run([{condition:{if:`lastError.response.data.email`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.email)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminEmail`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminEmail)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesEmail`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesEmail)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerEmail`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerEmail)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerFirstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerFirstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerLastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerLastName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerPhone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerPhone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminPhone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminPhone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminFirstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminFirstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminLastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminLastName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesPhone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesPhone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesFirstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesFirstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesLastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesLastName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.name)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.zip`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.zip)`,outputType:'text'}}},outputType:'boolean'}}])">
+                        <input id="invite" name="invite" type="hidden" class="form-control" />
+
+                        <div class="form-group md-3" id="facilityForm">
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="name" name="name" aria-describedby="logoLabel" placeholder="Location Name" is="dmx-input" value="" minlength="3" maxlength="50" required="">
+                                </div>
+                                <div class="col-6 d-flex position-relative">
+                                    <input id="logo" name="logo" type="file" class="form-control input-file" accept="image/png, image/gif, image/jpeg, image/svg" />
+                                    <img id="upload" class="image-upload" src="/assets/images/upload.svg" width="20px">
+                                </div>
+                                <div class="undefined-NaN col-6">
+                                    <input type="email" class="form-control input-text" id="email" name="email" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" required="" data-rule-email="">
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group md-3 d-flex gap-2">
+                                        <input name="isValidNumberFacility" type="hidden" class="form-control validate-input">
+                                        <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-countrycode-name="facilityCountryCode">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted secondary-label-modal">Physical Address</small>
+                        <div class="form-group md-3" id="addressForm">
+                            <div class="row">
+                                <div class="col-12">
+                                    <input id="address1" name="address1" class="form-control input-text" placeholder="Address 1" required>
+                                </div>
+                                <div class="col-12">
+                                    <input id="address2" name="address2" type="text" class="form-control input-text" placeholder="Address 2">
+                                </div>
+                                <br />
+                                <br />
+                                <div class="col">
+                                    <input id="city" name="city" type="text" class="form-control input-text" placeholder="City" required />
+                                </div>
+                                <div class="col">
+                                    <input id="state" name="state" type="text" class="form-control input-text" placeholder="State" required="" dmx-on:keyup="createState.setValue(value)">
+                                </div>
+                                <div class="col">
+                                    <input id="zip" name="zip" class="form-control input-text" placeholder="ZIP" required="" type="text">
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <small class="text-muted label-modal">Owner information</small>
+                        <div class="form-group md-3" id="ownerForm">
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="ownerFirstName" name="ownerFirstName" aria-describedby="logoLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" required onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="ownerLastName" name="ownerLastName" aria-describedby="logoLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" required onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                </div>
+                                <div class="col">
+                                    <input type="email" class="form-control input-text" id="ownerEmail" name="ownerEmail" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" required="" data-rule-email="">
+                                </div>
+                                <div class="col">
+                                    <div class="form-group md-3 d-flex gap-2">
+                                        <input name="isValidNumberOwner" type="hidden" class="form-control validate-input">
+                                        <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-phone-name="ownerPhone" data-countrycode-name="ownerCountryCode">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <small class="text-muted label-modal">Admin (Optional)</small>
+                        <div class="form-group md-3" id="adminForm">
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="adminFirstName" name="adminFirstName" aria-describedby="logoLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="adminLastName" name="adminLastName" aria-describedby="logoLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                </div>
+                                <div class="col">
+                                    <input type="email" class="form-control input-text" id="adminEmail" name="adminEmail" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="">
+                                </div>
+                                <div class="col">
+                                    <div class="form-group md-3 d-flex gap-2">
+                                        <input name="isValidNumberAdmin" type="hidden" class="form-control validate-input">
+                                        <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-phone-name="adminPhone" data-countrycode-name="adminCountryCode">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <small class="text-muted label-modal">Sales Rep. (Optional)</small>
+                        <div class="form-group md-3" id="salesForm">
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="salesFirstName" name="salesFirstName" aria-describedby="logoLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="salesLastName" name="salesLastName" aria-describedby="logoLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                </div>
+                                <div class="col">
+                                    <input type="email" class="form-control input-text" id="salesEmail" name="salesEmail" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="">
+                                </div>
+                                <div class="col">
+                                    <div class="form-group md-3 d-flex gap-2">
+                                        <input name="isValidNumberSales" type="hidden" class="form-control validate-input">
+                                        <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-phone-name="salesPhone" data-countrycode-name="salesCountryCode">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-between bg-footer-modal">
+                    <div></div>
+                    <div>
+                        <button class="btn btn-primary save-button order-11" is="dmx-button" value="" type="submit" data-bs-target="#userModal" dmx-on:click="run({condition:{if:`!createFacility.name.value||!createFacility.email.value||!createFacility.address1.value||!createFacility.city.value||!createState.value||!createFacility.zip.value||!createFacility.ownerFirstName.value||!createFacility.ownerLastName.value||!createFacility.ownerEmail.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:{condition:{if:`createFacility.isValidNumberFacility.value==0||createFacility.isValidNumberOwner.value==0||(createFacility.adminPhone.value&amp;&amp;createFacility.isValidNumberAdmin.value==0)||(createFacility.salesPhone.value&amp;&amp;createFacility.isValidNumberSales.value==0)`,then:{steps:{run:{action:`notifies.warning(\'Invalid Phone Number\')`,outputType:'text'}}},else:{steps:[{run:{action:`createFacility.invite.setValue(false)`,outputType:'text'}},{run:{action:`createFacility.submit()`,outputType:'text'}},{run:{action:`createFacility.reset()`,outputType:'text'}},{run:{action:`facilityCreateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})" id="save">Add</button>
+                        <button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" dmx-on:click="run([{run:{action:`createFacility.name.validate();createFacility.email.validate();createFacility.phone.validate();createFacility.address1.validate();createFacility.city.validate();createFacility.state.validate();createFacility.zip.validate();createFacility.ownerFirstName.validate();createFacility.ownerLastName.validate();createFacility.ownerEmail.validate();createFacility.ownerPhone.validate()`,outputType:'text',disabled:true}},{condition:{if:`!createFacility.name.value||!createFacility.email.value||!createFacility.address1.value||!createFacility.city.value||!createState.value||!createFacility.zip.value||!createFacility.ownerFirstName.value||!createFacility.ownerLastName.value||!createFacility.ownerEmail.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:{condition:{if:`createFacility.isValidNumberFacility.value==0||createFacility.isValidNumberOwner.value==0||(createFacility.adminPhone.value&amp;&amp;createFacility.isValidNumberAdmin.value==0)||(createFacility.salesPhone.value&amp;&amp;createFacility.isValidNumberSales.value==0)`,then:{steps:{run:{action:`notifies.warning(\'Invalid Phone Number\')`,outputType:'text'}}},else:{steps:[{run:{action:`createFacility.invite.setValue(true)`,outputType:'text'}},{run:{action:`createFacility.submit()`,outputType:'text'}},{run:{action:`createFacility.reset()`,outputType:'text'}},{run:{action:`facilityCreateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}}])" id="saveInvite">Add &amp; invite</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="facilityUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Update a location</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" id="close" dmx-on:click="data_facility.facilityForm.reset();facilityUpdateModal.hide()"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields</small>
+                    <br />
+                    <br />
+                    <small class="text-muted label-modal">Location information</small>
+                    <div class="container" id="data_facility" is="dmx-data-detail" dmx-bind:data="getInformation.data.facilities" key="id">
+                        <form id="facilityForm" method="post" is="dmx-api-form" action="/api/facility/update" novalidate="" dmx-on:success="facilityUpdateModal.hide();getInformation.load({});notifies.success('Facility updated')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error updating location')" dmx-on:invalid="run([{condition:{if:`lastError.response.data.email`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.email)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminEmail`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminEmail)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesEmail`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesEmail)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerEmail`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerEmail)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerFirstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerFirstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerLastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerLastName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.ownerPhone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.ownerPhone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminPhone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminPhone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminFirstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminFirstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.adminLastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.adminLastName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesPhone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesPhone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesFirstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesFirstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.salesLastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.salesLastName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.name)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.zip`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.zip)`,outputType:'text'}}},outputType:'boolean'}}])">
+                            <input type="hidden" class="form-control" id="invite" name="invite" aria-describedby="input1_help" placeholder="Enter some text" />
+                            <div class="form-group md-3" id="idForm">
+                                <input type="hidden" class="form-control input-text" id="id" name="id" aria-describedby="logoLabel" placeholder="id" is="dmx-input" value="" required="" dmx-bind:value="data_facility.data.id" />
+                            </div>
+                            <div class="form-group md-3" id="facilityForm">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control input-text" id="name" name="name" aria-describedby="logoLabel" placeholder="Location Name" is="dmx-input" value="" minlength="3" maxlength="50" required dmx-bind:value="data_facility.data.name" />
+                                    </div>
+                                    <div class="col-6 d-flex position-relative">
+                                        <input id="logo" name="logo" type="file" class="form-control input-file" accept="image/png, image/gif, image/jpeg, image/svg" />
+                                        <img id="upload" class="image-upload" src="/assets/images/upload.svg" width="20px">
+                                    </div>
+                                    <div class="col">
+                                        <input type="email" class="form-control input-text" id="email" name="email" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" required="" dmx-bind:value="data_facility.data.email" data-rule-email="">
+                                    </div>
+                                    <div class="col-6">
+                                        <input name="isValidNumberFacility" type="hidden" class="form-control validate-input">
+                                        <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-countrycode-name="facilityCountryCode" dmx-bind:value="data_facility.data.phone">
+                                    </div>
+                                </div>
+                                <small class="text-muted secondary-label-modal">Physical Address</small>
+                                <br />
+                                <div class="form-group md-3" id="addressForm">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <input id="address1" name="address1" class="form-control input-text" placeholder="Address 1" dmx-bind:value="data_facility.data.address1" minlength="3" maxlength="50" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <input id="address2" name="address2" type="text" class="form-control input-text" placeholder="Address 2" dmx-bind:value="data_facility.data.address2" minlength="3" maxlength="50">
+                                        </div>
+                                        <br />
+                                        <br />
+                                        <div class="col">
+                                            <input id="city" name="city" type="text" class="form-control input-text" placeholder="City" dmx-bind:value="data_facility.data.city" minlength="3" maxlength="50" required>
+                                        </div>
+                                        <div class="col">
+                                            <input id="state" name="state" type="text" class="form-control input-text" placeholder="State" dmx-bind:value="data_facility.data.state" minlength="3" maxlength="50" required>
+                                        </div>
+                                        <div class="col">
+                                            <input id="zip" name="zip" type="text" class="form-control input-text" placeholder="ZIP" dmx-bind:value="data_facility.data.zip" required="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br /><small class="text-muted label-modal">Owner information</small>
+                                <div class="form-group md-3" id="ownerForm">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="text" class="form-control input-text" id="ownerFirstName" name="ownerFirstName" aria-describedby="logoLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" required dmx-bind:value="data_facility.data.ownerFirstName" />
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="text" class="form-control input-text" id="ownerLastName" name="ownerLastName" aria-describedby="logoLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" required onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" dmx-bind:value="data_facility.data.ownerLastName" />
+                                        </div>
+                                        <div class="col">
+                                            <input type="email" class="form-control input-text" id="ownerEmail" name="ownerEmail" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" required="" dmx-bind:value="data_facility.data.ownerEmail" data-rule-email="">
+                                        </div>
+                                        <div class="col">
+                                            <input name="isValidNumberOwner" type="hidden" class="form-control validate-input">
+                                            <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-phone-name="ownerPhone" data-countrycode-name="ownerCountryCode" dmx-bind:value="data_facility.data.ownerCountryCode+data_facility.data.ownerPhone">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <br />
+                                <small class="text-muted label-modal">Admin (Optional)</small>
+                                <br />
+                                <div class="form-group md-3" id="adminForm">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="text" class="form-control input-text" id="adminFirstName" name="adminFirstName" aria-describedby="logoLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" dmx-bind:value="data_facility.data.adminFirstName" />
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="text" class="form-control input-text" id="adminLastName" name="adminLastName" aria-describedby="logoLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" dmx-bind:value="data_facility.data.adminLastName" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                        </div>
+                                        <div class="col">
+                                            <input type="email" class="form-control input-text" id="adminEmail" name="adminEmail" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" required="" dmx-bind:value="data_facility.data.adminEmail">
+                                        </div>
+                                        <div class="col">
+                                            <input name="isValidNumberAdmin" type="hidden" class="form-control validate-input">
+                                            <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-phone-name="adminPhone" data-countrycode-name="adminCountryCode" dmx-bind:value="data_facility.data.adminCountryCode+data_facility.data.adminPhone">
+                                        </div>
+                                    </div>
+                                </div>
+                                <small class="text-muted label-modal">Sales Rep. (Optional)</small>
+                                <div class="form-group md-3" id="salesForm">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="text" class="form-control input-text" id="salesFirstName" name="salesFirstName" aria-describedby="logoLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" dmx-bind:value="data_facility.data.salesFirstName" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="text" class="form-control input-text" id="salesLastName" name="salesLastName" aria-describedby="logoLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" dmx-bind:value="data_facility.data.salesLastName" onkeydown="return ((event.keyCode >= 65 && event.keyCode <= 90) || event.keyCode == 8 || event.keyCode == 32)" />
+                                        </div>
+                                        <div class="col">
+                                            <input type="email" class="form-control input-text" id="salesEmail" name="salesEmail" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" dmx-bind:value="data_facility.data.salesEmail">
+                                        </div>
+                                        <div class="col">
+                                            <input name="isValidNumberSales" type="hidden" class="form-control validate-input">
+                                            <input type="tel" class="form-control input-text intl-phone" placeholder="Phone" data-phone-name="salesPhone" data-countrycode-name="salesCountryCode" dmx-bind:value="data_facility.data.salesPhone">
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer bg-footer-modal">
+                    <button class="btn btn-primary save-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run([{run:{action:`data_facility.facilityForm.name.validate();data_facility.facilityForm.email.validate();data_facility.facilityForm.phone.validate();data_facility.facilityForm.address1.validate();data_facility.facilityForm.city.validate();data_facility.facilityForm.state.validate();data_facility.facilityForm.zip.validate();data_facility.facilityForm.ownerFirstName.validate();data_facility.facilityForm.ownerLastName.validate();data_facility.facilityForm.ownerEmail.validate();data_facility.facilityForm.ownerPhone.validate()`,outputType:'text',disabled:true}},{condition:{if:`!data_facility.facilityForm.name.value||!data_facility.facilityForm.email.value||!data_facility.facilityForm.address1.value||!data_facility.facilityForm.city.value||!data_facility.facilityForm.state.value||!data_facility.facilityForm.zip.value||!data_facility.facilityForm.ownerFirstName.value||!data_facility.facilityForm.ownerLastName.value||!data_facility.facilityForm.ownerEmail.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:{condition:{if:`createFacility.isValidNumberFacility.value==0||createFacility.isValidNumberOwner.value==0||(createFacility.adminPhone.value&amp;&amp;createFacility.isValidNumberAdmin.value==0)||(createFacility.salesPhone.value&amp;&amp;createFacility.isValidNumberSales.value==0)`,then:{steps:{run:{action:`notifies.warning(\'Invalid Phone Number\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_facility.facilityForm.invite.setValue(false)`,outputType:'text'}},{run:{action:`data_facility.facilityForm.submit()`,outputType:'text'}},{run:{action:`data_facility.facilityForm.reset()`,outputType:'text'}},{run:{action:`facilityUpdateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}}])">
+                        Save</button><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="saveInvite" dmx-on:click="run([{run:{action:`data_facility.facilityForm.name.validate();data_facility.facilityForm.email.validate();data_facility.facilityForm.phone.validate();data_facility.facilityForm.address1.validate();data_facility.facilityForm.city.validate();data_facility.facilityForm.state.validate();data_facility.facilityForm.zip.validate();data_facility.facilityForm.ownerFirstName.validate();data_facility.facilityForm.ownerLastName.validate();data_facility.facilityForm.ownerEmail.validate();data_facility.facilityForm.ownerPhone.validate()`,outputType:'text',disabled:true}},{condition:{if:`!data_facility.facilityForm.name.value||!data_facility.facilityForm.email.value||!data_facility.facilityForm.address1.value||!data_facility.facilityForm.city.value||!data_facility.facilityForm.state.value||!data_facility.facilityForm.zip.value||!data_facility.facilityForm.ownerFirstName.value||!data_facility.facilityForm.ownerLastName.value||!data_facility.facilityForm.ownerEmail.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:{condition:{if:`createFacility.isValidNumberFacility.value==0||createFacility.isValidNumberOwner.value==0||(createFacility.adminPhone.value&amp;&amp;createFacility.isValidNumberAdmin.value==0)||(createFacility.salesPhone.value&amp;&amp;createFacility.isValidNumberSales.value==0)`,then:{steps:{run:{action:`notifies.warning(\'Invalid Phone Number\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_facility.facilityForm.invite.setValue(true)`,outputType:'text'}},{run:{action:`data_facility.facilityForm.submit()`,outputType:'text'}},{run:{action:`data_facility.facilityForm.reset()`,outputType:'text'}},{run:{action:`facilityUpdateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}}])">Save &amp; invite</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

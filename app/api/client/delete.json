@@ -1,0 +1,294 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "exist",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "client"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "select * from \"client\" where \"client\".\"id\" = ?",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "client.id",
+                  "field": "client.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "client",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "height"
+          },
+          {
+            "type": "text",
+            "name": "weight"
+          },
+          {
+            "type": "text",
+            "name": "sickDays"
+          },
+          {
+            "type": "text",
+            "name": "eyeColor"
+          },
+          {
+            "type": "text",
+            "name": "hairColor"
+          },
+          {
+            "type": "text",
+            "name": "skinColor"
+          },
+          {
+            "type": "number",
+            "name": "userId"
+          },
+          {
+            "type": "text",
+            "name": "birth"
+          },
+          {
+            "type": "number",
+            "name": "freckles"
+          },
+          {
+            "type": "number",
+            "name": "sunTooLong"
+          },
+          {
+            "type": "number",
+            "name": "degreeTurnBrown"
+          },
+          {
+            "type": "number",
+            "name": "brownSeveralHours"
+          },
+          {
+            "type": "number",
+            "name": "facialReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "tanning"
+          },
+          {
+            "type": "number",
+            "name": "abdomenLowerBack"
+          },
+          {
+            "type": "number",
+            "name": "sunburn"
+          },
+          {
+            "type": "text",
+            "name": "gender"
+          },
+          {
+            "type": "datetime",
+            "name": "consentTreatment"
+          },
+          {
+            "type": "text",
+            "name": "treatments"
+          },
+          {
+            "type": "text",
+            "name": "customerId"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exist.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "",
+                "module": "core",
+                "action": "exec",
+                "options": {
+                  "exec": "stripe/customer/delete",
+                  "params": {
+                    "id": "{{exist.customerId}}"
+                  }
+                },
+                "output": false
+              },
+              {
+                "name": "deleteClient",
+                "module": "dbupdater",
+                "action": "delete",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "delete",
+                    "table": "client",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "delete from \"client\" where \"id\" = ?",
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messagesHandler.CLIENT_DELETE}}"
+                }
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_CLIENT}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

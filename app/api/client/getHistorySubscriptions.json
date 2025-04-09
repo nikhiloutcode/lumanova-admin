@@ -1,0 +1,820 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "historyPackageByFaciltyQuery",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT f.name as \"facilityName\", f.logo ,s.name as \"packageName\", TO_CHAR(dc.\"createdAt\"::date, 'mm/dd/yyyy') as purchase,TO_CHAR(dc.\"expirationAt\"::date, 'mm/dd/yyyy') as expiration,\np.\"limitSessions\", s.id as \"subscriptionId\", f.id as \"facilityId\",dc.status\nfrom client c\ninner join \"detailsClient\" dc on dc.\"clientId\" = c.id \ninner join subscriptions s on s.id = dc.\"subscriptionId\"\nleft join treatments t ON t.\"clientId\" = c.id\ninner join \"detailsFacility\" df on df.\"subscriptionId\" = s.id\nleft join \"detailsSubscription\" ds on s.id = ds.\"subscriptionId\"\nleft join \"plans\" p on p.id = ds.\"plansId\"\nleft join facility f on f.id = df.\"facilityId\"\nwhere c.\"userId\" = :P1\ngroup by s.id,dc.\"createdAt\", p.\"name\", p.\"limitSessions\",dc.id, f.id,c.treatments ",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "176"
+              }
+            ]
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "name": "facilityName",
+            "type": "text"
+          },
+          {
+            "name": "logo",
+            "type": "text"
+          },
+          {
+            "name": "packageName",
+            "type": "text"
+          },
+          {
+            "name": "purchase",
+            "type": "text"
+          },
+          {
+            "name": "expiration",
+            "type": "text"
+          },
+          {
+            "name": "limitSessions",
+            "type": "text"
+          },
+          {
+            "name": "subscriptionId",
+            "type": "number"
+          },
+          {
+            "name": "facilityId",
+            "type": "number"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          }
+        ],
+        "type": "dbcustom_query",
+        "disabled": true
+      },
+      {
+        "name": "packages",
+        "module": "core",
+        "action": "repeat",
+        "options": {
+          "repeat": "{{historyPackageByFaciltyQuery}}",
+          "outputFields": [],
+          "exec": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{facilityId}}",
+                "then": {
+                  "steps": [
+                    {
+                      "name": "historyByFacilty",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{historyPackageByFaciltyQuery[$index]}}",
+                        "key": "historyByFacilty",
+                        "schema": []
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "object"
+                    },
+                    {
+                      "name": "treatments",
+                      "module": "dbconnector",
+                      "action": "select",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "distinct": false,
+                          "columns": [
+                            {
+                              "table": "treatments",
+                              "column": "lastTreatment"
+                            }
+                          ],
+                          "table": {
+                            "name": "treatments"
+                          },
+                          "joins": [
+                            {
+                              "table": "client",
+                              "column": "*",
+                              "alias": "c",
+                              "type": "INNER",
+                              "clauses": {
+                                "condition": "AND",
+                                "rules": [
+                                  {
+                                    "table": "c",
+                                    "column": "id",
+                                    "operator": "equal",
+                                    "operation": "=",
+                                    "value": {
+                                      "table": "treatments",
+                                      "column": "clientId"
+                                    }
+                                  }
+                                ]
+                              },
+                              "primary": "id"
+                            }
+                          ],
+                          "orders": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{historyByFacilty.facilityId}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P2",
+                              "value": "{{jwt.userId}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "greater_or_equal",
+                              "type": "expression",
+                              "name": ":P3",
+                              "value": "{{historyByFacilty.purchase}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "less_or_equal",
+                              "type": "expression",
+                              "name": ":P4",
+                              "value": "{{historyByFacilty.expiration}}",
+                              "test": ""
+                            }
+                          ],
+                          "primary": "id",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "treatments.facilityId",
+                                "field": "treatments.facilityId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{historyByFacilty.facilityId}}",
+                                "data": {
+                                  "table": "treatments",
+                                  "column": "facilityId",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "reference",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "references": "id",
+                                    "inTable": "facility",
+                                    "referenceType": "integer",
+                                    "onUpdate": "CASCADE",
+                                    "onDelete": "CASCADE",
+                                    "name": "facilityId"
+                                  }
+                                },
+                                "operation": "="
+                              },
+                              {
+                                "id": "c.userId",
+                                "field": "c.userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{jwt.userId}}",
+                                "data": {
+                                  "table": "c",
+                                  "column": "userId",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "reference",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "references": "id",
+                                    "inTable": "user",
+                                    "referenceType": "integer",
+                                    "onUpdate": "CASCADE",
+                                    "onDelete": "CASCADE",
+                                    "name": "userId"
+                                  }
+                                },
+                                "operation": "="
+                              },
+                              {
+                                "id": "treatments.lastTreatment",
+                                "field": "treatments.lastTreatment",
+                                "type": "datetime",
+                                "operator": "greater_or_equal",
+                                "value": "{{historyByFacilty.purchase}}",
+                                "data": {
+                                  "table": "treatments",
+                                  "column": "lastTreatment",
+                                  "type": "datetime",
+                                  "columnObj": {
+                                    "type": "timestamp",
+                                    "useTz": true,
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "name": "lastTreatment"
+                                  }
+                                },
+                                "operation": ">="
+                              },
+                              {
+                                "id": "treatments.lastTreatment",
+                                "field": "treatments.lastTreatment",
+                                "type": "datetime",
+                                "operator": "less_or_equal",
+                                "value": "{{historyByFacilty.expiration}}",
+                                "data": {
+                                  "table": "treatments",
+                                  "column": "lastTreatment",
+                                  "type": "datetime",
+                                  "columnObj": {
+                                    "type": "timestamp",
+                                    "useTz": true,
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "name": "lastTreatment"
+                                  }
+                                },
+                                "operation": "<="
+                              },
+                              {
+                                "id": "treatments.isPlan",
+                                "field": "treatments.isPlan",
+                                "type": "boolean",
+                                "operator": "equal",
+                                "value": false,
+                                "data": {
+                                  "table": "treatments",
+                                  "column": "isPlan",
+                                  "type": "boolean",
+                                  "columnObj": {
+                                    "type": "boolean",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "default": "false",
+                                    "name": "isPlan"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select \"treatments\".\"lastTreatment\" from \"treatments\" inner join \"client\" as \"c\" on \"c\".\"id\" = \"treatments\".\"clientId\" where \"treatments\".\"facilityId\" = ? and \"c\".\"userId\" = ? and \"treatments\".\"lastTreatment\" >= ? and \"treatments\".\"lastTreatment\" <= ? and \"treatments\".\"isPlan\" = ?"
+                        }
+                      },
+                      "output": true,
+                      "meta": [
+                        {
+                          "type": "datetime",
+                          "name": "lastTreatment"
+                        }
+                      ],
+                      "outputType": "array",
+                      "type": "dbconnector_select"
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{historyByFacilty.expiration.formatDate(\"MM/dd/yyyy\")<NOW.formatDate(\"MM/dd/yyyy\")}}",
+                        "then": {
+                          "steps": {
+                            "name": "isCurrentlyActive",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": false
+                            },
+                            "meta": [],
+                            "output": true,
+                            "outputType": "text"
+                          }
+                        },
+                        "else": {
+                          "steps": {
+                            "name": "isCurrentlyActive",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": true
+                            },
+                            "meta": [],
+                            "output": true,
+                            "outputType": "text"
+                          }
+                        }
+                      },
+                      "outputType": "boolean"
+                    }
+                  ]
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "$index",
+            "type": "number"
+          },
+          {
+            "name": "$number",
+            "type": "number"
+          },
+          {
+            "name": "$name",
+            "type": "text"
+          },
+          {
+            "name": "$value",
+            "type": "object"
+          },
+          {
+            "name": "facilityName",
+            "type": "text"
+          },
+          {
+            "name": "logo",
+            "type": "text"
+          },
+          {
+            "name": "packageName",
+            "type": "text"
+          },
+          {
+            "name": "purchase",
+            "type": "text"
+          },
+          {
+            "name": "expiration",
+            "type": "text"
+          },
+          {
+            "name": "limitSessions",
+            "type": "text"
+          },
+          {
+            "name": "subscriptionId",
+            "type": "number"
+          },
+          {
+            "name": "facilityId",
+            "type": "number"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "historyByFacilty",
+            "type": "object",
+            "sub": []
+          },
+          {
+            "name": "treatments",
+            "type": "array",
+            "sub": [
+              {
+                "type": "datetime",
+                "name": "lastTreatment"
+              }
+            ]
+          },
+          {
+            "name": "isCurrentlyActive",
+            "type": "text",
+            "sub": []
+          }
+        ],
+        "outputType": "array",
+        "disabled": true
+      },
+      {
+        "name": "historyPlanByFaciltyQuery",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT dp.id as \"paymentId\", p.\"name\",p.\"limitSessions\",dp.status,p.id,p.\"productId\",dp.\"createdAt\", TO_CHAR(dp.\"createdAt\"::date, 'mm/dd/yyyy') as purchase, dp.\"subscriptionStripeId\" as \"subscriptionId\", p.amount, dp.\"canceledAt\" \nfrom client c\nleft join \"user\" u on u.id = c.\"userId\" \ninner join \"detailsPayment\" dp on dp.\"clientId\" = c.id \nleft join \"plans\" p on p.id = dp.\"planId\"\nwhere c.\"userId\" = :P1\ngroup by dp.id, p.\"name\", p.\"limitSessions\",dp.status,p.id, dp.\"createdAt\", dp.\"subscriptionStripeId\", dp.\"canceledAt\"\norder by dp.\"createdAt\" asc",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "296"
+              }
+            ]
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "name": "paymentId",
+            "type": "number"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "limitSessions",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "productId",
+            "type": "text"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "purchase",
+            "type": "text"
+          },
+          {
+            "name": "subscriptionId",
+            "type": "text"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "canceledAt",
+            "type": "datetime"
+          }
+        ],
+        "type": "dbcustom_query"
+      },
+      {
+        "name": "limitSessionsBefore",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": 0,
+          "key": "limitSessionsBefore"
+        },
+        "meta": [],
+        "outputType": "number",
+        "disabled": true
+      },
+      {
+        "name": "plans",
+        "module": "core",
+        "action": "repeat",
+        "options": {
+          "repeat": "{{historyPlanByFaciltyQuery}}",
+          "outputFields": [],
+          "exec": {
+            "steps": [
+              {
+                "name": "historyByFacilty",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{historyPlanByFaciltyQuery[$index]}}",
+                  "key": "historyByFacilty"
+                },
+                "meta": [],
+                "output": true,
+                "outputType": "object"
+              },
+              {
+                "name": "treatments",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT t.\"lastTreatment\"\nFROM treatments as t\nINNER JOIN client AS c ON c.id = t.\"clientId\"\nWHERE c.\"userId\" = :P1 AND t.\"paymentId\" = :P2 AND t.complete = true AND t.\"isPlan\" = true\nORDER BY t.\"lastTreatment\" ASC",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "296"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{historyByFacilty.paymentId}}",
+                        "test": "131"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "lastTreatment",
+                    "type": "datetime"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "treatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{treatments}}"
+                },
+                "meta": [
+                  {
+                    "name": "lastTreatment",
+                    "type": "datetime"
+                  }
+                ],
+                "output": true,
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$value.limitSessions.toNumber()}}",
+                  "key": "limitSessionsBefore"
+                },
+                "meta": [],
+                "outputType": "text",
+                "disabled": true
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{historyByFacilty.canceledAt}}",
+                  "then": {
+                    "steps": {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{historyByFacilty.purchase.dateAdd(\"weeks\", 4)<NOW||historyByFacilty.canceledAt<NOW||historyByFacilty.status!='active'}}",
+                        "then": {
+                          "steps": {
+                            "name": "isCurrentlyActive",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": false
+                            },
+                            "meta": [],
+                            "output": true,
+                            "outputType": "text"
+                          }
+                        },
+                        "else": {
+                          "steps": {
+                            "name": "isCurrentlyActive",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": true
+                            },
+                            "meta": [],
+                            "output": true,
+                            "outputType": "text"
+                          }
+                        }
+                      },
+                      "outputType": "boolean"
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{historyByFacilty.purchase.dateAdd(\"weeks\", 4)<NOW||historyByFacilty.status!='active'}}",
+                        "then": {
+                          "steps": {
+                            "name": "isCurrentlyActive",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": false
+                            },
+                            "meta": [],
+                            "output": true,
+                            "outputType": "text"
+                          }
+                        },
+                        "else": {
+                          "steps": {
+                            "name": "isCurrentlyActive",
+                            "module": "core",
+                            "action": "setvalue",
+                            "options": {
+                              "value": true
+                            },
+                            "meta": [],
+                            "output": true,
+                            "outputType": "text"
+                          }
+                        }
+                      },
+                      "outputType": "boolean"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{historyByFacilty.amount==0}}",
+                  "then": {
+                    "steps": {
+                      "name": "isPlanEmployee",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "isPlanEmployee",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": false
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  }
+                },
+                "outputType": "boolean",
+                "output": false
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "$index",
+            "type": "number"
+          },
+          {
+            "name": "$number",
+            "type": "number"
+          },
+          {
+            "name": "$name",
+            "type": "text"
+          },
+          {
+            "name": "$value",
+            "type": "object"
+          },
+          {
+            "name": "paymentId",
+            "type": "number"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "limitSessions",
+            "type": "text"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "productId",
+            "type": "text"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "purchase",
+            "type": "text"
+          },
+          {
+            "name": "subscriptionId",
+            "type": "text"
+          },
+          {
+            "name": "amount",
+            "type": "text"
+          },
+          {
+            "name": "canceledAt",
+            "type": "datetime"
+          },
+          {
+            "name": "historyByFacilty",
+            "type": "object",
+            "sub": []
+          },
+          {
+            "name": "treatments",
+            "type": "array",
+            "sub": [
+              {
+                "name": "lastTreatment",
+                "type": "datetime"
+              }
+            ]
+          },
+          {
+            "name": "isCurrentlyActive",
+            "type": "text",
+            "sub": []
+          },
+          {
+            "name": "isPlanEmployee",
+            "type": "text",
+            "sub": []
+          }
+        ],
+        "outputType": "array"
+      }
+    ]
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "name": "customerId"
+      },
+      {
+        "type": "text",
+        "name": "productId"
+      },
+      {
+        "type": "text",
+        "name": "paymentMethodId"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "listPrices",
+        "module": "stripe",
+        "action": "listPrices",
+        "options": {
+          "active": true,
+          "__extra": {
+            "api_key": "{{$_ENV.STRIPE_SECRET_KEY}}"
+          },
+          "product": "{{$_PARAM.productId}}"
+        },
+        "outputType": "object",
+        "meta": [
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "name": "active",
+                "type": "boolean"
+              },
+              {
+                "name": "billing_scheme",
+                "type": "text"
+              },
+              {
+                "name": "created",
+                "type": "number"
+              },
+              {
+                "name": "currency",
+                "type": "text"
+              },
+              {
+                "name": "id",
+                "type": "text"
+              },
+              {
+                "name": "livemode",
+                "type": "boolean"
+              },
+              {
+                "name": "lookup_key",
+                "type": "text"
+              },
+              {
+                "name": "metadata",
+                "type": "object"
+              },
+              {
+                "name": "nickname",
+                "type": "text"
+              },
+              {
+                "name": "object",
+                "type": "text"
+              },
+              {
+                "name": "product",
+                "type": "text",
+                "expand": [
+                  "stripe_product",
+                  "stripe_deleted_product"
+                ]
+              },
+              {
+                "name": "recurring",
+                "type": "object",
+                "ref": "stripe_recurring"
+              },
+              {
+                "name": "tax_behavior",
+                "type": "text"
+              },
+              {
+                "name": "tiers",
+                "type": "array",
+                "sub": [
+                  {
+                    "name": "flat_amount",
+                    "type": "number"
+                  },
+                  {
+                    "name": "flat_amount_decimal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "unit_amount",
+                    "type": "number"
+                  },
+                  {
+                    "name": "unit_amount_decimal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "up_to",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "tiers_mode",
+                "type": "text"
+              },
+              {
+                "name": "transform_quantity",
+                "type": "object",
+                "ref": "stripe_transform_quantity"
+              },
+              {
+                "name": "type",
+                "type": "text"
+              },
+              {
+                "name": "unit_amount",
+                "type": "number"
+              },
+              {
+                "name": "unit_amount_decimal",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "name": "has_more",
+            "type": "boolean"
+          },
+          {
+            "name": "object",
+            "type": "text"
+          },
+          {
+            "name": "url",
+            "type": "text"
+          }
+        ],
+        "output": false
+      },
+      {
+        "name": "paymentIntent",
+        "module": "api",
+        "action": "send",
+        "options": {
+          "url": "https://api.stripe.com/v1/payment_intents",
+          "method": "POST",
+          "headers": {
+            "authorization": "{{'Bearer '+$_ENV.STRIPE_SECRET_KEY}}"
+          },
+          "data": {
+            "amount": "{{listPrices.data[0].unit_amount_decimal}}",
+            "currency": "{{listPrices.data[0].currency}}",
+            "automatic_payment_methods[enabled]": true,
+            "customer": "{{$_PARAM.customerId}}",
+            "payment_method": "{{$_PARAM.paymentMethodId}}",
+            "setup_future_usage": "on_session",
+            "automatic_payment_methods[allow_redirects]": "never"
+          }
+        },
+        "output": true
+      }
+    ]
+  }
+}

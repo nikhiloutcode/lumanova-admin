@@ -1,0 +1,305 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxDataTraversal:{},dmxStateManagement:{},dmxBootstrap5Modal:{},dmxValidator:{},dmxBootbox5:{}}" -->
+
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/facility/getFacilityDetails" dmx-param:sort="search.value" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:id="query.id" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error getting information')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<dmx-api-datasource id="getPlans" is="dmx-fetch" url="/api/plans/getInformation" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:id="query.id" dmx-on:unauthorized="browser.goto('/')"></dmx-api-datasource>
+<meta name="ac:route" content="/facility/:id/packages/">
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+
+            <div class="row bg-header pt-4">
+
+                <div class="col-3">
+                    <h1 class="title-section">
+                        <p>Packages</p>
+                    </h1>
+                </div>
+                <div class="col">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+                </div>
+                <div class="col-2">
+                    <button id="createPackage" class="btn add-button" data-bs-toggle="modal" data-bs-target="#packageCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.packages" onclick="clearStyles()">Add</button>
+                </div>
+            </div>
+            <div class="row">
+
+                <div class="col">
+                    <p style="" class="results-data">Showing <b class="results-data-bold">{{getInformation.data.packages.length}}</b> results</p>
+                </div>
+            </div>
+            <br>
+            <div class="row" is="dmx-repeat" id="packageData" dmx-bind:repeat="getInformation.data.packages">
+                <div class="col-4 pt-2">
+                    <div class="card card-plans h-100">
+                        <div class="card-body h-100">
+                            <div class="row">
+                                <div class="col-11">
+                                    <h2 class="card-title card-plans-title">{{name}}</h2>
+                                </div>
+                                <div class="col-1">
+                                    <div class="dropdown" dmx-show="getMe.data.user.packages">
+                                        <button id="actions" class="btn details-data" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdown1">
+
+                                            <a class="dropdown-item" href="#" dmx-on:click="packageUpdateModal.show();packageUpdateModal.data_package.select(id)" id="editAction">Edit</a>
+                                            <a class="dropdown-item" href="#" dmx-on:click="run({'bootbox.confirm':{message:'Are you sure you want to delete?',title:'Confirm',buttons:{confirm:{label:'Yes, confirm',className:'btn-primary'},cancel:{label:'Cancel'}},then:{steps:{run:{action:`deletePackage.submit();getInformation.load({})`,name:'submit',outputType:'text'}}},name:'Confirmation'}})" id="deleteAction">Delete</a>
+                                        </div>
+                                    </div>
+                                    <form id="deletePackage" method="post" is="dmx-api-form" action="/api/subscriptions/delete" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="getInformation.load({});notifies.success('Package deleted')" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error deleting package')">
+
+                                        <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.packages[$index].id" type="hidden"><button id="delete" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="d-flex">
+                                <h2 class="card-title card-package-secondary_text">{{description}}</h2>
+                            </div>
+                            <!-- <div class="d-flex align-items-baseline mt-2">
+                                <h3 class="card-text card-package-secondary_text">Enyrgy plan related:</h3>
+                                <p class="card-text card-package-plan" dmx-show="plan">&nbsp; {{plan}}</p>
+                                <p class="card-text card-package-plan" dmx-show="plan===null">&nbsp; N/A</p>
+                            </div> -->
+                            <div class="d-flex card-plans-bg_amount mt-2">
+                                <div>
+                                    <p class="card-text card-plans-title_amount">Duration</p>
+                                    <p class="card-text card-plans-duration">{{numberDuration}} {{duration}}</p>
+                                </div>
+                                <div>
+                                    <p class="card-text card-plans-title_amount">Price</p>
+                                    <p class="card-text card-plans-amount">$ {{amount.toNumber().formatNumber(2, '.', ',')}}</p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="packageCreateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Add a package</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" dmx-on:click="packageForm.reset();packageCreateModal.hide()"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                    <br>
+                    <br>
+                    <form id="packageForm" method="post" is="dmx-api-form" action="/api/subscriptions/create" novalidate="" dmx-on:success="packageCreateModal.hide();getInformation.load({});notifies.success('Package created')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error creating package')" dmx-on:invalid="run({condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.name)`,outputType:'text'}}},else:{steps:{condition:{if:`lastError.response.data.amount`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.amount)`,outputType:'text'}}},else:{steps:{condition:{if:`lastError.response.data.numberDuration`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.numberDuration)`,outputType:'text'}}},else:{steps:{condition:{if:`lastError.response.data.duration`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.duration)`,outputType:'text'}}},outputType:'boolean'}}},outputType:'boolean'}}},outputType:'boolean'}}},outputType:'boolean'}})">
+
+
+                        <div class="form-group md-3" id="Form">
+                            <div class="row">
+                                <div class="col-6"><input type="text" class="form-control input-text" id="name" name="name" aria-describedby="nameLabel" placeholder="Package name" is="dmx-input" value="" minlength="3" maxlength="100" required></div>
+                                <div class="col-6"><input type="number" class="form-control input-text" min="0" id="amount" name="amount" aria-describedby="nameLabel" placeholder="Price" is="dmx-input" value="" onkeypress="return isNumberPrice(event)" onchange="(function(el){el.value=el.value.replace(/[-,]/g, '').replace(/[+,]/g, '');el.value=parseFloat(el.value).toFixed(2);})(this)" required></div>
+                                <div class="col">
+                                    <textarea class="form-control input-text" id="description" name="description" aria-describedby="nameLabel" placeholder="Description" is="dmx-input" value="" required=""></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+                        <br>
+                        <small class="text-muted fill-inputs-modal">Package duration:</small>
+                        <br><br>
+                        <div class="form-group md-3" id="durationForm">
+                            <div class="row d-flex align-items-baseline">
+
+                                <div class="col-2">
+                                    <input id="duration" name="duration" class="form-control" type="hidden">
+                                    <input type="number" class="form-control input-text" id="numberDuration" name="numberDuration" aria-describedby="nameLabel" placeholder="#" is="dmx-input" value="" min="0" oninput="this.value = 
+ !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" required>
+                                </div>
+                                <div class="col-10">
+                                    <button id="day" class="btn card-package-button" dmx-on:click.prevent="duration.setValue('day')" onclick="setBGDuration(this)">Days</button>
+                                    <button id="week" class="btn card-package-button" dmx-on:click.prevent="duration.setValue('week')" onclick="setBGDuration(this)">Weeks</button>
+                                    <button id="month" class="btn card-package-button" dmx-on:click.prevent="duration.setValue('month')" onclick="setBGDuration(this)">Months</button>
+                                </div>
+                            </div>
+
+                        </div>
+                        <small class="text-muted fill-inputs-modal">Add an Enyrgy plan (optional):</small>
+                        <div class="form-group md-3" id="plansForm">
+                            <div class="row" is="dmx-repeat" id="planData" dmx-bind:repeat="getPlans.data.packages">
+                                <div dmx-bind:id="id" class="col-6 pt-2" onclick="setBGPlans(this)">
+                                    <div class="card card-plans p-auto h-100">
+                                        <div class="card-body h-100">
+                                            <div class="row">
+                                                <div class="col-11">
+                                                    <h2 class="card-title card-plans-title">{{name}}</h2>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex">
+                                                <h2 class="card-title card-package-secondary_text">{{description}}</h2>
+                                            </div>
+                                            <div class="d-flex align-items-baseline">
+                                                <h3 class="card-text card-plans-sessions">{{limitSessions}} treatments</h3>
+                                                <p class="card-text card-plans-secondary_text">&nbsp;/ Every 4 weeks</p>
+                                            </div>
+                                            <div class="d-flex card-plans-bg_amount mt-3">
+                                                <p class="card-text card-plans-title_amount">Price</p>
+                                                <p class="card-text card-plans-amount">$ {{amount.toNumber().formatNumber(2, '.', ',')}}</p>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group md-3">
+                            <input id="plansId" name="plansId" class="form-control" type="hidden">
+                            <input id="facilityId" name="facilityId" type="hidden" class="form-control">
+                            <input id="facility" name="facility" type="hidden" class="form-control" value="true">
+
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run({condition:{if:`!packageForm.name.value||!packageForm.amount.value||!packageForm.duration.value||!packageForm.numberDuration.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`packageForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`packageForm.submit()`,outputType:'text'}},{run:{action:`packageForm.reset()`,outputType:'text'}},{run:{action:`packageCreateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}})">Add</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="packageUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Update a package</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container" is="dmx-data-detail" id="data_package" dmx-bind:data="getInformation.data.packages" key="id">
+                        <form id="packageForm" method="post" is="dmx-api-form" action="/api/subscriptions/update" novalidate="" dmx-on:success="packageUpdateModal.hide();getInformation.load({});notifies.success('Package updated')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error updating package')" dmx-on:invalid="run({condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.name)`,outputType:'text'}}},else:{steps:{condition:{if:`lastError.response.data.amount`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.amount)`,outputType:'text'}}},else:{steps:{condition:{if:`lastError.response.data.numberDuration`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.numberDuration)`,outputType:'text'}}},else:{steps:{condition:{if:`lastError.response.data.duration`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.duration)`,outputType:'text'}}},outputType:'boolean'}}},outputType:'boolean'}}},outputType:'boolean'}}},outputType:'boolean'}})">
+                            <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                            <br>
+                            <br>
+                            <div class="form-group md-3" id="idForm">
+                                <input type="hidden" class="form-control" id="id" name="id" aria-describedby="input1_help" placeholder="" dmx-bind:value=" data_package.data.id" dmx-bind:value="data_package.data.id">
+                            </div>
+
+
+                            <div class="form-group md-3" id="Form">
+                                <div class="row">
+                                    <div class="col-6"><input type="text" class="form-control input-text" id="name" name="name" aria-describedby="nameLabel" placeholder="Package name" is="dmx-input" value="" minlength="3" maxlength="50" required dmx-bind:value="data_package.data.name"></div>
+                                    <div class="col-6"><input type="number" class="form-control input-text" id="amount" name="amount" aria-describedby="nameLabel" placeholder="Price" is="dmx-input" value="" required="" onkeypress="return isNumberPrice(event)" onchange="(function(el){el.value=el.value.replace(/[-,]/g, '').replace(/[+,]/g, '');el.value=parseFloat(el.value).toFixed(2);})(this)" min="0" dmx-bind:value="data_package.data.amount"></div>
+                                    <div class="col"><textarea class="form-control input-text" id="description" name="description" aria-describedby="nameLabel" placeholder="Description" is="dmx-input" value="" required="" dmx-bind:value="data_package.data.description"></textarea></div>
+                                </div>
+
+                            </div>
+                            <br>
+                            <small class="text-muted fill-inputs-modal">Package duration:</small>
+                            <br><br>
+                            <div class="form-group md-3" id="durationForm">
+                                <div class="row d-flex align-items-baseline">
+
+                                    <div class="col-2">
+                                        <input id="duration" name="duration" class="form-control" dmx-bind:value="data_package.data.duration" type="hidden">
+                                        <input type="number" class="form-control input-text" id="numberDuration" name="numberDuration" aria-describedby="nameLabel" placeholder="#" min="0" oninput="this.value = 
+ !!this.value && Math.abs(this.value) >= 0 ? Math.abs(this.value) : null" is="dmx-input" value="" required dmx-bind:value="data_package.data.numberDuration">
+                                    </div>
+                                    <div class="col-10">
+                                        <button id="day" class="btn card-package-button" dmx-on:click.prevent="duration.setValue('day')" onclick="setBGDuration(this)" dmx-class:card-package-button_active="duration.value=='day'">Days</button>
+                                        <button id="week" class="btn card-package-button" dmx-on:click.prevent="duration.setValue('week')" onclick="setBGDuration(this)" dmx-class:card-package-button_active="duration.value=='week'">Weeks</button>
+                                        <button id="month" class="btn card-package-button" dmx-on:click.prevent="duration.setValue('month')" onclick="setBGDuration(this)" dmx-class:card-package-button_active="duration.value=='month'">Months</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <small class="text-muted fill-inputs-modal">Add an Enyrgy plan (optional):</small>
+                            <div class="form-group md-3" id="plansForm">
+                                <div class="row" is="dmx-repeat" id="planData" dmx-bind:repeat="getPlans.data.packages">
+                                    <div dmx-bind:id="id" class="col-6 pt-2" onclick="setBGPlan(this)">
+                                        <div class="card card-plans p-auto h-100" dmx-class:card-package-button_active="$value.id==planId.value">
+                                            <div class="card-body h-100">
+                                                <div class="row">
+                                                    <div class="col-11">
+                                                        <h2 class="card-title card-plans-title">{{name}}</h2>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex">
+                                                    <h2 class="card-title card-package-secondary_text">{{description}}</h2>
+                                                </div>
+                                                <div class="d-flex align-items-baseline">
+                                                    <h3 class="card-text card-plans-sessions">{{limitSessions}} treatments</h3>
+                                                    <p class="card-text card-plans-secondary_text">&nbsp;/ Every 4 weeks</p>
+                                                </div>
+                                                <div class="d-flex card-plans-bg_amount mt-3">
+                                                    <p class="card-text card-plans-title_amount">Price</p>
+                                                    <p class="card-text card-plans-amount">$ {{amount.toNumber().formatNumber(2, '.', ',')}}</p>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group md-3">
+                                <input id="planId" name="planId" class="form-control" dmx-bind:value="data_package.data.planId" type="hidden">
+                                <input id="facilityId" name="facilityId" type="hidden" class="form-control" dmx-bind:value="query.id">
+                                <input id="facility" name="facility" type="hidden" class="form-control" value="true">
+
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run({condition:{if:`!data_package.packageForm.name.value||!data_package.packageForm.amount.value||!data_package.packageForm.duration.value||!data_package.packageForm.numberDuration.value||!data_package.packageForm.planId.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_package.packageForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`data_package.packageForm.submit()`,outputType:'text'}},{run:{action:`data_package.packageForm.reset()`,outputType:'text'}},{run:{action:`packageUpdateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}})">Save</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function setBGDuration(e){
+        let buttons = ['day','week','month']
+        for(let cont=0;cont<buttons.length;cont++)
+            document.getElementById(buttons[cont]).classList.remove("card-package-button_active")
+
+        e.classList.add("card-package-button_active");
+    }
+    function setBGPlans(e){
+        let parent = e.parentNode.children
+        let active = true
+        if(e.children[0].classList.value.includes("card-package-button_active")){
+            document.getElementById('plansId').value = ''
+            active = false
+        }
+        for(let cont=0;cont<parent.length;cont++)
+            parent[cont].children[0].classList.remove("card-package-button_active")
+        if(active){
+            e.children[0].classList.add("card-package-button_active");
+            document.getElementById('plansId').value = e.id
+        }
+    }
+    function setBGPlan(e){
+        let parent = e.parentNode.children
+        let active = true
+        if(e.children[0].classList.value.includes("card-package-button_active")){
+            document.getElementById('planId').value = ''
+            active = false
+        }
+        for(let cont=0;cont<parent.length;cont++)
+            parent[cont].children[0].classList.remove("card-package-button_active")
+        if(active){
+            e.children[0].classList.add("card-package-button_active");
+            document.getElementById('planId').value = e.id
+        }
+    }
+</script>
+<script>
+    function clearStyles(){
+        let buttons = ['day','week','month']
+        for(let cont=0;cont<buttons.length;cont++) 
+            document.getElementById(buttons[cont]).classList.remove("card-package-button_active")
+
+        let parent = document.getElementById("planData").children
+        for(let cont=0;cont<parent.length;cont++) 
+            parent[cont].children[0].classList.remove("card-package-button_active")
+    }
+</script>

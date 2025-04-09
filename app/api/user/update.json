@@ -1,0 +1,1567 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:email": {}
+          }
+        },
+        "name": "email"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in first name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in first name."
+            }
+          }
+        },
+        "name": "firstName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in last name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in last name."
+            }
+          }
+        },
+        "name": "lastName"
+      },
+      {
+        "type": "text",
+        "name": "roleId"
+      },
+      {
+        "type": "boolean",
+        "name": "disabled"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:minlength": {
+              "param": 10,
+              "message": "Please enter at least {0} characters in phone number."
+            }
+          }
+        },
+        "name": "phone"
+      },
+      {
+        "type": "number",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      },
+      {
+        "type": "boolean",
+        "name": "invite"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "countryCode"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messages",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "phone",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.phone.replace(/\\D+/g,'')}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "user",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"user\" where \"user\".\"id\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "firstName"
+          },
+          {
+            "type": "text",
+            "name": "lastName"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "verificationCode"
+          },
+          {
+            "type": "datetime",
+            "name": "verificationCodeExpire"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "number",
+            "name": "userIdInvited"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "boolean",
+            "name": "isTester"
+          },
+          {
+            "type": "boolean",
+            "name": "isGodMode"
+          },
+          {
+            "type": "boolean",
+            "name": "isDebug"
+          },
+          {
+            "type": "text",
+            "name": "countryCode"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{user.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateUser",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "user",
+                        "column": "firstName",
+                        "type": "text",
+                        "value": "{{$_POST.firstName}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "lastName",
+                        "type": "text",
+                        "value": "{{$_POST.lastName}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "email",
+                        "type": "text",
+                        "value": "{{$_POST.email.lowercase()}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "phone",
+                        "type": "text",
+                        "value": "{{phone}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "disabled",
+                        "type": "boolean",
+                        "value": "{{$_POST.disabled}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "countryCode",
+                        "type": "text",
+                        "value": "{{$_POST.countryCode}}"
+                      }
+                    ],
+                    "table": "user",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ]
+                    },
+                    "returning": "id",
+                    "query": "update \"user\" set \"firstName\" = ?, \"lastName\" = ?, \"email\" = ?, \"phone\" = ?, \"updatedAt\" = ?, \"disabled\" = ?, \"countryCode\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.firstName}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.lastName}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.email.lowercase()}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{phone}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.disabled}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_POST.countryCode}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P8",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "updateRoleUser",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "detailsUser",
+                        "column": "rolesId",
+                        "type": "number",
+                        "value": "{{$_POST.roleId}}"
+                      },
+                      {
+                        "table": "detailsUser",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      }
+                    ],
+                    "table": "detailsUser",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "userId",
+                          "field": "userId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{user.id}}",
+                          "data": {
+                            "column": "userId"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"detailsUser\" set \"rolesId\" = ?, \"updatedAt\" = ? where \"userId\" = ?",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.roleId}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P3",
+                        "value": "{{user.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "exists",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ],
+                    "table": {
+                      "name": "client"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "client.userId",
+                          "field": "client.userId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "table": "client",
+                            "column": "userId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "user",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "userId"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select * from \"client\" where \"client\".\"userId\" = ?"
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "height"
+                  },
+                  {
+                    "type": "text",
+                    "name": "weight"
+                  },
+                  {
+                    "type": "text",
+                    "name": "sickDays"
+                  },
+                  {
+                    "type": "number",
+                    "name": "eyeColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "hairColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skinColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "userId"
+                  },
+                  {
+                    "type": "text",
+                    "name": "birth"
+                  },
+                  {
+                    "type": "number",
+                    "name": "freckles"
+                  },
+                  {
+                    "type": "number",
+                    "name": "sunTooLong"
+                  },
+                  {
+                    "type": "number",
+                    "name": "degreeTurnBrown"
+                  },
+                  {
+                    "type": "number",
+                    "name": "brownSeveralHours"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facialReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "tanning"
+                  },
+                  {
+                    "type": "number",
+                    "name": "exposedArea"
+                  },
+                  {
+                    "type": "text",
+                    "name": "gender"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "consentTreatment"
+                  },
+                  {
+                    "type": "number",
+                    "name": "treatments"
+                  },
+                  {
+                    "type": "text",
+                    "name": "customerId"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreGeneticDisposition"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreTanningHabits"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skintype"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "hasFreeTrial"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "hasFinishedQuestions"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{!exists.id}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "insertClient",
+                        "module": "dbupdater",
+                        "action": "insert",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "insert",
+                            "values": [
+                              {
+                                "table": "client",
+                                "column": "userId",
+                                "type": "number",
+                                "value": "{{user.id}}"
+                              }
+                            ],
+                            "table": "client",
+                            "returning": "id",
+                            "query": "insert into \"client\" (\"userId\") values (?)",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{user.id}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "identity",
+                            "type": "text"
+                          },
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "createCustomer",
+                        "module": "core",
+                        "action": "exec",
+                        "options": {
+                          "exec": "stripe/customer/create",
+                          "params": {
+                            "phone": "{{phone}}",
+                            "email": "{{$_POST.email}}",
+                            "name": "{{$_POST.firstName+' '+$_POST.lastName}}"
+                          }
+                        },
+                        "output": false
+                      },
+                      {
+                        "name": "customerId",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{createCustomer.createCustomer.id}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "updateCustomerId",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "client",
+                                "column": "customerId",
+                                "type": "text",
+                                "value": "{{customerId}}"
+                              }
+                            ],
+                            "table": "client",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{insertClient.identity}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "update \"client\" set \"customerId\" = ? where \"id\" = ?",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{customerId}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{insertClient.identity}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "roleUser",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "select",
+                            "columns": [],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{user.id}}",
+                                "test": ""
+                              }
+                            ],
+                            "table": {
+                              "name": "detailsUser"
+                            },
+                            "primary": "id",
+                            "joins": [
+                              {
+                                "table": "roles",
+                                "column": "*",
+                                "alias": "r",
+                                "type": "INNER",
+                                "clauses": {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "r",
+                                      "column": "id",
+                                      "operator": "equal",
+                                      "operation": "=",
+                                      "value": {
+                                        "table": "detailsUser",
+                                        "column": "rolesId"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "primary": "id"
+                              }
+                            ],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "detailsUser.userId",
+                                  "field": "detailsUser.userId",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{user.id}}",
+                                  "data": {
+                                    "table": "detailsUser",
+                                    "column": "userId",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "reference",
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "references": "id",
+                                      "inTable": "user",
+                                      "referenceType": "integer",
+                                      "onUpdate": "CASCADE",
+                                      "onDelete": "CASCADE",
+                                      "name": "userId"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "select * from \"detailsUser\" inner join \"roles\" as \"r\" on \"r\".\"id\" = \"detailsUser\".\"rolesId\" where \"detailsUser\".\"userId\" = ?"
+                          }
+                        },
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "number",
+                            "name": "userId"
+                          },
+                          {
+                            "type": "number",
+                            "name": "rolesId"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "createdAt"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "updatedAt"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{roleUser.name=='adminFacility'||roleUser.name=='ownerFacility'||roleUser.name=='facilitatorFacility'}}",
+                          "then": {
+                            "steps": {
+                              "name": "planEmployee",
+                              "module": "dbconnector",
+                              "action": "single",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "select",
+                                  "columns": [],
+                                  "params": [],
+                                  "table": {
+                                    "name": "plans"
+                                  },
+                                  "primary": "id",
+                                  "joins": [],
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "plans.active",
+                                        "field": "plans.active",
+                                        "type": "boolean",
+                                        "operator": "equal",
+                                        "value": true,
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "active",
+                                          "type": "boolean",
+                                          "columnObj": {
+                                            "type": "boolean",
+                                            "default": "true",
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "active"
+                                          }
+                                        },
+                                        "operation": "=",
+                                        "table": "plans"
+                                      },
+                                      {
+                                        "id": "plans.amount",
+                                        "field": "plans.amount",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "0.00",
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "amount",
+                                          "type": "text",
+                                          "columnObj": {
+                                            "type": "string",
+                                            "maxLength": 255,
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "amount"
+                                          }
+                                        },
+                                        "operation": "=",
+                                        "table": "plans"
+                                      },
+                                      {
+                                        "id": "plans.productId",
+                                        "field": "plans.productId",
+                                        "type": "string",
+                                        "operator": "not_equal",
+                                        "value": "''",
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "productId",
+                                          "type": "text",
+                                          "columnObj": {
+                                            "type": "text",
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "productId"
+                                          }
+                                        },
+                                        "operation": "<>",
+                                        "table": "plans"
+                                      },
+                                      {
+                                        "id": "plans.name",
+                                        "field": "plans.name",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "Employee Facility",
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "name",
+                                          "type": "text",
+                                          "columnObj": {
+                                            "type": "string",
+                                            "maxLength": 255,
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "name"
+                                          }
+                                        },
+                                        "operation": "=",
+                                        "table": "plans"
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "query": "select * from \"plans\" where \"plans\".\"active\" = ? and \"plans\".\"amount\" = ? and \"plans\".\"productId\" <> ? and \"plans\".\"name\" = ?"
+                                }
+                              },
+                              "output": false,
+                              "meta": [
+                                {
+                                  "type": "number",
+                                  "name": "id"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "name"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "amount"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "limitSessions"
+                                },
+                                {
+                                  "type": "datetime",
+                                  "name": "createdAt"
+                                },
+                                {
+                                  "type": "datetime",
+                                  "name": "updatedAt"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "productId"
+                                },
+                                {
+                                  "type": "boolean",
+                                  "name": "active"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "description"
+                                }
+                              ],
+                              "outputType": "object",
+                              "type": "dbconnector_single"
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "planEmployee",
+                              "module": "dbconnector",
+                              "action": "single",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "select",
+                                  "columns": [],
+                                  "params": [],
+                                  "table": {
+                                    "name": "plans"
+                                  },
+                                  "primary": "id",
+                                  "joins": [],
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "plans.active",
+                                        "field": "plans.active",
+                                        "type": "boolean",
+                                        "operator": "equal",
+                                        "value": true,
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "active",
+                                          "type": "boolean",
+                                          "columnObj": {
+                                            "type": "boolean",
+                                            "default": "true",
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "active"
+                                          }
+                                        },
+                                        "operation": "="
+                                      },
+                                      {
+                                        "id": "plans.amount",
+                                        "field": "plans.amount",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "0.00",
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "amount",
+                                          "type": "text",
+                                          "columnObj": {
+                                            "type": "string",
+                                            "maxLength": 255,
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "amount"
+                                          }
+                                        },
+                                        "operation": "="
+                                      },
+                                      {
+                                        "id": "plans.productId",
+                                        "field": "plans.productId",
+                                        "type": "string",
+                                        "operator": "not_equal",
+                                        "value": "''",
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "productId",
+                                          "type": "text",
+                                          "columnObj": {
+                                            "type": "text",
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "productId"
+                                          }
+                                        },
+                                        "operation": "<>"
+                                      },
+                                      {
+                                        "id": "plans.name",
+                                        "field": "plans.name",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "Employee Enyrgy",
+                                        "data": {
+                                          "table": "plans",
+                                          "column": "name",
+                                          "type": "text",
+                                          "columnObj": {
+                                            "type": "string",
+                                            "maxLength": 255,
+                                            "primary": false,
+                                            "unique": false,
+                                            "nullable": true,
+                                            "name": "name"
+                                          }
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "query": "select * from \"plans\" where \"plans\".\"active\" = ? and \"plans\".\"amount\" = ? and \"plans\".\"productId\" <> ? and \"plans\".\"name\" = ?"
+                                }
+                              },
+                              "output": false,
+                              "meta": [
+                                {
+                                  "type": "number",
+                                  "name": "id"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "name"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "amount"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "limitSessions"
+                                },
+                                {
+                                  "type": "datetime",
+                                  "name": "createdAt"
+                                },
+                                {
+                                  "type": "datetime",
+                                  "name": "updatedAt"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "productId"
+                                },
+                                {
+                                  "type": "boolean",
+                                  "name": "active"
+                                },
+                                {
+                                  "type": "text",
+                                  "name": "description"
+                                }
+                              ],
+                              "outputType": "object",
+                              "type": "dbconnector_single"
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{planEmployee.productId}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "createPlanEmployee",
+                                "module": "core",
+                                "action": "exec",
+                                "options": {
+                                  "exec": "stripe/subscriptions/create",
+                                  "params": {
+                                    "customerId": "{{customerId}}",
+                                    "productId": "{{planEmployee.productId}}"
+                                  }
+                                },
+                                "output": false
+                              },
+                              {
+                                "name": "subscriptionId",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{createPlanEmployee.createSubscription.data.id}}"
+                                },
+                                "meta": [],
+                                "outputType": "text"
+                              },
+                              {
+                                "name": "insertDetailsPayment",
+                                "module": "dbupdater",
+                                "action": "insert",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "insert",
+                                    "values": [
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "status",
+                                        "type": "text",
+                                        "value": "{{createPlanEmployee.createSubscription.data.status}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "clientId",
+                                        "type": "number",
+                                        "value": "{{insertClient.identity}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "subscriptionStripeId",
+                                        "type": "text",
+                                        "value": "{{subscriptionId}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "createdAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "updatedAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "planId",
+                                        "type": "number",
+                                        "value": "{{planEmployee.id}}"
+                                      }
+                                    ],
+                                    "table": "detailsPayment",
+                                    "returning": "id",
+                                    "query": "insert into \"detailsPayment\" (\"clientId\", \"createdAt\", \"planId\", \"status\", \"subscriptionStripeId\", \"updatedAt\") values (?, ?, ?, ?, ?, ?) returning \"id\"",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{createPlanEmployee.createSubscription.data.status}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{insertClient.identity}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P3",
+                                        "type": "expression",
+                                        "value": "{{subscriptionId}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P4",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P5",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P6",
+                                        "type": "expression",
+                                        "value": "{{planEmployee.id}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "identity",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "updateClient",
+                                "module": "dbupdater",
+                                "action": "update",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "update",
+                                    "values": [
+                                      {
+                                        "table": "client",
+                                        "column": "treatments",
+                                        "type": "number",
+                                        "value": "{{planEmployee.limitSessions}}"
+                                      }
+                                    ],
+                                    "table": "client",
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "id",
+                                          "field": "id",
+                                          "type": "double",
+                                          "operator": "equal",
+                                          "value": "{{insertClient.identity}}",
+                                          "data": {
+                                            "column": "id"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "returning": "id",
+                                    "query": "update \"client\" set \"treatments\" = ? where \"id\" = ? returning \"id\"",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{planEmployee.limitSessions}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P2",
+                                        "value": "{{insertClient.identity}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{exists.customerId}}",
+                        "then": {
+                          "steps": {
+                            "name": "updateCustomer",
+                            "module": "core",
+                            "action": "exec",
+                            "options": {
+                              "exec": "stripe/customer/update",
+                              "params": {
+                                "phone": "{{$_POST.phone}}",
+                                "email": "{{$_POST.email}}",
+                                "id": "{{exists.customerId}}",
+                                "name": "{{$_POST.firstName+' '+$_POST.lastName}}"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "outputType": "boolean"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.invite}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "updateUserInvite",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "user",
+                                "column": "userIdInvited",
+                                "type": "number",
+                                "value": "{{jwt.userId}}"
+                              },
+                              {
+                                "table": "user",
+                                "column": "updatedAt",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              }
+                            ],
+                            "table": "user",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ]
+                            },
+                            "returning": "id",
+                            "query": "update \"user\" set \"userIdInvited\" = ?, \"updatedAt\" = ? where \"id\" = ? returning \"id\"",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{jwt.userId}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{NOW}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P3",
+                                "value": "{{$_POST.id}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "invite",
+                        "module": "api",
+                        "action": "send",
+                        "options": {
+                          "method": "POST",
+                          "url": "{{$_ENV.HOST+'/api/auth/invitation'}}",
+                          "data": {
+                            "userId": "{{$_POST.id}}"
+                          },
+                          "headers": {
+                            "authorization": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+                          }
+                        },
+                        "output": false
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messages.USER_UPDATED}}"
+                }
+              }
+            ]
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "exists",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": true
+                },
+                "meta": [],
+                "output": true,
+                "outputType": "text"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messages.ERROR_USER}}"
+                },
+                "disabled": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

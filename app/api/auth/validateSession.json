@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SESSION": [
+      {
+        "type": "text",
+        "name": "jwt"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "",
+      "module": "core",
+      "action": "trycatch",
+      "options": {
+        "try": {
+          "steps": [
+            {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_SESSION.jwt}}",
+                "then": {
+                  "steps": {
+                    "name": "jwt",
+                    "module": "core",
+                    "action": "exec",
+                    "options": {
+                      "exec": "utils/verifyJWT",
+                      "params": {
+                        "token": "{{$_SESSION.jwt}}"
+                      }
+                    },
+                    "output": false
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "jwt",
+                    "module": "core",
+                    "action": "exec",
+                    "options": {
+                      "exec": "utils/verifyJWT",
+                      "params": {
+                        "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+                      }
+                    },
+                    "output": false
+                  }
+                }
+              },
+              "outputType": "boolean"
+            },
+            {
+              "name": "token",
+              "module": "core",
+              "action": "setvalue",
+              "options": {
+                "value": "{{$_SESSION.jwt}}"
+              },
+              "meta": [],
+              "outputType": "text",
+              "output": true
+            }
+          ]
+        },
+        "catch": {
+          "steps": {
+            "name": "",
+            "module": "core",
+            "action": "response",
+            "options": {
+              "status": 400,
+              "data": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

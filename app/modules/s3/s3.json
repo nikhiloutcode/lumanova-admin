@@ -1,0 +1,10 @@
+{
+  "name": "s3",
+  "module": "s3",
+  "action": "provider",
+  "options": {
+    "endpoint": "s3.us-east-1.amazonaws.com",
+    "accessKeyId": "{{$_ENV.AWS_KEY}}",
+    "secretAccessKey": "{{$_ENV.AWS_SECRET}}"
+  }
+}

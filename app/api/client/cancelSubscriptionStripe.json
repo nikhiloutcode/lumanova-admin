@@ -1,0 +1,470 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "subscriptionId"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "client",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "client"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "client.userId",
+                  "field": "client.userId",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "client",
+                    "column": "userId",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "reference",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "references": "id",
+                      "inTable": "user",
+                      "referenceType": "integer",
+                      "onUpdate": "CASCADE",
+                      "onDelete": "CASCADE",
+                      "name": "userId"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"client\" where \"client\".\"userId\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "height"
+          },
+          {
+            "type": "text",
+            "name": "weight"
+          },
+          {
+            "type": "text",
+            "name": "sickDays"
+          },
+          {
+            "type": "number",
+            "name": "eyeColor"
+          },
+          {
+            "type": "number",
+            "name": "hairColor"
+          },
+          {
+            "type": "number",
+            "name": "skinColor"
+          },
+          {
+            "type": "number",
+            "name": "userId"
+          },
+          {
+            "type": "text",
+            "name": "birth"
+          },
+          {
+            "type": "number",
+            "name": "freckles"
+          },
+          {
+            "type": "number",
+            "name": "sunTooLong"
+          },
+          {
+            "type": "number",
+            "name": "degreeTurnBrown"
+          },
+          {
+            "type": "number",
+            "name": "brownSeveralHours"
+          },
+          {
+            "type": "number",
+            "name": "facialReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "tanning"
+          },
+          {
+            "type": "number",
+            "name": "exposedArea"
+          },
+          {
+            "type": "text",
+            "name": "gender"
+          },
+          {
+            "type": "datetime",
+            "name": "consentTreatment"
+          },
+          {
+            "type": "number",
+            "name": "treatments"
+          },
+          {
+            "type": "text",
+            "name": "customerId"
+          },
+          {
+            "type": "number",
+            "name": "scoreGeneticDisposition"
+          },
+          {
+            "type": "number",
+            "name": "scoreReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "scoreTanningHabits"
+          },
+          {
+            "type": "number",
+            "name": "skintype"
+          },
+          {
+            "type": "boolean",
+            "name": "hasFreeTrial"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "cancelSubscription",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "stripe/subscriptions/cancel",
+          "params": {
+            "subscriptionId": "{{$_POST.subscriptionId}}"
+          }
+        }
+      },
+      {
+        "name": "canceledAt",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{cancelSubscription.updateSubscription.canceled_at.formatDate('MM-dd-yyyy hh:mm:ss')}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{client.hasFreeTrial}}",
+          "then": {
+            "steps": {
+              "name": "updateDetailsPayment",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "detailsPayment",
+                      "column": "updatedAt",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "detailsPayment",
+                      "column": "canceledAt",
+                      "type": "datetime",
+                      "value": "{{canceledAt}}"
+                    },
+                    {
+                      "table": "detailsPayment",
+                      "column": "freeTrialEndAt",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "detailsPayment",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "subscriptionStripeId",
+                        "field": "subscriptionStripeId",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{$_POST.subscriptionId}}",
+                        "data": {
+                          "column": "subscriptionStripeId"
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "status",
+                        "field": "status",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{'active'}}",
+                        "data": {
+                          "column": "status"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "update \"detailsPayment\" set \"status\" = ?, \"updatedAt\" = ?, \"canceledAt\" = ?, \"freeTrialEndAt\" = ? where \"subscriptionStripeId\" = ? and \"status\" = ? returning \"id\"",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{NOW}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{canceledAt}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{canceledAt}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "name": ":P4",
+                      "value": "{{$_POST.subscriptionId}}",
+                      "test": ""
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P5",
+                      "value": "{{$_POST.subscriptionId}}",
+                      "test": ""
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P6",
+                      "value": "{{'active'}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "updateDetailsPayment",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "detailsPayment",
+                      "column": "updatedAt",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "detailsPayment",
+                      "column": "canceledAt",
+                      "type": "datetime",
+                      "value": "{{canceledAt}}"
+                    }
+                  ],
+                  "table": "detailsPayment",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "subscriptionStripeId",
+                        "field": "subscriptionStripeId",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{$_POST.subscriptionId}}",
+                        "data": {
+                          "column": "subscriptionStripeId"
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "status",
+                        "field": "status",
+                        "type": "string",
+                        "operator": "equal",
+                        "value": "{{'active'}}",
+                        "data": {
+                          "column": "status"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "update \"detailsPayment\" set \"status\" = ?, \"updatedAt\" = ?, \"canceledAt\" = ? where \"subscriptionStripeId\" = ? and \"status\" = ? returning \"id\"",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{NOW}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{NOW}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "name": ":P3",
+                      "value": "{{$_POST.subscriptionId}}",
+                      "test": ""
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P4",
+                      "value": "{{$_POST.subscriptionId}}",
+                      "test": ""
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P5",
+                      "value": "{{'active'}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ],
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "response",
+        "options": {
+          "status": 200,
+          "data": "{{messagesHandler.CLIENT_CREATE}}"
+        },
+        "disabled": true
+      }
+    ]
+  }
+}

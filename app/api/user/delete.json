@@ -1,0 +1,1367 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "options": {
+          "rules": {}
+        },
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "message",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messageHandler}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "user",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"user\" where \"user\".\"id\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "firstName"
+          },
+          {
+            "type": "text",
+            "name": "lastName"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "verificationCode"
+          },
+          {
+            "type": "datetime",
+            "name": "verificationCodeExpire"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "number",
+            "name": "userIdInvited"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "boolean",
+            "name": "isTester"
+          },
+          {
+            "type": "boolean",
+            "name": "isGodMode"
+          },
+          {
+            "type": "boolean",
+            "name": "isDebug"
+          }
+        ],
+        "outputType": "object",
+        "type": "dbconnector_single"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{user.id}}",
+          "then": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_POST.id}}",
+                "then": {
+                  "steps": [
+                    {
+                      "name": "client",
+                      "module": "dbconnector",
+                      "action": "single",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{$_POST.id}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "client"
+                          },
+                          "primary": "id",
+                          "joins": [],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "client.userId",
+                                "field": "client.userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.id}}",
+                                "data": {
+                                  "table": "client",
+                                  "column": "userId",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "reference",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "references": "id",
+                                    "inTable": "user",
+                                    "referenceType": "integer",
+                                    "onUpdate": "CASCADE",
+                                    "onDelete": "CASCADE",
+                                    "name": "userId"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select * from \"client\" where \"client\".\"userId\" = ?"
+                        }
+                      },
+                      "output": false,
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "height"
+                        },
+                        {
+                          "type": "text",
+                          "name": "weight"
+                        },
+                        {
+                          "type": "text",
+                          "name": "sickDays"
+                        },
+                        {
+                          "type": "number",
+                          "name": "eyeColor"
+                        },
+                        {
+                          "type": "number",
+                          "name": "hairColor"
+                        },
+                        {
+                          "type": "number",
+                          "name": "skinColor"
+                        },
+                        {
+                          "type": "number",
+                          "name": "userId"
+                        },
+                        {
+                          "type": "text",
+                          "name": "birth"
+                        },
+                        {
+                          "type": "number",
+                          "name": "freckles"
+                        },
+                        {
+                          "type": "number",
+                          "name": "sunTooLong"
+                        },
+                        {
+                          "type": "number",
+                          "name": "degreeTurnBrown"
+                        },
+                        {
+                          "type": "number",
+                          "name": "brownSeveralHours"
+                        },
+                        {
+                          "type": "number",
+                          "name": "facialReactionSun"
+                        },
+                        {
+                          "type": "number",
+                          "name": "tanning"
+                        },
+                        {
+                          "type": "number",
+                          "name": "exposedArea"
+                        },
+                        {
+                          "type": "text",
+                          "name": "gender"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "consentTreatment"
+                        },
+                        {
+                          "type": "number",
+                          "name": "treatments"
+                        },
+                        {
+                          "type": "text",
+                          "name": "customerId"
+                        },
+                        {
+                          "type": "number",
+                          "name": "scoreGeneticDisposition"
+                        },
+                        {
+                          "type": "number",
+                          "name": "scoreReactionSun"
+                        },
+                        {
+                          "type": "number",
+                          "name": "scoreTanningHabits"
+                        },
+                        {
+                          "type": "number",
+                          "name": "skintype"
+                        }
+                      ],
+                      "type": "dbconnector_single",
+                      "outputType": "object"
+                    },
+                    {
+                      "name": "updateDetailsClient",
+                      "module": "dbupdater",
+                      "action": "update",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "update",
+                          "values": [
+                            {
+                              "table": "detailsClient",
+                              "column": "updatedAt",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "table": "detailsClient",
+                              "column": "status",
+                              "type": "text",
+                              "value": "deleted"
+                            },
+                            {
+                              "table": "detailsClient",
+                              "column": "expirationAt",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            }
+                          ],
+                          "table": "detailsClient",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "clientId",
+                                "field": "clientId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{client.id}}",
+                                "data": {
+                                  "column": "clientId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "update \"detailsClient\" set \"updatedAt\" = ?, \"status\" = ?, \"expirationAt\" = ? where \"clientId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{NOW}}",
+                              "test": ""
+                            },
+                            {
+                              "name": ":P2",
+                              "type": "expression",
+                              "value": "{{NOW}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P3",
+                              "value": "{{client.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "deleteDetailsUserFacility",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "detailsUsersFacility",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "userId",
+                                "field": "userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.id}}",
+                                "data": {
+                                  "column": "userId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"detailsUsersFacility\" where \"userId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{$_POST.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "deleteSessions",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "sessions",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "userId",
+                                "field": "userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.id}}",
+                                "data": {
+                                  "column": "userId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"sessions\" where \"userId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{$_POST.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "deleteDetailsUser",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "detailsUser",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "userId",
+                                "field": "userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.id}}",
+                                "data": {
+                                  "column": "userId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"detailsUser\" where \"userId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{$_POST.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "plansActive",
+                      "module": "dbconnector",
+                      "action": "select",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{$_POST.id}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "detailsPayment"
+                          },
+                          "primary": "id",
+                          "joins": [
+                            {
+                              "table": "client",
+                              "column": "*",
+                              "type": "INNER",
+                              "clauses": {
+                                "condition": "AND",
+                                "rules": [
+                                  {
+                                    "table": "client",
+                                    "column": "id",
+                                    "operator": "equal",
+                                    "operation": "=",
+                                    "value": {
+                                      "table": "detailsPayment",
+                                      "column": "clientId"
+                                    }
+                                  }
+                                ]
+                              },
+                              "primary": "id"
+                            }
+                          ],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "detailsPayment.status",
+                                "field": "detailsPayment.status",
+                                "type": "string",
+                                "operator": "equal",
+                                "value": "active",
+                                "data": {
+                                  "table": "detailsPayment",
+                                  "column": "status",
+                                  "type": "text",
+                                  "columnObj": {
+                                    "type": "string",
+                                    "maxLength": 255,
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "name": "status"
+                                  }
+                                },
+                                "operation": "="
+                              },
+                              {
+                                "id": "client.userId",
+                                "field": "client.userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.id}}",
+                                "data": {
+                                  "table": "client",
+                                  "column": "userId",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "reference",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "references": "id",
+                                    "inTable": "user",
+                                    "referenceType": "integer",
+                                    "onUpdate": "CASCADE",
+                                    "onDelete": "CASCADE",
+                                    "name": "userId"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select * from \"detailsPayment\" inner join \"client\" on \"client\".\"id\" = \"detailsPayment\".\"clientId\" where \"detailsPayment\".\"status\" = ? and \"client\".\"userId\" = ?"
+                        }
+                      },
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "status"
+                        },
+                        {
+                          "type": "number",
+                          "name": "clientId"
+                        },
+                        {
+                          "type": "text",
+                          "name": "subscriptionStripeId"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "createdAt"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "updatedAt"
+                        },
+                        {
+                          "type": "number",
+                          "name": "planId"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "canceledAt"
+                        }
+                      ],
+                      "outputType": "array"
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{plansActive.length>0}}",
+                        "then": {
+                          "steps": {
+                            "name": "repeat",
+                            "module": "core",
+                            "action": "repeat",
+                            "options": {
+                              "repeat": "{{plansActive}}",
+                              "outputFields": [],
+                              "exec": {
+                                "steps": {
+                                  "name": "cancelPlans",
+                                  "module": "core",
+                                  "action": "exec",
+                                  "options": {
+                                    "exec": "stripe/subscriptions/cancel",
+                                    "params": {
+                                      "subscriptionId": "{{subscriptionStripeId}}"
+                                    }
+                                  },
+                                  "output": false
+                                }
+                              }
+                            },
+                            "meta": [
+                              {
+                                "name": "$index",
+                                "type": "number"
+                              },
+                              {
+                                "name": "$number",
+                                "type": "number"
+                              },
+                              {
+                                "name": "$name",
+                                "type": "text"
+                              },
+                              {
+                                "name": "$value",
+                                "type": "object"
+                              },
+                              {
+                                "name": "id",
+                                "type": "number"
+                              },
+                              {
+                                "name": "status",
+                                "type": "text"
+                              },
+                              {
+                                "name": "clientId",
+                                "type": "number"
+                              },
+                              {
+                                "name": "subscriptionStripeId",
+                                "type": "text"
+                              },
+                              {
+                                "name": "createdAt",
+                                "type": "datetime"
+                              },
+                              {
+                                "name": "updatedAt",
+                                "type": "datetime"
+                              },
+                              {
+                                "name": "planId",
+                                "type": "number"
+                              },
+                              {
+                                "name": "canceledAt",
+                                "type": "datetime"
+                              }
+                            ],
+                            "outputType": "array",
+                            "output": true
+                          }
+                        }
+                      },
+                      "outputType": "boolean"
+                    },
+                    {
+                      "name": "deleteUser",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "user",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "id",
+                                "field": "id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{$_POST.id}}",
+                                "data": {
+                                  "column": "id"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"user\" where \"id\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{$_POST.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "response",
+                      "options": {
+                        "status": 200,
+                        "data": "{{message.USER_DELETED}}"
+                      },
+                      "disabled": true
+                    }
+                  ]
+                },
+                "else": {
+                  "steps": [
+                    {
+                      "name": "deleteSessions",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "sessions",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "userId",
+                                "field": "userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{jwt.userId}}",
+                                "data": {
+                                  "column": "userId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"sessions\" where \"userId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{jwt.userId}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "updateDetailsClient",
+                      "module": "dbupdater",
+                      "action": "update",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "update",
+                          "values": [
+                            {
+                              "table": "detailsClient",
+                              "column": "updatedAt",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            },
+                            {
+                              "table": "detailsClient",
+                              "column": "status",
+                              "type": "text",
+                              "value": "deleted"
+                            },
+                            {
+                              "table": "detailsClient",
+                              "column": "expirationAt",
+                              "type": "datetime",
+                              "value": "{{NOW}}"
+                            }
+                          ],
+                          "table": "detailsClient",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "clientId",
+                                "field": "clientId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{client.id}}",
+                                "data": {
+                                  "column": "clientId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "update \"detailsClient\" set \"updatedAt\" = ?, \"status\" = ?, \"expirationAt\" = ? where \"clientId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "type": "expression",
+                              "value": "{{NOW}}",
+                              "test": ""
+                            },
+                            {
+                              "name": ":P2",
+                              "type": "expression",
+                              "value": "{{NOW}}",
+                              "test": ""
+                            },
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P3",
+                              "value": "{{client.id}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "deleteDetailsUser",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "detailsUser",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "userId",
+                                "field": "userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{jwt.userId}}",
+                                "data": {
+                                  "column": "userId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"detailsUser\" where \"userId\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{jwt.userId}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "deleteDetailsUserFacility",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "detailsUsersFacility",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "userId",
+                                "field": "userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{jwt.userId}}",
+                                "data": {
+                                  "column": "userId"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"detailsUsersFacility\" where \"userId\" = ?",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{jwt.userId}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "plansActive",
+                      "module": "dbconnector",
+                      "action": "select",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "select",
+                          "columns": [],
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{jwt.userId}}",
+                              "test": ""
+                            }
+                          ],
+                          "table": {
+                            "name": "detailsPayment"
+                          },
+                          "primary": "id",
+                          "joins": [
+                            {
+                              "table": "client",
+                              "column": "*",
+                              "type": "INNER",
+                              "clauses": {
+                                "condition": "AND",
+                                "rules": [
+                                  {
+                                    "table": "client",
+                                    "column": "id",
+                                    "operator": "equal",
+                                    "operation": "=",
+                                    "value": {
+                                      "table": "detailsPayment",
+                                      "column": "clientId"
+                                    }
+                                  }
+                                ]
+                              },
+                              "primary": "id"
+                            }
+                          ],
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "detailsPayment.status",
+                                "field": "detailsPayment.status",
+                                "type": "string",
+                                "operator": "equal",
+                                "value": "active",
+                                "data": {
+                                  "table": "detailsPayment",
+                                  "column": "status",
+                                  "type": "text",
+                                  "columnObj": {
+                                    "type": "string",
+                                    "maxLength": 255,
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "name": "status"
+                                  }
+                                },
+                                "operation": "="
+                              },
+                              {
+                                "id": "client.userId",
+                                "field": "client.userId",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{jwt.userId}}",
+                                "data": {
+                                  "table": "client",
+                                  "column": "userId",
+                                  "type": "number",
+                                  "columnObj": {
+                                    "type": "reference",
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "references": "id",
+                                    "inTable": "user",
+                                    "referenceType": "integer",
+                                    "onUpdate": "CASCADE",
+                                    "onDelete": "CASCADE",
+                                    "name": "userId"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "query": "select * from \"detailsPayment\" inner join \"client\" on \"client\".\"id\" = \"detailsPayment\".\"clientId\" where \"detailsPayment\".\"status\" = ? and \"client\".\"userId\" = ?"
+                        }
+                      },
+                      "meta": [
+                        {
+                          "type": "number",
+                          "name": "id"
+                        },
+                        {
+                          "type": "text",
+                          "name": "status"
+                        },
+                        {
+                          "type": "number",
+                          "name": "clientId"
+                        },
+                        {
+                          "type": "text",
+                          "name": "subscriptionStripeId"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "createdAt"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "updatedAt"
+                        },
+                        {
+                          "type": "number",
+                          "name": "planId"
+                        },
+                        {
+                          "type": "datetime",
+                          "name": "canceledAt"
+                        }
+                      ],
+                      "outputType": "array"
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{plansActive.length>0}}",
+                        "then": {
+                          "steps": {
+                            "name": "repeat",
+                            "module": "core",
+                            "action": "repeat",
+                            "options": {
+                              "repeat": "{{plansActive}}",
+                              "outputFields": [],
+                              "exec": {
+                                "steps": {
+                                  "name": "cancelPlans",
+                                  "module": "core",
+                                  "action": "exec",
+                                  "options": {
+                                    "exec": "stripe/subscriptions/cancel",
+                                    "params": {
+                                      "subscriptionId": "{{subscriptionStripeId}}"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "meta": [
+                              {
+                                "name": "$index",
+                                "type": "number"
+                              },
+                              {
+                                "name": "$number",
+                                "type": "number"
+                              },
+                              {
+                                "name": "$name",
+                                "type": "text"
+                              },
+                              {
+                                "name": "$value",
+                                "type": "object"
+                              },
+                              {
+                                "name": "id",
+                                "type": "number"
+                              },
+                              {
+                                "name": "status",
+                                "type": "text"
+                              },
+                              {
+                                "name": "clientId",
+                                "type": "number"
+                              },
+                              {
+                                "name": "subscriptionStripeId",
+                                "type": "text"
+                              },
+                              {
+                                "name": "createdAt",
+                                "type": "datetime"
+                              },
+                              {
+                                "name": "updatedAt",
+                                "type": "datetime"
+                              },
+                              {
+                                "name": "planId",
+                                "type": "number"
+                              },
+                              {
+                                "name": "canceledAt",
+                                "type": "datetime"
+                              }
+                            ],
+                            "outputType": "array"
+                          }
+                        }
+                      },
+                      "outputType": "boolean"
+                    },
+                    {
+                      "name": "deleteUser",
+                      "module": "dbupdater",
+                      "action": "delete",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "type": "delete",
+                          "table": "user",
+                          "wheres": {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "id",
+                                "field": "id",
+                                "type": "double",
+                                "operator": "equal",
+                                "value": "{{jwt.userId}}",
+                                "data": {
+                                  "column": "id"
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null,
+                            "valid": true
+                          },
+                          "returning": "id",
+                          "query": "delete from \"user\" where \"id\" = ? returning \"id\"",
+                          "params": [
+                            {
+                              "operator": "equal",
+                              "type": "expression",
+                              "name": ":P1",
+                              "value": "{{jwt.userId}}",
+                              "test": ""
+                            }
+                          ]
+                        }
+                      },
+                      "meta": [
+                        {
+                          "name": "affected",
+                          "type": "number"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "",
+                      "module": "core",
+                      "action": "response",
+                      "options": {
+                        "status": 200,
+                        "data": "{{message.USER_DELETED}}"
+                      }
+                    }
+                  ]
+                }
+              },
+              "outputType": "boolean"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{message.ERROR_USER}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

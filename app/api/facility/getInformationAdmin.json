@@ -1,0 +1,451 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "facility",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "query": "SELECT distinct f.*,\n(select \nu.\"firstName\" as \"adminFirstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" as \"adminLastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"phone\" as \"adminPhone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"countryCode\" as \"adminCountryCode\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"email\" as \"adminEmail\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"firstName\" as \"ownerFirstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" as \"ownerLastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"phone\" as \"ownerPhone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"countryCode\" as \"ownerCountryCode\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"email\" as \"ownerEmail\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM facility AS f\nwhere f.id = :P1 /* {{$_POST.id}} */ and f.disabled = false\ngroup by f.id,f.name,f.phone",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": "1"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "logo",
+                  "type": "text"
+                },
+                {
+                  "name": "phone",
+                  "type": "text"
+                },
+                {
+                  "name": "disabled",
+                  "type": "boolean"
+                },
+                {
+                  "name": "createdAt",
+                  "type": "datetime"
+                },
+                {
+                  "name": "updatedAt",
+                  "type": "datetime"
+                },
+                {
+                  "name": "name",
+                  "type": "text"
+                },
+                {
+                  "name": "email",
+                  "type": "text"
+                },
+                {
+                  "name": "city",
+                  "type": "text"
+                },
+                {
+                  "name": "state",
+                  "type": "text"
+                },
+                {
+                  "name": "zip",
+                  "type": "text"
+                },
+                {
+                  "name": "address1",
+                  "type": "text"
+                },
+                {
+                  "name": "address2",
+                  "type": "text"
+                },
+                {
+                  "name": "salesFirstName",
+                  "type": "text"
+                },
+                {
+                  "name": "salesLastName",
+                  "type": "text"
+                },
+                {
+                  "name": "salesPhone",
+                  "type": "text"
+                },
+                {
+                  "name": "salesEmail",
+                  "type": "text"
+                },
+                {
+                  "name": "adminFirstName",
+                  "type": "text"
+                },
+                {
+                  "name": "adminLastName",
+                  "type": "text"
+                },
+                {
+                  "name": "adminPhone",
+                  "type": "text"
+                },
+                {
+                  "name": "adminEmail",
+                  "type": "text"
+                },
+                {
+                  "name": "ownerFirstName",
+                  "type": "text"
+                },
+                {
+                  "name": "ownerLastName",
+                  "type": "text"
+                },
+                {
+                  "name": "ownerPhone",
+                  "type": "text"
+                },
+                {
+                  "name": "ownerEmail",
+                  "type": "text"
+                }
+              ],
+              "type": "dbcustom_query",
+              "outputType": "array"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": [
+                    {
+                      "name": "sort",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{$_GET.sort.lowercase()}}"
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": false
+                    },
+                    {
+                      "name": "facilities",
+                      "module": "dbupdater",
+                      "action": "custom",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "query": "SELECT distinct f.*,\n(select \nu.\"firstName\" as \"adminFirstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" as \"adminLastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"phone\" as \"adminPhone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"countryCode\" as \"adminCountryCode\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"email\" as \"adminEmail\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"firstName\" as \"ownerFirstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" as \"ownerLastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"phone\" as \"ownerPhone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"countryCode\" as \"ownerCountryCode\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"email\" as \"ownerEmail\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM facility AS f \nwhere (LOWER(f.\"name\") LIKE '%' || :P1 || '%' /* {{sort}} */ OR LOWER(f.phone) like '%' || :P1 || '%' /* {{sort}} */ \nor LOWER(f.email) LIKE '%' || :P1 || '%' /* {{sort}} */ or LOWER(f.address1) LIKE '%' || :P1 || '%' /* {{sort}} */\nor LOWER(f.city) LIKE '%' || :P1 || '%' /* {{sort}} */ or LOWER(f.state) LIKE '%' || :P1 || '%' /* {{sort}} */ \nor LOWER(f.zip) LIKE '%' || :P1 || '%' /* {{sort}} */ or LOWER(f.\"salesFirstName\") LIKE '%' || :P1 || '%' /* {{sort}} */\nor LOWER(f.\"salesLastName\") LIKE '%' || :P1 || '%' /* {{sort}} */) and f.disabled = false\ngroup by f.id,f.name,f.phone",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "value": "{{sort}}",
+                              "test": "ju"
+                            }
+                          ]
+                        }
+                      },
+                      "output": true,
+                      "meta": [
+                        {
+                          "name": "id",
+                          "type": "number"
+                        },
+                        {
+                          "name": "logo",
+                          "type": "text"
+                        },
+                        {
+                          "name": "phone",
+                          "type": "text"
+                        },
+                        {
+                          "name": "disabled",
+                          "type": "boolean"
+                        },
+                        {
+                          "name": "createdAt",
+                          "type": "datetime"
+                        },
+                        {
+                          "name": "updatedAt",
+                          "type": "datetime"
+                        },
+                        {
+                          "name": "name",
+                          "type": "text"
+                        },
+                        {
+                          "name": "email",
+                          "type": "text"
+                        },
+                        {
+                          "name": "city",
+                          "type": "text"
+                        },
+                        {
+                          "name": "state",
+                          "type": "text"
+                        },
+                        {
+                          "name": "zip",
+                          "type": "text"
+                        },
+                        {
+                          "name": "address1",
+                          "type": "text"
+                        },
+                        {
+                          "name": "address2",
+                          "type": "text"
+                        },
+                        {
+                          "name": "salesFirstName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "salesLastName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "salesEmail",
+                          "type": "text"
+                        },
+                        {
+                          "name": "salesPhone",
+                          "type": "text"
+                        },
+                        {
+                          "name": "adminFirstName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "adminLastName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "adminPhone",
+                          "type": "text"
+                        },
+                        {
+                          "name": "adminEmail",
+                          "type": "text"
+                        },
+                        {
+                          "name": "ownerFirstName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "ownerLastName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "ownerPhone",
+                          "type": "text"
+                        },
+                        {
+                          "name": "ownerEmail",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "dbcustom_query",
+                      "outputType": "array"
+                    }
+                  ]
+                },
+                "else": {
+                  "steps": {
+                    "name": "facilities",
+                    "module": "dbupdater",
+                    "action": "custom",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "query": "SELECT distinct f.*,\n(select \nu.\"firstName\" as \"adminFirstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" as \"adminLastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"phone\" as \"adminPhone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"countryCode\" as \"adminCountryCode\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"email\" as \"adminEmail\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"firstName\" as \"ownerFirstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" as \"ownerLastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"phone\" as \"ownerPhone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"countryCode\" as \"ownerCountryCode\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"email\" as \"ownerEmail\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM facility AS f where f.disabled = false\ngroup by f.id,f.name,f.phone",
+                        "params": []
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "name": "id",
+                        "type": "number"
+                      },
+                      {
+                        "name": "logo",
+                        "type": "text"
+                      },
+                      {
+                        "name": "phone",
+                        "type": "text"
+                      },
+                      {
+                        "name": "disabled",
+                        "type": "boolean"
+                      },
+                      {
+                        "name": "createdAt",
+                        "type": "datetime"
+                      },
+                      {
+                        "name": "updatedAt",
+                        "type": "datetime"
+                      },
+                      {
+                        "name": "name",
+                        "type": "text"
+                      },
+                      {
+                        "name": "email",
+                        "type": "text"
+                      },
+                      {
+                        "name": "city",
+                        "type": "text"
+                      },
+                      {
+                        "name": "state",
+                        "type": "text"
+                      },
+                      {
+                        "name": "zip",
+                        "type": "text"
+                      },
+                      {
+                        "name": "address1",
+                        "type": "text"
+                      },
+                      {
+                        "name": "address2",
+                        "type": "text"
+                      },
+                      {
+                        "name": "salesFirstName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "salesLastName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "salesEmail",
+                        "type": "text"
+                      },
+                      {
+                        "name": "salesPhone",
+                        "type": "text"
+                      },
+                      {
+                        "name": "adminFirstName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "adminLastName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "adminPhone",
+                        "type": "text"
+                      },
+                      {
+                        "name": "adminEmail",
+                        "type": "text"
+                      },
+                      {
+                        "name": "ownerFirstName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "ownerLastName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "ownerPhone",
+                        "type": "text"
+                      },
+                      {
+                        "name": "ownerEmail",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "dbcustom_query",
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,479 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "userId"
+      },
+      {
+        "type": "text",
+        "name": "facilityName"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "trycatch",
+        "options": {
+          "try": {
+            "steps": [
+              "lib/utils/getRandomCode",
+              {
+                "name": "code",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{g_code}}"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "user",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "SELECT",
+                    "distinct": false,
+                    "columns": [
+                      {
+                        "table": "r",
+                        "column": "sendEmail"
+                      },
+                      {
+                        "table": "r",
+                        "column": "sendSMS"
+                      },
+                      {
+                        "table": "user",
+                        "column": "id"
+                      },
+                      {
+                        "table": "user",
+                        "column": "email"
+                      },
+                      {
+                        "table": "user",
+                        "column": "phone"
+                      },
+                      {
+                        "table": "r",
+                        "column": "name"
+                      },
+                      {
+                        "table": "r",
+                        "column": "adminView"
+                      },
+                      {
+                        "table": "r",
+                        "column": "mobileView"
+                      },
+                      {
+                        "table": "r",
+                        "column": "facilityView"
+                      }
+                    ],
+                    "table": {
+                      "name": "user"
+                    },
+                    "joins": [
+                      {
+                        "table": "detailsUser",
+                        "column": "*",
+                        "alias": "du",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "du",
+                              "column": "userId",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "user",
+                                "column": "id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "roles",
+                        "column": "*",
+                        "alias": "r",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "r",
+                              "column": "id",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "du",
+                                "column": "rolesId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "user.id",
+                          "field": "user.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.userId}}",
+                          "data": {
+                            "table": "user",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "=",
+                          "table": "user"
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "orders": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_POST.userId}}",
+                        "test": "305"
+                      }
+                    ],
+                    "primary": "id",
+                    "query": "select \"r\".\"sendEmail\", \"r\".\"sendSMS\", \"user\".\"id\", \"user\".\"email\", \"user\".\"phone\", \"r\".\"name\", \"r\".\"adminView\", \"r\".\"mobileView\", \"r\".\"facilityView\" from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"user\".\"id\" = ?"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "boolean",
+                    "name": "sendEmail"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "sendSMS"
+                  },
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "email"
+                  },
+                  {
+                    "type": "text",
+                    "name": "phone"
+                  },
+                  {
+                    "type": "text",
+                    "name": "name"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "adminView"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "mobileView"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "facilityView"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "expiration_code",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{NOW.dateAdd(\"days\",1)}}"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "updateUser",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "user",
+                        "column": "verificationCode",
+                        "type": "text",
+                        "value": "{{code}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "verificationCodeExpire",
+                        "type": "datetime",
+                        "value": "{{expiration_code}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "userIdInvited",
+                        "type": "number",
+                        "value": "{{jwt.userId}}"
+                      }
+                    ],
+                    "table": "user",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{user.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"user\" set \"verificationCode\" = ?, \"verificationCodeExpire\" = ?, \"updatedAt\" = ?, \"userIdInvited\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{code}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{expiration_code}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{jwt.userId}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P5",
+                        "value": "{{user.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{user.email&&(user.adminView||user.facilityView)}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "link",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$_ENV.HOST+'/api/auth/verify?code='+code}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{$_POST.facilityName}}",
+                          "then": {
+                            "steps": {
+                              "name": "",
+                              "module": "mail",
+                              "action": "send",
+                              "options": {
+                                "instance": "sendgrid",
+                                "subject": "Your invitation link",
+                                "fromName": "Enyrgy Invitation Link",
+                                "fromEmail": "{{$_ENV.SENDGRID_EMAIL}}",
+                                "body": "<p>You've been invited to Enyrgy</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.enyrgy.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/us/app/enyrgy/id6450723326\" target=\"_blank\">iOS</a>",
+                                "toEmail": "{{user.email}}",
+                                "contentType": "html"
+                              }
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "",
+                              "module": "mail",
+                              "action": "send",
+                              "options": {
+                                "instance": "sendgrid",
+                                "subject": "Your invitation link",
+                                "fromName": "Enyrgy Invitation Link",
+                                "fromEmail": "{{$_ENV.SENDGRID_EMAIL}}",
+                                "body": "<p>You've been invited to Enyrgy</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.enyrgy.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/us/app/enyrgy/id6450723326\" target=\"_blank\">iOS</a>",
+                                "toEmail": "{{user.email}}",
+                                "contentType": "html"
+                              }
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{user.phone&&user.mobileView}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "link",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{'Your link is: '+$_ENV.HOST+'/sms/'+code}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "twilio",
+                        "module": "core",
+                        "action": "exec",
+                        "options": {
+                          "exec": "utils/sendSMS",
+                          "params": {
+                            "to": "{{user.phone}}",
+                            "body": "{{link}}"
+                          }
+                        },
+                        "output": false
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "catch": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_INVITATION}}"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

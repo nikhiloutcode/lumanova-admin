@@ -1,0 +1,638 @@
+{
+  "meta": {
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "height"
+      },
+      {
+        "type": "text",
+        "name": "weight"
+      },
+      {
+        "type": "text",
+        "name": "sickDays"
+      },
+      {
+        "type": "number",
+        "name": "eyeColor"
+      },
+      {
+        "type": "number",
+        "name": "hairColor"
+      },
+      {
+        "type": "number",
+        "name": "skinColor"
+      },
+      {
+        "type": "text",
+        "name": "birth"
+      },
+      {
+        "type": "number",
+        "name": "freckles"
+      },
+      {
+        "type": "number",
+        "name": "sunTooLong"
+      },
+      {
+        "type": "number",
+        "name": "degreeTurnBrown"
+      },
+      {
+        "type": "number",
+        "name": "brownSeveralHours"
+      },
+      {
+        "type": "number",
+        "name": "facialReactionSun"
+      },
+      {
+        "type": "number",
+        "name": "tanning"
+      },
+      {
+        "type": "text",
+        "name": "gender"
+      },
+      {
+        "type": "text",
+        "name": "consentTreatment"
+      },
+      {
+        "type": "number",
+        "name": "exposedArea"
+      },
+      {
+        "type": "text",
+        "name": "serial"
+      },
+      {
+        "type": "boolean",
+        "name": "calcSkinType"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "device"
+      },
+      {
+        "type": "text",
+        "name": "hasFinishedQuestions"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "exist",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "user",
+                "column": "isGodMode"
+              },
+              {
+                "table": "client",
+                "column": "id"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [
+              {
+                "table": "client",
+                "column": "*",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "client",
+                      "column": "userId",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "user",
+                        "column": "id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"user\".\"isGodMode\", \"client\".\"id\" from \"user\" inner join \"client\" on \"client\".\"userId\" = \"user\".\"id\" where \"user\".\"id\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "boolean",
+            "name": "isGodMode"
+          },
+          {
+            "type": "number",
+            "name": "id"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exist.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateClient",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "client",
+                        "column": "height",
+                        "type": "text",
+                        "value": "{{$_POST.height}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "weight",
+                        "type": "text",
+                        "value": "{{$_POST.weight}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "sickDays",
+                        "type": "text",
+                        "value": "{{$_POST.sickDays}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "eyeColor",
+                        "type": "text",
+                        "value": "{{$_POST.eyeColor}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "hairColor",
+                        "type": "text",
+                        "value": "{{$_POST.hairColor}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "skinColor",
+                        "type": "text",
+                        "value": "{{$_POST.skinColor}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "birth",
+                        "type": "text",
+                        "value": "{{$_POST.birth}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "freckles",
+                        "type": "number",
+                        "value": "{{$_POST.freckles}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "sunTooLong",
+                        "type": "number",
+                        "value": "{{$_POST.sunTooLong}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "degreeTurnBrown",
+                        "type": "number",
+                        "value": "{{$_POST.degreeTurnBrown}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "brownSeveralHours",
+                        "type": "number",
+                        "value": "{{$_POST.brownSeveralHours}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "facialReactionSun",
+                        "type": "number",
+                        "value": "{{$_POST.facialReactionSun}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "tanning",
+                        "type": "number",
+                        "value": "{{$_POST.tanning}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "gender",
+                        "type": "text",
+                        "value": "{{$_POST.gender}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "consentTreatment",
+                        "type": "datetime",
+                        "value": "{{$_POST.consentTreatment}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "exposedArea",
+                        "type": "number",
+                        "value": "{{$_POST.exposedArea}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "hasFinishedQuestions",
+                        "type": "datetime",
+                        "value": "{{$_POST.hasFinishedQuestions}}"
+                      }
+                    ],
+                    "table": "client",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "userId",
+                          "field": "userId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{jwt.userId}}",
+                          "data": {
+                            "column": "userId"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"client\" set \"height\" = ?, \"weight\" = ?, \"sickDays\" = ?, \"eyeColor\" = ?, \"hairColor\" = ?, \"skinColor\" = ?, \"birth\" = ?, \"freckles\" = ?, \"sunTooLong\" = ?, \"degreeTurnBrown\" = ?, \"brownSeveralHours\" = ?, \"facialReactionSun\" = ?, \"tanning\" = ?, \"gender\" = ?, \"consentTreatment\" = ?, \"exposedArea\" = ?, \"hasFinishedQuestions\" = ? where \"userId\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.height}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.weight}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.sickDays}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.eyeColor}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_POST.hairColor}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.skinColor}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_POST.birth}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{$_POST.freckles}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{$_POST.sunTooLong}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{$_POST.degreeTurnBrown}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P11",
+                        "type": "expression",
+                        "value": "{{$_POST.brownSeveralHours}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P12",
+                        "type": "expression",
+                        "value": "{{$_POST.facialReactionSun}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P13",
+                        "type": "expression",
+                        "value": "{{$_POST.tanning}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P14",
+                        "type": "expression",
+                        "value": "{{$_POST.gender}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P15",
+                        "type": "expression",
+                        "value": "{{$_POST.consentTreatment}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P16",
+                        "type": "expression",
+                        "value": "{{$_POST.exposedArea}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P17",
+                        "type": "expression",
+                        "value": "{{$_POST.hasFinishedQuestions}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P18",
+                        "value": "{{jwt.userId}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.calcSkinType&&$_POST.device}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "exec",
+                        "options": {
+                          "exec": "utils/getTimeTreatment",
+                          "params": {
+                            "userId": "{{jwt.userId}}",
+                            "serial": "{{$_POST.device}}",
+                            "fullAccess": "{{exist.isGodMode}}"
+                          }
+                        }
+                      },
+                      {
+                        "name": "clientId",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{exist.id}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      },
+                      {
+                        "name": "skinType",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{skinType}}"
+                        },
+                        "meta": [],
+                        "outputType": "text",
+                        "output": true
+                      },
+                      {
+                        "name": "hasFacility",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{hasFacility}}"
+                        },
+                        "meta": [],
+                        "outputType": "boolean",
+                        "output": true
+                      },
+                      {
+                        "name": "hasPlan",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{hasPlan}}"
+                        },
+                        "meta": [],
+                        "outputType": "boolean",
+                        "output": true
+                      },
+                      {
+                        "name": "facilityId",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{facilityId}}"
+                        },
+                        "meta": [],
+                        "outputType": "object",
+                        "output": true
+                      },
+                      {
+                        "name": "tooManyRedness",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{tooManyRedness}}"
+                        },
+                        "meta": [],
+                        "outputType": "boolean",
+                        "output": true
+                      },
+                      {
+                        "name": "time",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{time}}"
+                        },
+                        "meta": [],
+                        "outputType": "number",
+                        "output": true
+                      }
+                    ]
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "",
+                      "module": "core",
+                      "action": "condition",
+                      "options": {
+                        "if": "{{$_POST.calcSkinType}}",
+                        "then": {
+                          "steps": [
+                            {
+                              "name": "",
+                              "module": "core",
+                              "action": "exec",
+                              "options": {
+                                "exec": "utils/getTimeTreatment",
+                                "params": {
+                                  "userId": "{{jwt.userId}}",
+                                  "serial": "{{$_POST.device}}",
+                                  "fullAccess": "{{exist.isGodMode}}"
+                                }
+                              }
+                            },
+                            {
+                              "name": "skinType",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "{{skinType}}"
+                              },
+                              "meta": [],
+                              "outputType": "text",
+                              "output": true
+                            }
+                          ]
+                        }
+                      },
+                      "outputType": "boolean"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_CLIENT}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

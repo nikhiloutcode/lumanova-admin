@@ -1,0 +1,2344 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "logo"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "phone"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in owner first name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in owner first name."
+            }
+          }
+        },
+        "name": "ownerFirstName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in owner last name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in owner last name."
+            }
+          }
+        },
+        "name": "ownerLastName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:email": {
+              "message": "Please enter a valid email address for owner."
+            }
+          }
+        },
+        "name": "ownerEmail"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "ownerPhone"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in facility name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in facility name."
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:email": {
+              "message": "Please enter a valid email address for the facility."
+            }
+          }
+        },
+        "name": "email"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in admin first name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in admin first name."
+            }
+          }
+        },
+        "name": "adminFirstName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in admin last name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in admin last name."
+            }
+          }
+        },
+        "name": "adminLastName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:email": {
+              "message": "Please enter a valid email address for admin."
+            }
+          }
+        },
+        "name": "adminEmail"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "adminPhone"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in sales first name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in sales first name."
+            }
+          }
+        },
+        "name": "salesFirstName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in sales last name."
+            },
+            "core:maxlength": {
+              "param": 50,
+              "message": "Please enter no more than {0} characters in sales last name."
+            }
+          }
+        },
+        "name": "salesLastName"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:email": {
+              "message": "Please enter a valid email address for sales."
+            }
+          }
+        },
+        "name": "salesEmail"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "salesPhone"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      },
+      {
+        "type": "boolean",
+        "name": "disabled"
+      },
+      {
+        "type": "boolean",
+        "name": "invite"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "city"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "state"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 5,
+              "message": "Please enter at least {0} characters in zip code."
+            }
+          }
+        },
+        "name": "zip"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "address1"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "address2"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "facilityCountryCode"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "salesCountryCode"
+      },
+      {
+        "type": "text",
+        "name": "adminCountryCode"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "ownerCountryCode"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messages",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "exists",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": "21"
+              }
+            ],
+            "table": {
+              "name": "facility"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "facility.id",
+                  "field": "facility.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "facility",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"facility\" where \"facility\".\"id\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "logo"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "city"
+          },
+          {
+            "type": "text",
+            "name": "state"
+          },
+          {
+            "type": "text",
+            "name": "zip"
+          },
+          {
+            "type": "text",
+            "name": "address1"
+          },
+          {
+            "type": "text",
+            "name": "address2"
+          },
+          {
+            "type": "text",
+            "name": "salesFirstName"
+          },
+          {
+            "type": "text",
+            "name": "salesLastName"
+          },
+          {
+            "type": "text",
+            "name": "salesEmail"
+          },
+          {
+            "type": "text",
+            "name": "salesPhone"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "phone",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.phone.replace(/\\D+/g,'')}}"
+        },
+        "meta": [],
+        "output": false,
+        "outputType": "text"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exists.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateFacility",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "facility",
+                        "column": "phone",
+                        "type": "text",
+                        "value": "{{$_POST.facilityCountryCode+phone}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "disabled",
+                        "type": "boolean",
+                        "value": "{{$_POST.disabled}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "name",
+                        "type": "text",
+                        "value": "{{$_POST.name}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "email",
+                        "type": "text",
+                        "value": "{{$_POST.email}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "city",
+                        "type": "text",
+                        "value": "{{$_POST.city}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "state",
+                        "type": "text",
+                        "value": "{{$_POST.state}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "zip",
+                        "type": "text",
+                        "value": "{{$_POST.zip}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "address1",
+                        "type": "text",
+                        "value": "{{$_POST.address1}}"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "address2",
+                        "type": "text",
+                        "value": "{{$_POST.address2}}"
+                      }
+                    ],
+                    "table": "facility",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ]
+                    },
+                    "returning": "id",
+                    "query": "update \"facility\" set \"phone\" = ?, \"disabled\" = ?, \"updatedAt\" = ?, \"name\" = ?, \"email\" = ?, \"city\" = ?, \"state\" = ?, \"zip\" = ?, \"address1\" = ?, \"address2\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.facilityCountryCode+phone}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.disabled}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.name}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_POST.email}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.city}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_POST.state}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{$_POST.zip}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{$_POST.address1}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{$_POST.address2}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P11",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "phoneOwner",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$_POST.ownerPhone.replace(/\\D+/g,'')}}"
+                },
+                "meta": [],
+                "output": false,
+                "outputType": "text"
+              },
+              {
+                "name": "updateOwnerUser",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "user",
+                        "column": "firstName",
+                        "type": "text",
+                        "value": "{{$_POST.ownerFirstName}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "lastName",
+                        "type": "text",
+                        "value": "{{$_POST.ownerLastName}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "email",
+                        "type": "text",
+                        "value": "{{$_POST.ownerEmail.lowercase()}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "phone",
+                        "type": "text",
+                        "value": "{{phoneOwner}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "user",
+                        "column": "countryCode",
+                        "type": "text",
+                        "value": "{{$_POST.ownerCountryCode}}"
+                      }
+                    ],
+                    "table": "user",
+                    "wheres": {
+                      "condition": "OR",
+                      "rules": [
+                        {
+                          "id": "email",
+                          "field": "email",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "{{$_POST.ownerEmail}}",
+                          "data": {
+                            "column": "email"
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "id": "phone",
+                          "field": "phone",
+                          "type": "string",
+                          "operator": "equal",
+                          "value": "{{$_POST.ownerPhone}}",
+                          "data": {
+                            "column": "phone"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"user\" set \"firstName\" = ?, \"lastName\" = ?, \"email\" = ?, \"phone\" = ?, \"updatedAt\" = ?, \"countryCode\" = ? where \"email\" = ? or \"phone\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.ownerFirstName}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.ownerLastName}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.ownerEmail.lowercase()}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{phoneOwner}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.ownerCountryCode}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P7",
+                        "value": "{{$_POST.ownerEmail}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P8",
+                        "value": "{{$_POST.ownerPhone}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.logo}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "upload",
+                        "module": "upload",
+                        "action": "upload",
+                        "options": {
+                          "fields": "{{$_POST.logo}}",
+                          "path": "/public/assets/facilities/{{$_POST.id}}/",
+                          "template": "{name}_{guid}{ext}",
+                          "replaceSpace": true,
+                          "overwrite": true,
+                          "throwErrors": true
+                        },
+                        "meta": [
+                          {
+                            "name": "name",
+                            "type": "text"
+                          },
+                          {
+                            "name": "path",
+                            "type": "text"
+                          },
+                          {
+                            "name": "url",
+                            "type": "text"
+                          },
+                          {
+                            "name": "type",
+                            "type": "text"
+                          },
+                          {
+                            "name": "size",
+                            "type": "text"
+                          },
+                          {
+                            "name": "error",
+                            "type": "number"
+                          }
+                        ],
+                        "outputType": "array"
+                      },
+                      {
+                        "name": "putFile",
+                        "module": "s3",
+                        "action": "putFile",
+                        "options": {
+                          "provider": "s3",
+                          "bucket": "{{$_ENV.AWS_BUCKET}}",
+                          "key": "{{upload.name}}",
+                          "path": "{{upload.path}}",
+                          "acl": "public-read"
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "updateFacilityLogo",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "facility",
+                                "column": "updatedAt",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              },
+                              {
+                                "table": "facility",
+                                "column": "logo",
+                                "type": "text",
+                                "value": "{{putFile.Location}}"
+                              }
+                            ],
+                            "table": "facility",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ]
+                            },
+                            "returning": "id",
+                            "query": "update \"facility\" set \"updatedAt\" = ?, \"logo\" = ? where \"id\" = ? returning \"id\"",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{NOW}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{putFile.Location}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P3",
+                                "value": "{{$_POST.id}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.invite}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "updateOwnerUser",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "user",
+                                "column": "userIdInvited",
+                                "type": "number",
+                                "value": "{{jwt.userId}}"
+                              },
+                              {
+                                "table": "user",
+                                "column": "updatedAt",
+                                "type": "datetime",
+                                "value": "{{NOW}}"
+                              }
+                            ],
+                            "table": "user",
+                            "wheres": {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "id": "email",
+                                  "field": "email",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.ownerEmail}}",
+                                  "data": {
+                                    "column": "email"
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "phone",
+                                  "field": "phone",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.ownerPhone}}",
+                                  "data": {
+                                    "column": "phone"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "update \"user\" set \"userIdInvited\" = ?, \"updatedAt\" = ? where \"email\" = ? or \"phone\" = ? returning \"id\"",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{jwt.userId}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{NOW}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P3",
+                                "value": "{{$_POST.ownerEmail}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P4",
+                                "value": "{{$_POST.ownerPhone}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      },
+                      {
+                        "name": "ownerUser",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "select",
+                            "columns": [],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{$_POST.ownerEmail}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{$_POST.ownerPhone}}",
+                                "test": ""
+                              }
+                            ],
+                            "table": {
+                              "name": "user"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "id": "user.email",
+                                  "field": "user.email",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.ownerEmail}}",
+                                  "data": {
+                                    "table": "user",
+                                    "column": "email",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "email"
+                                    }
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "user.phone",
+                                  "field": "user.phone",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.ownerPhone}}",
+                                  "data": {
+                                    "table": "user",
+                                    "column": "phone",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "phone"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "select * from \"user\" where \"user\".\"email\" = ? or \"user\".\"phone\" = ?"
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "text",
+                            "name": "firstName"
+                          },
+                          {
+                            "type": "text",
+                            "name": "lastName"
+                          },
+                          {
+                            "type": "text",
+                            "name": "email"
+                          },
+                          {
+                            "type": "text",
+                            "name": "verificationCode"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "verificationCodeExpire"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "disabled"
+                          },
+                          {
+                            "type": "text",
+                            "name": "phone"
+                          },
+                          {
+                            "type": "number",
+                            "name": "userIdInvited"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "createdAt"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "updatedAt"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "isTester"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "isGodMode"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "isDebug"
+                          },
+                          {
+                            "type": "text",
+                            "name": "countryCode"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "invite",
+                        "module": "api",
+                        "action": "send",
+                        "options": {
+                          "method": "POST",
+                          "data": {
+                            "userId": "{{ownerUser.id}}"
+                          },
+                          "url": "{{$_ENV.HOST+'/api/auth/invitation'}}",
+                          "headers": {
+                            "authorization": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+                          }
+                        },
+                        "output": true
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.adminEmail}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "phoneAdmin",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$_POST.adminPhone.replace(/\\D+/g,'')}}"
+                        },
+                        "meta": [],
+                        "output": false,
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "existAdminUser",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "select",
+                            "columns": [],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{$_POST.adminEmail}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P2",
+                                "value": "{{$_POST.adminPhone}}",
+                                "test": ""
+                              }
+                            ],
+                            "table": {
+                              "name": "user"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "id": "user.email",
+                                  "field": "user.email",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.adminEmail}}",
+                                  "data": {
+                                    "table": "user",
+                                    "column": "email",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "email"
+                                    }
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "user.phone",
+                                  "field": "user.phone",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.adminPhone}}",
+                                  "data": {
+                                    "table": "user",
+                                    "column": "phone",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "phone"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "select * from \"user\" where \"user\".\"email\" = ? or \"user\".\"phone\" = ?"
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "text",
+                            "name": "firstName"
+                          },
+                          {
+                            "type": "text",
+                            "name": "lastName"
+                          },
+                          {
+                            "type": "text",
+                            "name": "email"
+                          },
+                          {
+                            "type": "text",
+                            "name": "verificationCode"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "verificationCodeExpire"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "disabled"
+                          },
+                          {
+                            "type": "text",
+                            "name": "phone"
+                          },
+                          {
+                            "type": "number",
+                            "name": "userIdInvited"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "createdAt"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "updatedAt"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "isTester"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "isGodMode"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "isDebug"
+                          },
+                          {
+                            "type": "text",
+                            "name": "countryCode"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{existAdminUser.id}}",
+                          "then": {
+                            "steps": {
+                              "name": "updateAdminUser",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "user",
+                                      "column": "firstName",
+                                      "type": "text",
+                                      "value": "{{$_POST.adminFirstName}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "lastName",
+                                      "type": "text",
+                                      "value": "{{$_POST.adminLastName}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "email",
+                                      "type": "text",
+                                      "value": "{{$_POST.adminEmail.lowercase()}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "phone",
+                                      "type": "text",
+                                      "value": "{{phoneAdmin}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "createdAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "updatedAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "user",
+                                      "column": "countryCode",
+                                      "type": "text",
+                                      "value": "{{$_POST.adminCountryCode}}"
+                                    }
+                                  ],
+                                  "table": "user",
+                                  "wheres": {
+                                    "condition": "OR",
+                                    "rules": [
+                                      {
+                                        "id": "email",
+                                        "field": "email",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "{{$_POST.adminEmail}}",
+                                        "data": {
+                                          "column": "email"
+                                        },
+                                        "operation": "="
+                                      },
+                                      {
+                                        "id": "phone",
+                                        "field": "phone",
+                                        "type": "string",
+                                        "operator": "equal",
+                                        "value": "{{$_POST.adminPhone}}",
+                                        "data": {
+                                          "column": "phone"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "update \"user\" set \"firstName\" = ?, \"lastName\" = ?, \"email\" = ?, \"phone\" = ?, \"createdAt\" = ?, \"updatedAt\" = ?, \"countryCode\" = ? where \"email\" = ? or \"phone\" = ? returning \"id\"",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{$_POST.adminFirstName}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{$_POST.adminLastName}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{$_POST.adminEmail.lowercase()}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{phoneAdmin}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P5",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P6",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P7",
+                                      "type": "expression",
+                                      "value": "{{$_POST.adminCountryCode}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P8",
+                                      "value": "{{$_POST.adminEmail}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P9",
+                                      "value": "{{$_POST.adminPhone}}",
+                                      "test": ""
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ],
+                              "output": false
+                            }
+                          },
+                          "else": {
+                            "steps": [
+                              {
+                                "name": "insertAdminUser",
+                                "module": "dbupdater",
+                                "action": "insert",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "insert",
+                                    "values": [
+                                      {
+                                        "table": "user",
+                                        "column": "firstName",
+                                        "type": "text",
+                                        "value": "{{$_POST.adminFirstName}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "lastName",
+                                        "type": "text",
+                                        "value": "{{$_POST.adminLastName}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "email",
+                                        "type": "text",
+                                        "value": "{{$_POST.adminEmail}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "disabled",
+                                        "type": "boolean",
+                                        "value": "{{false}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "phone",
+                                        "type": "text",
+                                        "value": "{{phoneAdmin}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "createdAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "updatedAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "countryCode",
+                                        "type": "text",
+                                        "value": "{{$_POST.adminCountryCode}}"
+                                      }
+                                    ],
+                                    "table": "user",
+                                    "returning": "id",
+                                    "query": "insert into \"user\" (\"countryCode\", \"createdAt\", \"disabled\", \"email\", \"firstName\", \"lastName\", \"phone\", \"updatedAt\") values (?, ?, ?, ?, ?, ?, ?, ?) returning \"id\"",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{$_POST.adminFirstName}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{$_POST.adminLastName}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P3",
+                                        "type": "expression",
+                                        "value": "{{$_POST.adminEmail}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P4",
+                                        "type": "expression",
+                                        "value": "{{false}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P5",
+                                        "type": "expression",
+                                        "value": "{{phoneAdmin}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P6",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P7",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P8",
+                                        "type": "expression",
+                                        "value": "{{$_POST.adminCountryCode}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "identity",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "roleAdmin",
+                                "module": "dbconnector",
+                                "action": "single",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "select",
+                                    "columns": [],
+                                    "params": [],
+                                    "table": {
+                                      "name": "roles"
+                                    },
+                                    "primary": "id",
+                                    "joins": [],
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "roles.name",
+                                          "field": "roles.name",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "adminFacility",
+                                          "data": {
+                                            "table": "roles",
+                                            "column": "name",
+                                            "type": "text",
+                                            "columnObj": {
+                                              "type": "string",
+                                              "maxLength": 255,
+                                              "primary": false,
+                                              "unique": false,
+                                              "nullable": true,
+                                              "name": "name"
+                                            }
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "query": "select * from \"roles\" where \"roles\".\"name\" = ?"
+                                  }
+                                },
+                                "output": false,
+                                "meta": [
+                                  {
+                                    "type": "number",
+                                    "name": "id"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "name"
+                                  },
+                                  {
+                                    "type": "datetime",
+                                    "name": "createdAt"
+                                  },
+                                  {
+                                    "type": "datetime",
+                                    "name": "updatedAt"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "sendEmail"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "sendSMS"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "users"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "packages"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "devices"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "clients"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "adminView"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "description"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "facilities"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "profile"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "mobileView"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "facilityView"
+                                  }
+                                ],
+                                "type": "dbconnector_single",
+                                "outputType": "object"
+                              },
+                              {
+                                "name": "insertDetailsUser",
+                                "module": "dbupdater",
+                                "action": "insert",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "insert",
+                                    "values": [
+                                      {
+                                        "table": "detailsUser",
+                                        "column": "userId",
+                                        "type": "number",
+                                        "value": "{{insertAdminUser.identity}}"
+                                      },
+                                      {
+                                        "table": "detailsUser",
+                                        "column": "rolesId",
+                                        "type": "number",
+                                        "value": "{{roleAdmin.id}}"
+                                      },
+                                      {
+                                        "table": "detailsUser",
+                                        "column": "createdAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "detailsUser",
+                                        "column": "updatedAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      }
+                                    ],
+                                    "table": "detailsUser",
+                                    "returning": "id",
+                                    "query": "insert into \"detailsUser\" (\"createdAt\", \"rolesId\", \"updatedAt\", \"userId\") values (?, ?, ?, ?)",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{insertAdminUser.identity}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{roleAdmin.id}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P3",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P4",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "identity",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ]
+                              },
+                              {
+                                "name": "insertDetailsUserFacility",
+                                "module": "dbupdater",
+                                "action": "insert",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "insert",
+                                    "values": [
+                                      {
+                                        "table": "detailsUsersFacility",
+                                        "column": "userId",
+                                        "type": "number",
+                                        "value": "{{insertAdminUser.identity}}"
+                                      },
+                                      {
+                                        "table": "detailsUsersFacility",
+                                        "column": "facilityId",
+                                        "type": "number",
+                                        "value": "{{$_POST.id}}"
+                                      },
+                                      {
+                                        "table": "detailsUsersFacility",
+                                        "column": "createdAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "detailsUsersFacility",
+                                        "column": "updatedAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      }
+                                    ],
+                                    "table": "detailsUsersFacility",
+                                    "returning": "id",
+                                    "query": "insert into \"detailsUsersFacility\" (\"createdAt\", \"facilityId\", \"updatedAt\", \"userId\") values (?, ?, ?, ?)",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{insertAdminUser.identity}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{$_POST.id}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P3",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P4",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "identity",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{$_POST.invite}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "updateAdminUser",
+                                "module": "dbupdater",
+                                "action": "update",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "update",
+                                    "values": [
+                                      {
+                                        "table": "user",
+                                        "column": "userIdInvited",
+                                        "type": "number",
+                                        "value": "{{jwt.userId}}"
+                                      },
+                                      {
+                                        "table": "user",
+                                        "column": "updatedAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      }
+                                    ],
+                                    "table": "user",
+                                    "wheres": {
+                                      "condition": "OR",
+                                      "rules": [
+                                        {
+                                          "id": "email",
+                                          "field": "email",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "{{$_POST.adminEmail}}",
+                                          "data": {
+                                            "column": "email"
+                                          },
+                                          "operation": "="
+                                        },
+                                        {
+                                          "id": "phone",
+                                          "field": "phone",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "{{$_POST.adminPhone}}",
+                                          "data": {
+                                            "column": "phone"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "returning": "id",
+                                    "query": "update \"user\" set \"userIdInvited\" = ?, \"updatedAt\" = ? where \"email\" = ? or \"phone\" = ? returning \"id\"",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{jwt.userId}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P3",
+                                        "value": "{{$_POST.adminEmail}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P4",
+                                        "value": "{{$_POST.adminPhone}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ],
+                                "output": false
+                              },
+                              {
+                                "name": "adminUser",
+                                "module": "dbconnector",
+                                "action": "single",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "select",
+                                    "columns": [],
+                                    "params": [
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P1",
+                                        "value": "{{$_POST.adminEmail}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P2",
+                                        "value": "{{$_POST.adminPhone}}",
+                                        "test": ""
+                                      }
+                                    ],
+                                    "table": {
+                                      "name": "user"
+                                    },
+                                    "primary": "id",
+                                    "joins": [],
+                                    "wheres": {
+                                      "condition": "OR",
+                                      "rules": [
+                                        {
+                                          "id": "user.email",
+                                          "field": "user.email",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "{{$_POST.adminEmail}}",
+                                          "data": {
+                                            "table": "user",
+                                            "column": "email",
+                                            "type": "text",
+                                            "columnObj": {
+                                              "type": "string",
+                                              "maxLength": 255,
+                                              "primary": false,
+                                              "unique": false,
+                                              "nullable": true,
+                                              "name": "email"
+                                            }
+                                          },
+                                          "operation": "=",
+                                          "table": "user"
+                                        },
+                                        {
+                                          "id": "user.phone",
+                                          "field": "user.phone",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "{{$_POST.adminPhone}}",
+                                          "data": {
+                                            "table": "user",
+                                            "column": "phone",
+                                            "type": "text",
+                                            "columnObj": {
+                                              "type": "string",
+                                              "maxLength": 255,
+                                              "primary": false,
+                                              "unique": false,
+                                              "nullable": true,
+                                              "name": "phone"
+                                            }
+                                          },
+                                          "operation": "=",
+                                          "table": "user"
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "query": "select * from \"user\" where \"user\".\"email\" = ? or \"user\".\"phone\" = ?"
+                                  }
+                                },
+                                "output": false,
+                                "meta": [
+                                  {
+                                    "type": "number",
+                                    "name": "id"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "firstName"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "lastName"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "email"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "verificationCode"
+                                  },
+                                  {
+                                    "type": "datetime",
+                                    "name": "verificationCodeExpire"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "disabled"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "phone"
+                                  },
+                                  {
+                                    "type": "number",
+                                    "name": "userIdInvited"
+                                  },
+                                  {
+                                    "type": "datetime",
+                                    "name": "createdAt"
+                                  },
+                                  {
+                                    "type": "datetime",
+                                    "name": "updatedAt"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "isTester"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "isGodMode"
+                                  },
+                                  {
+                                    "type": "boolean",
+                                    "name": "isDebug"
+                                  },
+                                  {
+                                    "type": "text",
+                                    "name": "countryCode"
+                                  }
+                                ],
+                                "type": "dbconnector_single",
+                                "outputType": "object"
+                              },
+                              {
+                                "name": "invite",
+                                "module": "api",
+                                "action": "send",
+                                "options": {
+                                  "method": "POST",
+                                  "data": {
+                                    "userId": "{{adminUser.id}}"
+                                  },
+                                  "url": "{{$_ENV.HOST+'/api/auth/invitation'}}",
+                                  "headers": {
+                                    "authorization": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+                                  }
+                                },
+                                "output": true
+                              }
+                            ]
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.salesEmail}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "phoneSales",
+                        "module": "core",
+                        "action": "setvalue",
+                        "options": {
+                          "value": "{{$_POST.salesPhone.replace(/\\D+/g,'')}}"
+                        },
+                        "meta": [],
+                        "outputType": "text"
+                      },
+                      {
+                        "name": "updateSalesRep",
+                        "module": "dbupdater",
+                        "action": "update",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "update",
+                            "values": [
+                              {
+                                "table": "facility",
+                                "column": "salesFirstName",
+                                "type": "text",
+                                "value": "{{$_POST.salesFirstName}}"
+                              },
+                              {
+                                "table": "facility",
+                                "column": "salesLastName",
+                                "type": "text",
+                                "value": "{{$_POST.salesLastName}}"
+                              },
+                              {
+                                "table": "facility",
+                                "column": "salesEmail",
+                                "type": "text",
+                                "value": "{{$_POST.salesEmail.lowercase()}}"
+                              },
+                              {
+                                "table": "facility",
+                                "column": "salesPhone",
+                                "type": "text",
+                                "value": "{{$_POST.salesCountryCode+phoneSales}}"
+                              }
+                            ],
+                            "table": "facility",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "id",
+                                  "field": "id",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.id}}",
+                                  "data": {
+                                    "column": "id"
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "returning": "id",
+                            "query": "update \"facility\" set \"salesFirstName\" = ?, \"salesLastName\" = ?, \"salesEmail\" = ?, \"salesPhone\" = ? where \"id\" = ? returning \"id\"",
+                            "params": [
+                              {
+                                "name": ":P1",
+                                "type": "expression",
+                                "value": "{{$_POST.salesFirstName}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P2",
+                                "type": "expression",
+                                "value": "{{$_POST.salesLastName}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P3",
+                                "type": "expression",
+                                "value": "{{$_POST.salesEmail.lowercase()}}",
+                                "test": ""
+                              },
+                              {
+                                "name": ":P4",
+                                "type": "expression",
+                                "value": "{{$_POST.salesCountryCode+phoneSales}}",
+                                "test": ""
+                              },
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P5",
+                                "value": "{{$_POST.id}}",
+                                "test": ""
+                              }
+                            ]
+                          }
+                        },
+                        "meta": [
+                          {
+                            "name": "affected",
+                            "type": "number"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messages.ERROR_FACILITY}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

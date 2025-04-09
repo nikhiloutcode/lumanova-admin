@@ -1,0 +1,529 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "name": "height"
+      },
+      {
+        "type": "text",
+        "name": "weight"
+      },
+      {
+        "type": "text",
+        "name": "sickDays"
+      },
+      {
+        "type": "number",
+        "name": "eyeColor"
+      },
+      {
+        "type": "number",
+        "name": "hairColor"
+      },
+      {
+        "type": "number",
+        "name": "skinColor"
+      },
+      {
+        "type": "number",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "name": "birth"
+      },
+      {
+        "type": "number",
+        "name": "freckles"
+      },
+      {
+        "type": "number",
+        "name": "sunTooLong"
+      },
+      {
+        "type": "number",
+        "name": "degreeTurnBrown"
+      },
+      {
+        "type": "number",
+        "name": "brownSeveralHours"
+      },
+      {
+        "type": "number",
+        "name": "facialReactionSun"
+      },
+      {
+        "type": "number",
+        "name": "tanning"
+      },
+      {
+        "type": "text",
+        "name": "gender"
+      },
+      {
+        "type": "number",
+        "name": "exposedArea"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "exist",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "client"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "client.id",
+                  "field": "client.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "client",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"client\" where \"client\".\"id\" = ?"
+          }
+        },
+        "output": false,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "height"
+          },
+          {
+            "type": "text",
+            "name": "weight"
+          },
+          {
+            "type": "text",
+            "name": "sickDays"
+          },
+          {
+            "type": "number",
+            "name": "eyeColor"
+          },
+          {
+            "type": "number",
+            "name": "hairColor"
+          },
+          {
+            "type": "number",
+            "name": "skinColor"
+          },
+          {
+            "type": "number",
+            "name": "userId"
+          },
+          {
+            "type": "text",
+            "name": "birth"
+          },
+          {
+            "type": "number",
+            "name": "freckles"
+          },
+          {
+            "type": "number",
+            "name": "sunTooLong"
+          },
+          {
+            "type": "number",
+            "name": "degreeTurnBrown"
+          },
+          {
+            "type": "number",
+            "name": "brownSeveralHours"
+          },
+          {
+            "type": "number",
+            "name": "facialReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "tanning"
+          },
+          {
+            "type": "number",
+            "name": "exposedArea"
+          },
+          {
+            "type": "text",
+            "name": "gender"
+          },
+          {
+            "type": "datetime",
+            "name": "consentTreatment"
+          },
+          {
+            "type": "number",
+            "name": "treatments"
+          },
+          {
+            "type": "text",
+            "name": "customerId"
+          },
+          {
+            "type": "number",
+            "name": "scoreGeneticDisposition"
+          },
+          {
+            "type": "number",
+            "name": "scoreReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "scoreTanningHabits"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exist.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateClient",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "client",
+                        "column": "height",
+                        "type": "text",
+                        "value": "{{$_POST.height}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "weight",
+                        "type": "text",
+                        "value": "{{$_POST.weight}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "sickDays",
+                        "type": "text",
+                        "value": "{{$_POST.sickDays}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "eyeColor",
+                        "type": "text",
+                        "value": "{{$_POST.eyeColor}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "hairColor",
+                        "type": "text",
+                        "value": "{{$_POST.hairColor}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "skinColor",
+                        "type": "text",
+                        "value": "{{$_POST.skinColor}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "birth",
+                        "type": "text",
+                        "value": "{{$_POST.birth}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "freckles",
+                        "type": "number",
+                        "value": "{{$_POST.freckles}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "sunTooLong",
+                        "type": "number",
+                        "value": "{{$_POST.sunTooLong}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "degreeTurnBrown",
+                        "type": "number",
+                        "value": "{{$_POST.degreeTurnBrown}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "brownSeveralHours",
+                        "type": "number",
+                        "value": "{{$_POST.brownSeveralHours}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "facialReactionSun",
+                        "type": "number",
+                        "value": "{{$_POST.facialReactionSun}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "tanning",
+                        "type": "number",
+                        "value": "{{$_POST.tanning}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "gender",
+                        "type": "text",
+                        "value": "{{$_POST.gender}}"
+                      },
+                      {
+                        "table": "client",
+                        "column": "exposedArea",
+                        "type": "number",
+                        "value": "{{$_POST.exposedArea}}"
+                      }
+                    ],
+                    "table": "client",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ]
+                    },
+                    "returning": "id",
+                    "query": "update \"client\" set \"height\" = ?, \"weight\" = ?, \"sickDays\" = ?, \"eyeColor\" = ?, \"hairColor\" = ?, \"skinColor\" = ?, \"birth\" = ?, \"freckles\" = ?, \"sunTooLong\" = ?, \"degreeTurnBrown\" = ?, \"brownSeveralHours\" = ?, \"facialReactionSun\" = ?, \"tanning\" = ?, \"gender\" = ?, \"exposedArea\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.height}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.weight}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{$_POST.sickDays}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.eyeColor}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_POST.hairColor}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.skinColor}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P7",
+                        "type": "expression",
+                        "value": "{{$_POST.birth}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P8",
+                        "type": "expression",
+                        "value": "{{$_POST.freckles}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P9",
+                        "type": "expression",
+                        "value": "{{$_POST.sunTooLong}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P10",
+                        "type": "expression",
+                        "value": "{{$_POST.degreeTurnBrown}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P11",
+                        "type": "expression",
+                        "value": "{{$_POST.brownSeveralHours}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P12",
+                        "type": "expression",
+                        "value": "{{$_POST.facialReactionSun}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P13",
+                        "type": "expression",
+                        "value": "{{$_POST.tanning}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P14",
+                        "type": "expression",
+                        "value": "{{$_POST.gender}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P15",
+                        "type": "expression",
+                        "value": "{{$_POST.exposedArea}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P16",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messagesHandler.CLIENT_UPDATE}}"
+                }
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_CLIENT}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

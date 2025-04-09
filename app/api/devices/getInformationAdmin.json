@@ -1,0 +1,273 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "device",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "query": "SELECT distinct d.id, d.serial, d.\"contactName\",d.\"contactEmail\",d.\"contactPhone\",TO_CHAR(d.\"createdAt\"::date, 'mm/dd/yyyy') as \"createdAt\",f.id as \"facilityId\",f.name,f.phone, (select \nu.\"firstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM device d\nleft JOIN facility AS f ON f.id = d.\"facilityId\" \nwhere d.id = :P1 /* {{$_POST.id}} */\ngroup by d.id,f.id,f.name,f.phone",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": "1"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "serial",
+                  "type": "text"
+                },
+                {
+                  "name": "contactName",
+                  "type": "text"
+                },
+                {
+                  "name": "contactEmail",
+                  "type": "text"
+                },
+                {
+                  "name": "contactPhone",
+                  "type": "text"
+                },
+                {
+                  "name": "createdAt",
+                  "type": "text"
+                },
+                {
+                  "name": "facilityId",
+                  "type": "number"
+                },
+                {
+                  "name": "name",
+                  "type": "text"
+                },
+                {
+                  "name": "phone",
+                  "type": "text"
+                },
+                {
+                  "name": "firstName",
+                  "type": "text"
+                },
+                {
+                  "name": "lastName",
+                  "type": "text"
+                }
+              ],
+              "type": "dbcustom_query"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": [
+                    {
+                      "name": "sort",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{$_GET.sort.lowercase()}}"
+                      },
+                      "meta": [],
+                      "outputType": "text"
+                    },
+                    {
+                      "name": "devices",
+                      "module": "dbupdater",
+                      "action": "custom",
+                      "options": {
+                        "connection": "EnyrgyDB",
+                        "sql": {
+                          "query": "SELECT distinct d.id,d.\"contactName\",d.\"contactEmail\",d.\"contactPhone\", d.serial, TO_CHAR(d.\"createdAt\"::date, 'mm/dd/yyyy') as \"createdAt\",f.id as \"facilityId\",f.name,f.phone, \n(select \nu.\"firstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM device d\nleft JOIN facility AS f ON f.id = d.\"facilityId\" \nwhere LOWER(d.serial) LIKE '%' || :P1 || '%' /* {{sort}} */ or LOWER(f.name) LIKE '%' || :P1 || '%' /* {{sort}} */\nor LOWER((select \nu.\"firstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )) LIKE '%' || :P1 || '%' /* {{sort}} */\nor LOWER((select \nu.\"lastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )) LIKE '%' || :P1 || '%' /* {{sort}} */\nor LOWER((select \nu.\"phone\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )) LIKE '%' || :P1 || '%' /* {{sort}} */\ngroup by d.id,f.id,f.name,f.phone",
+                          "params": [
+                            {
+                              "name": ":P1",
+                              "value": "{{sort}}",
+                              "test": "July"
+                            }
+                          ]
+                        }
+                      },
+                      "output": true,
+                      "meta": [
+                        {
+                          "name": "id",
+                          "type": "number"
+                        },
+                        {
+                          "name": "contactName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "contactEmail",
+                          "type": "text"
+                        },
+                        {
+                          "name": "contactPhone",
+                          "type": "text"
+                        },
+                        {
+                          "name": "serial",
+                          "type": "text"
+                        },
+                        {
+                          "name": "createdAt",
+                          "type": "text"
+                        },
+                        {
+                          "name": "facilityId",
+                          "type": "number"
+                        },
+                        {
+                          "name": "name",
+                          "type": "text"
+                        },
+                        {
+                          "name": "phone",
+                          "type": "text"
+                        },
+                        {
+                          "name": "firstName",
+                          "type": "text"
+                        },
+                        {
+                          "name": "lastName",
+                          "type": "text"
+                        }
+                      ],
+                      "type": "dbcustom_query",
+                      "outputType": "array"
+                    }
+                  ]
+                },
+                "else": {
+                  "steps": {
+                    "name": "devices",
+                    "module": "dbupdater",
+                    "action": "custom",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "query": "SELECT distinct d.id,d.\"contactName\",d.\"contactEmail\",d.\"contactPhone\" ,d.serial,TO_CHAR(d.\"createdAt\"::date, 'mm/dd/yyyy') as \"createdAt\",f.id as \"facilityId\",f.name,f.phone, (select \nu.\"firstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM device d\nleft JOIN facility AS f ON f.id = d.\"facilityId\" \ngroup by d.id,f.id,f.name,f.phone",
+                        "params": []
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "name": "id",
+                        "type": "number"
+                      },
+                      {
+                        "name": "contactName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "contactEmail",
+                        "type": "text"
+                      },
+                      {
+                        "name": "contactPhone",
+                        "type": "text"
+                      },
+                      {
+                        "name": "serial",
+                        "type": "text"
+                      },
+                      {
+                        "name": "createdAt",
+                        "type": "text"
+                      },
+                      {
+                        "name": "facilityId",
+                        "type": "number"
+                      },
+                      {
+                        "name": "name",
+                        "type": "text"
+                      },
+                      {
+                        "name": "phone",
+                        "type": "text"
+                      },
+                      {
+                        "name": "firstName",
+                        "type": "text"
+                      },
+                      {
+                        "name": "lastName",
+                        "type": "text"
+                      }
+                    ],
+                    "type": "dbcustom_query",
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,1100 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "duration"
+      },
+      {
+        "type": "time",
+        "name": "lastTreatment"
+      },
+      {
+        "type": "boolean",
+        "name": "complete"
+      },
+      {
+        "type": "number",
+        "name": "id"
+      },
+      {
+        "type": "boolean",
+        "name": "redness"
+      },
+      {
+        "type": "number",
+        "name": "detailsFitzpatrickSkinTypeId"
+      },
+      {
+        "type": "number",
+        "name": "facilityId"
+      },
+      {
+        "type": "boolean",
+        "name": "isPlan"
+      },
+      {
+        "type": "text",
+        "name": "height"
+      },
+      {
+        "type": "text",
+        "name": "weight"
+      },
+      {
+        "type": "text",
+        "name": "sickDays"
+      },
+      {
+        "type": "number",
+        "name": "eyeColor"
+      },
+      {
+        "type": "number",
+        "name": "hairColor"
+      },
+      {
+        "type": "number",
+        "name": "skinColor"
+      },
+      {
+        "type": "number",
+        "name": "userId"
+      },
+      {
+        "type": "text",
+        "name": "birth"
+      },
+      {
+        "type": "number",
+        "name": "freckles"
+      },
+      {
+        "type": "number",
+        "name": "sunTooLong"
+      },
+      {
+        "type": "number",
+        "name": "degreeTurnBrown"
+      },
+      {
+        "type": "number",
+        "name": "brownSeveralHours"
+      },
+      {
+        "type": "number",
+        "name": "facialReactionSun"
+      },
+      {
+        "type": "number",
+        "name": "tanning"
+      },
+      {
+        "type": "number",
+        "name": "exposedArea"
+      },
+      {
+        "type": "text",
+        "name": "gender"
+      },
+      {
+        "type": "datetime",
+        "name": "consentTreatment"
+      },
+      {
+        "type": "number",
+        "name": "treatments"
+      },
+      {
+        "type": "text",
+        "name": "customerId"
+      },
+      {
+        "type": "number",
+        "name": "scoreGeneticDisposition"
+      },
+      {
+        "type": "number",
+        "name": "scoreReactionSun"
+      },
+      {
+        "type": "number",
+        "name": "scoreTanningHabits"
+      },
+      {
+        "type": "number",
+        "name": "skintype"
+      },
+      {
+        "type": "boolean",
+        "name": "hasFreeTrial"
+      },
+      {
+        "type": "number",
+        "name": "time"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "subscription",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT dp.id, dp.status, dp.\"planId\" FROM \"detailsPayment\" as dp\nINNER JOIN treatments AS t ON t.id = :P1\nWHERE dp.id = t.\"paymentId\"",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": "318"
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "status",
+            "type": "text"
+          },
+          {
+            "name": "planId",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "name": "plan",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "plans",
+                "column": "limitSessions"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{subscription[0].planId}}",
+                "test": "21"
+              }
+            ],
+            "table": {
+              "name": "plans"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "plans.id",
+                  "field": "plans.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{subscription[0].planId}}",
+                  "data": {
+                    "table": "plans",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"limitSessions\" from \"plans\" where \"plans\".\"id\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "text",
+            "name": "limitSessions"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "planLimitSessions",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{plan.limitSessions.toNumber()}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "updateTreatment",
+        "module": "dbupdater",
+        "action": "update",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "update",
+            "values": [
+              {
+                "table": "historyTreatmentClient",
+                "column": "duration",
+                "type": "number",
+                "value": "{{$_POST.duration}}"
+              },
+              {
+                "table": "historyTreatmentClient",
+                "column": "lastTreatment",
+                "type": "time",
+                "value": "{{$_POST.lastTreatment}}"
+              },
+              {
+                "table": "historyTreatmentClient",
+                "column": "updatedAt",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              },
+              {
+                "table": "historyTreatmentClient",
+                "column": "complete",
+                "type": "boolean",
+                "value": "{{$_POST.complete}}"
+              },
+              {
+                "table": "treatments",
+                "column": "redness",
+                "type": "boolean",
+                "value": "{{$_POST.redness}}"
+              },
+              {
+                "table": "treatments",
+                "column": "facilityId",
+                "type": "number",
+                "value": "{{$_POST.facilityId}}"
+              },
+              {
+                "table": "treatments",
+                "column": "time",
+                "type": "number",
+                "value": "{{$_POST.time}}"
+              }
+            ],
+            "table": "treatments",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "id",
+                  "field": "id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "column": "id"
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "returning": "id",
+            "query": "update \"treatments\" set \"duration\" = ?, \"lastTreatment\" = ?, \"updatedAt\" = ?, \"complete\" = ?, \"redness\" = ?, \"facilityId\" = ?, \"time\" = ? where \"id\" = ? returning \"id\"",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.duration}}",
+                "test": ""
+              },
+              {
+                "name": ":P2",
+                "type": "expression",
+                "value": "{{$_POST.lastTreatment}}",
+                "test": ""
+              },
+              {
+                "name": ":P3",
+                "type": "expression",
+                "value": "{{NOW}}",
+                "test": ""
+              },
+              {
+                "name": ":P4",
+                "type": "expression",
+                "value": "{{$_POST.complete}}",
+                "test": ""
+              },
+              {
+                "name": ":P5",
+                "type": "expression",
+                "value": "{{$_POST.redness}}",
+                "test": ""
+              },
+              {
+                "name": ":P6",
+                "type": "expression",
+                "value": "{{$_POST.facilityId}}",
+                "test": ""
+              },
+              {
+                "name": ":P7",
+                "type": "expression",
+                "value": "{{$_POST.time}}",
+                "test": ""
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P8",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "name": "client",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "client"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "client.userId",
+                  "field": "client.userId",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "client",
+                    "column": "userId",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "reference",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "references": "id",
+                      "inTable": "user",
+                      "referenceType": "integer",
+                      "onUpdate": "CASCADE",
+                      "onDelete": "CASCADE",
+                      "name": "userId"
+                    }
+                  },
+                  "operation": "=",
+                  "table": "client"
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"client\" where \"client\".\"userId\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "height"
+          },
+          {
+            "type": "text",
+            "name": "weight"
+          },
+          {
+            "type": "text",
+            "name": "sickDays"
+          },
+          {
+            "type": "number",
+            "name": "eyeColor"
+          },
+          {
+            "type": "number",
+            "name": "hairColor"
+          },
+          {
+            "type": "number",
+            "name": "skinColor"
+          },
+          {
+            "type": "number",
+            "name": "userId"
+          },
+          {
+            "type": "text",
+            "name": "birth"
+          },
+          {
+            "type": "number",
+            "name": "freckles"
+          },
+          {
+            "type": "number",
+            "name": "sunTooLong"
+          },
+          {
+            "type": "number",
+            "name": "degreeTurnBrown"
+          },
+          {
+            "type": "number",
+            "name": "brownSeveralHours"
+          },
+          {
+            "type": "number",
+            "name": "facialReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "tanning"
+          },
+          {
+            "type": "number",
+            "name": "exposedArea"
+          },
+          {
+            "type": "text",
+            "name": "gender"
+          },
+          {
+            "type": "datetime",
+            "name": "consentTreatment"
+          },
+          {
+            "type": "number",
+            "name": "treatments"
+          },
+          {
+            "type": "text",
+            "name": "customerId"
+          },
+          {
+            "type": "number",
+            "name": "scoreGeneticDisposition"
+          },
+          {
+            "type": "number",
+            "name": "scoreReactionSun"
+          },
+          {
+            "type": "number",
+            "name": "scoreTanningHabits"
+          },
+          {
+            "type": "number",
+            "name": "skintype"
+          },
+          {
+            "type": "boolean",
+            "name": "hasFreeTrial"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "treatmentsCount",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "treatments",
+                "column": "id",
+                "aggregate": "COUNT"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{subscription[0].id}}",
+                "test": "95"
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{'true'}}",
+                "test": "true"
+              }
+            ],
+            "table": {
+              "name": "treatments"
+            },
+            "primary": "id",
+            "joins": [],
+            "groupBy": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "treatments.paymentId",
+                  "field": "treatments.paymentId",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{subscription[0].id}}",
+                  "data": {
+                    "table": "treatments",
+                    "column": "paymentId",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "reference",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "references": "id",
+                      "inTable": "detailsPayment",
+                      "referenceType": "integer",
+                      "onUpdate": "CASCADE",
+                      "onDelete": "CASCADE",
+                      "name": "paymentId"
+                    }
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "treatments.complete",
+                  "field": "treatments.complete",
+                  "type": "boolean",
+                  "operator": "equal",
+                  "value": "{{'true'}}",
+                  "data": {
+                    "table": "treatments",
+                    "column": "complete",
+                    "type": "boolean",
+                    "columnObj": {
+                      "type": "boolean",
+                      "default": "false",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "complete"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select count(\"id\") from \"treatments\" where \"treatments\".\"paymentId\" = ? and \"treatments\".\"complete\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "totalTreatments",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{treatmentsCount.count.toNumber()}}"
+        },
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          }
+        ],
+        "outputType": "text"
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "mark subscription as completed if the total treatments for this subscription is equal to the limit number of sessions of the plan"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.complete&&totalTreatments>=planLimitSessions}}",
+          "then": {
+            "steps": {
+              "name": "updateSubscription",
+              "module": "dbupdater",
+              "action": "update",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "update",
+                  "values": [
+                    {
+                      "table": "detailsPayment",
+                      "column": "status",
+                      "type": "text",
+                      "value": "completed"
+                    }
+                  ],
+                  "table": "detailsPayment",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "id",
+                        "field": "id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{subscription[0].id}}",
+                        "data": {
+                          "column": "id"
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "returning": "id",
+                  "query": "update \"detailsPayment\" set \"status\" = ? where \"id\" = ? returning \"id\"",
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{subscription[0].id}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean",
+        "output": false
+      },
+      {
+        "name": "hasGodMode",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "user",
+                "column": "isGodMode"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "236"
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "select \"isGodMode\" from \"user\" where \"user\".\"id\" = ?",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "type": "dbconnector_single",
+        "meta": [
+          {
+            "type": "boolean",
+            "name": "isGodMode"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.complete&&!hasGodMode.isGodMode}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateClient",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "client",
+                        "column": "treatments",
+                        "type": "number",
+                        "value": "{{client.treatments.toNumber()-1}}"
+                      }
+                    ],
+                    "table": "client",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{client.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"client\" set \"treatments\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{client.treatments.toNumber()-1}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P2",
+                        "value": "{{client.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "treatments",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT *\nFROM client AS c\nINNER JOIN treatments AS t ON t.\"clientId\" = c.id\nWHERE c.\"userId\" = :P1 AND t.complete = TRUE\nORDER BY t.id ASC",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "315"
+                      }
+                    ]
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "height",
+                    "type": "text"
+                  },
+                  {
+                    "name": "weight",
+                    "type": "text"
+                  },
+                  {
+                    "name": "sickDays",
+                    "type": "text"
+                  },
+                  {
+                    "name": "eyeColor",
+                    "type": "number"
+                  },
+                  {
+                    "name": "hairColor",
+                    "type": "number"
+                  },
+                  {
+                    "name": "skinColor",
+                    "type": "number"
+                  },
+                  {
+                    "name": "userId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "birth",
+                    "type": "text"
+                  },
+                  {
+                    "name": "freckles",
+                    "type": "number"
+                  },
+                  {
+                    "name": "sunTooLong",
+                    "type": "number"
+                  },
+                  {
+                    "name": "degreeTurnBrown",
+                    "type": "number"
+                  },
+                  {
+                    "name": "brownSeveralHours",
+                    "type": "number"
+                  },
+                  {
+                    "name": "facialReactionSun",
+                    "type": "number"
+                  },
+                  {
+                    "name": "tanning",
+                    "type": "number"
+                  },
+                  {
+                    "name": "exposedArea",
+                    "type": "number"
+                  },
+                  {
+                    "name": "gender",
+                    "type": "text"
+                  },
+                  {
+                    "name": "consentTreatment",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "treatments",
+                    "type": "number"
+                  },
+                  {
+                    "name": "customerId",
+                    "type": "text"
+                  },
+                  {
+                    "name": "scoreGeneticDisposition",
+                    "type": "number"
+                  },
+                  {
+                    "name": "scoreReactionSun",
+                    "type": "number"
+                  },
+                  {
+                    "name": "scoreTanningHabits",
+                    "type": "number"
+                  },
+                  {
+                    "name": "skintype",
+                    "type": "number"
+                  },
+                  {
+                    "name": "hasFreeTrial",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "duration",
+                    "type": "number"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "complete",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "clientId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "lastTreatment",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "redness",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "facilityId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "isPlan",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "paymentId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "time",
+                    "type": "number"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "firstTreatment",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{treatments[0].lastTreatment.formatDate('dd/MM/yyyy', true)}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

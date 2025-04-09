@@ -1,0 +1,245 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "user",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "SELECT",
+            "distinct": false,
+            "columns": [
+              {
+                "table": "r",
+                "column": "name",
+                "field": "r.name"
+              },
+              {
+                "table": "r",
+                "column": "adminView"
+              },
+              {
+                "table": "r",
+                "column": "mobileView"
+              },
+              {
+                "table": "r",
+                "column": "facilityView"
+              }
+            ],
+            "table": {
+              "name": "user",
+              "alias": "u"
+            },
+            "joins": [
+              {
+                "table": "detailsUser",
+                "column": "*",
+                "alias": "du",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "du",
+                      "column": "userId",
+                      "field": "du.userId",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "u",
+                        "column": "id",
+                        "field": "u.id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "roles",
+                "column": "*",
+                "alias": "r",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "r",
+                      "column": "id",
+                      "field": "r.id",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "du",
+                        "column": "rolesId",
+                        "field": "du.rolesId"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "table": "u",
+                  "column": "id",
+                  "field": "u.id",
+                  "operation": "=",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "id": "u.id"
+                }
+              ]
+            },
+            "orders": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "1"
+              }
+            ],
+            "primary": "id",
+            "query": "select \"r\".\"name\", \"r\".\"adminView\", \"r\".\"mobileView\", \"r\".\"facilityView\" from \"user\" as \"u\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"u\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"u\".\"id\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "boolean",
+            "name": "adminView"
+          },
+          {
+            "type": "boolean",
+            "name": "mobileView"
+          },
+          {
+            "type": "boolean",
+            "name": "facilityView"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object",
+        "output": true
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{user.adminView}}",
+          "then": {
+            "steps": {
+              "name": "redirect",
+              "module": "core",
+              "action": "setvalue",
+              "options": {
+                "value": "/users/"
+              },
+              "meta": [],
+              "outputType": "text",
+              "output": true
+            }
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "facility",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT duf.\"facilityId\" as id, r.name\nFROM \"user\" as u\nLEFT JOIN \"detailsUser\" AS du ON du.\"userId\" = u.id \nLEFT JOIN roles AS r ON r.id = du.\"rolesId\"\nLEFT join \"detailsUsersFacility\" duf on u.id = duf.\"userId\" \nWHERE u.id = :P1 /* {{jwt.userId}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "95"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{user.facilityView}}",
+                  "then": {
+                    "steps": {
+                      "name": "redirect",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": "{{'/facility/'+facility[0].id+'/users/'}}"
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

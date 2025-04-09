@@ -1,0 +1,667 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "object",
+        "name": "data",
+        "sub": [
+          {
+            "type": "object",
+            "ref": "stripe_subscription",
+            "name": "object"
+          }
+        ]
+      },
+      {
+        "type": "text",
+        "name": "status"
+      },
+      {
+        "type": "number",
+        "name": "clientId"
+      },
+      {
+        "type": "text",
+        "name": "subscriptionStripeId"
+      },
+      {
+        "type": "datetime",
+        "name": "createdAt"
+      },
+      {
+        "type": "datetime",
+        "name": "updatedAt"
+      },
+      {
+        "type": "number",
+        "name": "planId"
+      },
+      {
+        "type": "datetime",
+        "name": "canceledAt"
+      },
+      {
+        "type": "datetime",
+        "name": "freeTrialEndAt"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "subscriptionId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.id}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "customerId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.customer}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "produtcId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.items.data[0].plan.product}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "status",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.status}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "cancellationReason",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.cancellation_details.reason}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "livemode",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.data.object.livemode}}"
+        },
+        "meta": [],
+        "outputType": "boolean",
+        "output": true
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "if subscription is renewed"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{status=='active'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "",
+                "options": {
+                  "comment": "execute if it is other than a cancellation request"
+                }
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{cancellationReason==null}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "client",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "SELECT",
+                            "distinct": false,
+                            "columns": [
+                              {
+                                "table": "client",
+                                "column": "id",
+                                "field": "id"
+                              },
+                              {
+                                "table": "client",
+                                "column": "treatments",
+                                "field": "treatments"
+                              }
+                            ],
+                            "table": {
+                              "name": "client"
+                            },
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "table": "client",
+                                  "column": "customerId",
+                                  "field": "customerId",
+                                  "operation": "=",
+                                  "operator": "equal",
+                                  "value": "{{customerId}}"
+                                }
+                              ]
+                            },
+                            "orders": [],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{customerId}}",
+                                "test": "cus_OtYCIiUvDDzYZ7"
+                              }
+                            ],
+                            "primary": "id",
+                            "query": "select \"id\", \"treatments\" from \"client\" where \"client\".\"customerId\" = ?"
+                          }
+                        },
+                        "output": true,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "number",
+                            "name": "treatments"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "plan",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "select",
+                            "columns": [
+                              {
+                                "table": "plans",
+                                "column": "id"
+                              },
+                              {
+                                "table": "plans",
+                                "column": "limitSessions"
+                              }
+                            ],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{produtcId}}",
+                                "test": ""
+                              }
+                            ],
+                            "table": {
+                              "name": "plans"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "query": "select \"id\", \"limitSessions\" from \"plans\" where \"plans\".\"productId\" = ?",
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "plans.productId",
+                                  "field": "plans.productId",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "{{produtcId}}",
+                                  "data": {
+                                    "table": "plans",
+                                    "column": "productId",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "text",
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "productId"
+                                    }
+                                  },
+                                  "operation": "=",
+                                  "table": "plans"
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            }
+                          }
+                        },
+                        "output": true,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "text",
+                            "name": "limitSessions"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{client.id&&plan.id}}",
+                          "then": {
+                            "steps": [
+                              {
+                                "name": "",
+                                "options": {
+                                  "comment": "change previous active plan to expired"
+                                }
+                              },
+                              {
+                                "name": "updatePreviousSubscription",
+                                "module": "dbupdater",
+                                "action": "update",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "update",
+                                    "values": [
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "status",
+                                        "type": "text",
+                                        "value": "{{'expired'}}"
+                                      }
+                                    ],
+                                    "table": "detailsPayment",
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "subscriptionStripeId",
+                                          "field": "subscriptionStripeId",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "{{subscriptionId}}",
+                                          "data": {
+                                            "column": "subscriptionStripeId"
+                                          },
+                                          "operation": "="
+                                        },
+                                        {
+                                          "id": "status",
+                                          "field": "status",
+                                          "type": "string",
+                                          "operator": "equal",
+                                          "value": "{{'active'}}",
+                                          "data": {
+                                            "column": "status"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "returning": "id",
+                                    "query": "update \"detailsPayment\" set \"status\" = ? where \"subscriptionStripeId\" = ? and \"status\" = ? returning \"id\"",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{'expired'}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P2",
+                                        "value": "{{subscriptionId}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P3",
+                                        "value": "{{'active'}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ],
+                                "output": true
+                              },
+                              {
+                                "name": "",
+                                "options": {
+                                  "comment": "create subscription"
+                                }
+                              },
+                              {
+                                "name": "createSubscription",
+                                "module": "dbupdater",
+                                "action": "insert",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "insert",
+                                    "values": [
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "status",
+                                        "type": "text",
+                                        "value": "{{status}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "clientId",
+                                        "type": "number",
+                                        "value": "{{client.id}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "subscriptionStripeId",
+                                        "type": "text",
+                                        "value": "{{subscriptionId}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "createdAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "updatedAt",
+                                        "type": "datetime",
+                                        "value": "{{NOW}}"
+                                      },
+                                      {
+                                        "table": "detailsPayment",
+                                        "column": "planId",
+                                        "type": "number",
+                                        "value": "{{plan.id}}"
+                                      }
+                                    ],
+                                    "table": "detailsPayment",
+                                    "returning": "id",
+                                    "query": "insert into \"detailsPayment\" (\"clientId\", \"createdAt\", \"planId\", \"status\", \"subscriptionStripeId\", \"updatedAt\") values (?, ?, ?, ?, ?, ?) returning \"id\"",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{status}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P2",
+                                        "type": "expression",
+                                        "value": "{{client.id}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P3",
+                                        "type": "expression",
+                                        "value": "{{subscriptionId}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P4",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P5",
+                                        "type": "expression",
+                                        "value": "{{NOW}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "name": ":P6",
+                                        "type": "expression",
+                                        "value": "{{plan.id}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "identity",
+                                    "type": "text"
+                                  },
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ],
+                                "output": true
+                              },
+                              {
+                                "name": "",
+                                "options": {
+                                  "comment": "Add up treatments to the client"
+                                }
+                              },
+                              {
+                                "name": "clientTreatments",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{client.treatments.toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "planTreatments",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{plan.limitSessions.toNumber()}}"
+                                },
+                                "meta": [],
+                                "outputType": "text",
+                                "output": true
+                              },
+                              {
+                                "name": "clientTotalTreatments",
+                                "module": "core",
+                                "action": "setvalue",
+                                "options": {
+                                  "value": "{{clientTreatments+planTreatments}}"
+                                },
+                                "meta": [],
+                                "outputType": "number",
+                                "output": true
+                              },
+                              {
+                                "name": "updateClientTreatments",
+                                "module": "dbupdater",
+                                "action": "update",
+                                "options": {
+                                  "connection": "EnyrgyDB",
+                                  "sql": {
+                                    "type": "update",
+                                    "values": [
+                                      {
+                                        "table": "client",
+                                        "column": "treatments",
+                                        "type": "number",
+                                        "value": "{{clientTotalTreatments}}"
+                                      }
+                                    ],
+                                    "table": "client",
+                                    "wheres": {
+                                      "condition": "AND",
+                                      "rules": [
+                                        {
+                                          "id": "id",
+                                          "field": "id",
+                                          "type": "double",
+                                          "operator": "equal",
+                                          "value": "{{client.id}}",
+                                          "data": {
+                                            "column": "id"
+                                          },
+                                          "operation": "="
+                                        }
+                                      ],
+                                      "conditional": null,
+                                      "valid": true
+                                    },
+                                    "returning": "id",
+                                    "query": "update \"client\" set \"treatments\" = ? where \"id\" = ?",
+                                    "params": [
+                                      {
+                                        "name": ":P1",
+                                        "type": "expression",
+                                        "value": "{{clientTotalTreatments}}",
+                                        "test": ""
+                                      },
+                                      {
+                                        "operator": "equal",
+                                        "type": "expression",
+                                        "name": ":P2",
+                                        "value": "{{client.id}}",
+                                        "test": ""
+                                      }
+                                    ]
+                                  }
+                                },
+                                "meta": [
+                                  {
+                                    "name": "affected",
+                                    "type": "number"
+                                  }
+                                ],
+                                "output": true
+                              }
+                            ]
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "error",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": "Client or Plan not found"
+                              },
+                              "meta": [],
+                              "output": true,
+                              "outputType": "text"
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "options": {
+          "comment": "if subscription is canceled or unpaid"
+        }
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{status=='canceled'||status=='unpaid'}}",
+          "then": {
+            "steps": [
+              {
+                "name": "",
+                "options": {
+                  "comment": "TODO: Handle canceled plan case. Such as remove left treatments."
+                }
+              },
+              {
+                "name": "canceledUnpaidStatus",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{status}}\n"
+                },
+                "meta": [],
+                "output": true,
+                "outputType": "text"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean",
+        "disabled": true
+      }
+    ]
+  }
+}

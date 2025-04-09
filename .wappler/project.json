@@ -1,0 +1,59 @@
+{
+  "projectName": "Enyrgy-WebApp",
+  "styleFile": "/css/style.css",
+  "assetsFolder": "/assets",
+  "designFramework": "bootstrap5",
+  "frameworks": [
+    {
+      "name": "fontawesome_5",
+      "type": "cdn"
+    },
+    {
+      "name": "bootstrap5",
+      "type": "local"
+    },
+    {
+      "name": "appConnect",
+      "type": "local"
+    }
+  ],
+  "hostingType": "wappler",
+  "projectServerModel": "node",
+  "runtime": "capacitor",
+  "webRootFolder": "/public",
+  "useRouting": true,
+  "addBase": true,
+  "routingHandler": "node",
+  "projectLinksType": "site",
+  "targets": [
+    {
+      "name": "Development",
+      "remoteURL": "http://localhost:3000",
+      "access": "local",
+      "targetType": "wappler",
+      "databaseConnectionType": "custom",
+      "db_host": "enyr-dev-stg-01.cm6iouj0dvft.us-east-1.rds.amazonaws.com",
+      "db_port": "5432",
+      "db_user": "postgres",
+      "db_password": "F4xbff4RVbLP4KfYj6xYfFmeSErHyx",
+      "db_database": "enyr_api_dev"
+    },
+    {
+      "name": "Staging",
+      "remoteURL": "http://localhost:3000",
+      "access": "local",
+      "targetType": "wappler",
+      "usage": "stage"
+    },
+    {
+      "name": "Production",
+      "remoteURL": "http://localhost:3000",
+      "access": "local",
+      "targetType": "wappler",
+      "usage": "production"
+    }
+  ],
+  "activeTarget": "Development",
+  "projectType": "web",
+  "extensions": []
+}

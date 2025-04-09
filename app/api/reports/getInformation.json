@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "array",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": {
+            "data": [
+              {
+                "id": 6,
+                "name": "Kaizen Progressive Health",
+                "activePlans": "12",
+                "plansPackage": "$1,021.95",
+                "enyrgyPlan": "$799.40",
+                "commission": "$28.42",
+                "total": "$222.55"
+              },
+              {
+                "id": 7,
+                "name": "Optimal Health & Wellness",
+                "activePlans": "4",
+                "plansPackage": "$340.64",
+                "enyrgyPlan": "$266.48",
+                "commission": "$9.48",
+                "total": "$74.16"
+              },
+              {
+                "id": 8,
+                "name": "The Collective",
+                "activePlans": "21",
+                "plansPackage": "$1,788.36",
+                "enyrgyPlan": "$1,399.02",
+                "commission": "$49.77",
+                "total": "$389.34"
+              },
+              {
+                "id": 9,
+                "name": "Fuego Yoga & Wellness",
+                "activePlans": "17",
+                "plansPackage": "$1,447.72",
+                "enyrgyPlan": "$1,132.54",
+                "commission": "$40.29",
+                "total": "$315.18"
+              },
+              {
+                "id": 10,
+                "name": "Anthem Golf and Country Club",
+                "activePlans": "8",
+                "plansPackage": "$681.28",
+                "enyrgyPlan": "$532.96",
+                "commission": "$18.96",
+                "total": "$148.32"
+              },
+              {
+                "id": 11,
+                "name": "Meraki Wellness",
+                "activePlans": "11",
+                "plansPackage": "$936.76",
+                "enyrgyPlan": "$732.82",
+                "commission": "$26.07",
+                "total": "$203.94"
+              },
+              {
+                "id": 12,
+                "name": "Enyrgy Inc",
+                "activePlans": "19",
+                "plansPackage": "$1,618.04",
+                "enyrgyPlan": "$1,265.78",
+                "commission": "$45.03",
+                "total": "$352.26"
+              }
+            ]
+          }
+        },
+        "meta": [],
+        "output": true,
+        "outputType": "text"
+      }
+    ]
+  }
+}

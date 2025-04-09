@@ -1,0 +1,264 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{},dmxValidator:{},dmxDataTraversal:{},dmxBootstrap5Alert:{},dmxStateManagement:{},dmxBootbox5:{}}" -->
+<dmx-session-manager id="session"></dmx-session-manager>
+<meta name="ac:route" content="/devices/">
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/devices/getInformationAdmin" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error getting devices')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<dmx-api-datasource id="getFacilities" is="dmx-fetch" url="/api/facility/getInformation" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')"></dmx-api-datasource>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="row bg-header pt-4">
+                <div class="col-3">
+                    <h1 class="title-section">
+                        <p>Devices</p>
+                    </h1>
+                </div>
+
+                <div class="col">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+                </div>
+                <div class="col-2">
+                    <button id="createUser" class="btn add-button" data-bs-toggle="modal" data-bs-target="#deviceCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.devices" onclick="clearInputText()">Add</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p style="" class="results-data">
+                        Showing <b class="results-data-bold">{{getInformation.data.devices.length}}</b> results
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <table class="table rowAlternate">
+                        <thead>
+                            <tr>
+
+                                <th scope="col" class="table-header">Serial</th>
+                                <th scope="col" class="table-header">Date added</th>
+                                <th scope="col" class="table-header">Location name</th>
+                                <th scope="col" class="table-header">Location admin</th>
+                                <th scope="col" class="table-header">Phone</th>
+                                <th scope="row"></th>
+                            </tr>
+                        </thead>
+                        <tbody is="dmx-repeat" id="devicesData" dmx-bind:repeat="getInformation.data.devices" key="id">
+                            <tr>
+
+                                <td class="table-content table-content-device p-auto"><a dmx-bind:href="'https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;data='+browser.location.protocol+'//'+browser.location.host+'/scan/'+$value.serial" target="_blank" id="sendQRCode"><img src="/assets/images/u_qrcode-scan.svg" id="qrCode" width="16px" height="16px">&nbsp;&nbsp;{{serial}}</a></td>
+                                <td class="table-content">{{createdAt}}</td>
+                                <td class="table-content table-content-device">{{name}}</td>
+                                <td class="table-content">{{firstName + ' ' + lastName}}</td>
+                                <td class="table-content" dmx-show="phone">{{'('+phone.substr(0,3)+') '+phone.substr(3, 3)+'-'+phone.substr(6, 4)}}</td>
+                                <td class="table-content" dmx-hide="phone">-</td>
+                                <td style="">
+                                    <div class="dropdown">
+                                        <button id="actions" class="btn details-data" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdown1">
+
+                                            <a class="dropdown-item" href="#" dmx-on:click="deviceUpdateModal.show();deviceUpdateModal.data_device.select(id)" id="editAction">Edit</a>
+                                            <a class="dropdown-item" href="#" dmx-on:click="run({'bootbox.confirm':{message:'Are you sure you want to delete?',title:'Confirm',buttons:{confirm:{label:'Yes, confirm',className:'btn-primary'},cancel:{label:'Cancel'}},then:{steps:{run:{action:`deleteDevice.submit();getInformation.load({})`,name:'submit',outputType:'text'}}},name:'Confirmation'}})" id="deleteAction">Delete</a>
+                                            <a class="dropdown-item" dmx-bind:href="'https://api.qrserver.com/v1/create-qr-code/?size=300x300&amp;data='+browser.location.protocol+'//'+browser.location.host+'/scan/'+$value.serial" id="downloadQRCode" target="_blank">Download QR Code</a>
+                                        </div>
+                                    </div>
+                                    <form id="deleteDevice" method="post" is="dmx-api-form" action="/api/devices/delete" dmx-on:success="getInformation.load({});notifies.success('Device deleted')" dmx-on:unauthorized="browser.goto('/')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:error="notifies.danger('Error deleting device')">
+
+                                        <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.devices[$index].id" type="hidden"><button id="delete" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+
+
+
+
+
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="deviceCreateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Add a device</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" dmx-on:click="deviceForm.reset()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="deviceForm" method="post" is="dmx-api-form" action="/api/devices/create" novalidate="" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Device already exists\')`,outputType:'text'}}},else:{steps:[{run:{action:`deviceCreateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Device created\')`,outputType:'text'}}]},outputType:'boolean'}})" dmx-on:unauthorized="browser.goto('/')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:error="notifies.danger('Error creating device')">
+                        <div class="row d-none">
+                            <div class="col-6">
+                                <input type="text" class="form-control input-text" id="contactName" name="contactName" aria-describedby="contactNameLabel" placeholder="Full name" is="dmx-input" value="Scott Hansbury" minlength="3" maxlength="50" required>
+                            </div>
+                            <div class="col-6">
+                                <input type="tel" class="form-control input-text" id="contactPhone" name="contactPhone" aria-describedby="emailLabel" placeholder="Phone" is="dmx-input" value="6023210322" required="" onkeyup="validatePhone(this)">
+                            </div>
+                            <div class="col-12">
+                                <input type="email" class="form-control input-text" id="contactEmail" name="contactEmail" aria-describedby="emailLabel" placeholder="Email address" is="dmx-input" value="support@enyrgy.com" minlength="3" maxlength="50" required>
+                            </div>
+                        </div>
+                        <small class="text-muted fill-inputs-modal">Please select the location:</small>
+                        <br>
+                        <br>
+                        <div class="form-group md-3" id="facilityIdForm">
+                            <select id="facility" class="form-select input-select" name="facility" is="dmx-select" dmx-bind:options="getFacilities.data.facilities" optiontext="name" optionvalue="id" onchanged="colorOptions(this)" dmx-on:changed.prevent="facilityId.setValue(value)">
+                                <option value="">Select Location</option>
+                            </select>
+                        </div>
+                        <br>
+                        <small class="text-muted fill-inputs-modal">Please add serial number from device(s):</small>
+                        <br>
+                        <br>
+                        <div class="form-group md-3" id="serialForm">
+                            <input id="serial" name="serial" class="form-control" type="hidden">
+                            <div class="row">
+                                <div class="col-11">
+                                    <input type="text" class="form-control input-text" id="serial1" name="serial1" aria-describedby="serialLabel" placeholder="Serial number" is="dmx-input" value="" minlength="3" maxlength="50" required="">
+                                </div>
+                                <div class="col-1">
+                                    <div class="h-100">
+                                        <button id="actionAdd" class="btn add-input-text" type="button" aria-haspopup="true" aria-expanded="false" data-bs-toggle="button" dmx-on:click="run({condition:{if:`!serial1.value`,then:{steps:{run:{action:`notifies.warning(\'Insert serial number\')`,outputType:'text'}}},outputType:'boolean'}})" onclick="createInputText(this)">
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group md-3" id="facilityIdForm">
+                            <input id="facilityId" name="facilityId" class="form-control" type="hidden">
+                        </div>
+                        <br>
+                    </form>
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" dmx-on:click="run({condition:{if:`!deviceCreateModal.deviceForm.contactName.value||!deviceCreateModal.deviceForm.contactPhone.value||!deviceCreateModal.deviceForm.contactEmail.value||!deviceCreateModal.deviceForm.serial.value||!deviceForm.facilityId.value`,then:{steps:{run:{action:`notifies.warning(\'Complete all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`deviceForm.facilityId.setValue(deviceForm.facility.value)`,outputType:'text'}},{run:{action:`deviceForm.submit()`,outputType:'text'}},{run:{action:`deviceForm.reset()`,outputType:'text'}},{run:{action:`deviceCreateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Add</button></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="deviceUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Update a device</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container" id="data_device" is="dmx-data-detail" dmx-bind:data="getInformation.data.devices" key="id">
+                        <form id="deviceForm" method="post" is="dmx-api-form" action="/api/devices/update" novalidate="" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Device already exists\')`,outputType:'text'}}},else:{steps:[{run:{action:`deviceUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Device updated\')`,outputType:'text'}}]},outputType:'boolean'}})" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error updating device')">
+                            <small class="text-muted fill-inputs-modal">Please complete contact details:</small>
+                            <br>
+                            <br>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="text" class="form-control input-text" id="contactName" name="contactName" aria-describedby="contactNameLabel" placeholder="Full name" is="dmx-input" value="" minlength="3" maxlength="50" dmx-bind:value="data_device.data.contactName" required>
+                                </div>
+                                <div class="col-6">
+                                    <input type="tel" class="form-control input-text" id="contactPhone" name="contactPhone" aria-describedby="phoneLabel" placeholder="Phone" is="dmx-input" value="" required="" onkeyup="validatePhone(this)" dmx-bind:value="data_device.data.contactPhone">
+                                </div>
+                                <div class="col-12">
+                                    <input type="email" class="form-control input-text" id="contactEmail" name="contactEmail" aria-describedby="emailLabel" placeholder="Email address" is="dmx-input" value="" minlength="3" maxlength="50" dmx-bind:value="data_device.data.contactEmail" required>
+                                </div>
+                            </div>
+                            <br>
+                            <small class="text-muted fill-inputs-modal">Please select the location:</small>
+                            <br>
+                            <br>
+                            <div class="form-group md-3" id="facilityIdForm">
+                                <select id="facility" class="form-select input-select" name="facility" is="dmx-select" dmx-bind:options="getFacilities.data.facilities" optiontext="name" optionvalue="id" dmx-bind:value="data_device.data.facilityId" dmx-on:changed.prevent="facilityId.setValue(value)">
+                                </select>
+                                <input id="facilityId" name="facilityId" type="hidden" class="form-control" dmx-bind:value="data_device.data.facilityId">
+                            </div>
+                            <br>
+                            <small class="text-muted fill-inputs-modal">Please add serial number from device(s):</small>
+                            <br>
+                            <br>
+
+                            <div class="form-group md-3" id="idForm">
+                                <input type="hidden" class="form-control input-text" id="id" name="id" aria-describedby="serialLabel" placeholder="Serial" is="dmx-input" value="" required="" dmx-bind:value="data_device.data.id">
+                            </div>
+                            <div class="form-group md-3 row" id="serialForm">
+                                <div class="col-9">
+                                    <input type="text" class="form-control input-text" id="serial" name="serial" aria-describedby="serialLabel" placeholder="Serial" is="dmx-input" value="" minlength="3" maxlength="50" required dmx-bind:value="data_device.data.serial">
+
+                                </div>
+                                <div class="col-3"><button id="generateQRCodeModal" type="button" onclick="editModalDownloadQRCode(this)" class="btn button-qr-code">Download QR Code</button></div>
+                            </div>
+
+
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" dmx-on:click="run({condition:{if:`!data_device.deviceForm.contactName.value||!data_device.deviceForm.contactPhone.value||!data_device.deviceForm.contactEmail.value||!data_device.deviceForm.serial.value||!data_device.deviceForm.facilityId.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_device.deviceForm.submit()`,outputType:'text'}},{run:{action:`data_device.deviceForm.reset()`,outputType:'text'}},{run:{action:`deviceUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Save</button></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function colorOptions(e){
+        let select = document.getElementById("facility")
+        if(select.value == 0){
+            select.classList.remove("input-select_option");
+            select.classList.add("input-select_non-option");
+        } else {
+            select.classList.remove("input-select_non-option");
+            select.classList.add("input-select_option");
+        }
+      }
+</script>
+<script>
+    let inputCount = 1;
+    function createInputText(e){
+        if($('#serial1').val()!=''){
+            inputCount += 1 
+            var newRowAdd =
+                '<div id="row" class="row"><div class="col-8">'+
+                '<input type="text" class="form-control input-text-disabled" id="serial'+inputCount+'" name="serial'+inputCount+'" aria-describedby="serialLabel" placeholder="Serial number" is="dmx-input" value="'+$('#serial1').val()+'" minlength="3" maxlength="50" required="" disabled></div>'+
+                '<div class="col-3"><button id="generateQRCodeModal" type="button" onclick="downloadQRCode(serial'+inputCount+')" class="btn button-qr-code">Download QR Code</button></div>'+
+                '<div class="col-1"><div class="h-100">'+
+                '<button id="actionRemove" class="btn remove-input-text" type="button" aria-haspopup="true" aria-expanded="false" onclick="deleteInputText(this)" data-bs-toggle="button">'+
+                '</button></div></div></div>';
+            $('#serialForm').append(newRowAdd);
+
+            let value = e.parentElement.parentElement.parentElement.children[0].children[0].value
+            let isEmpty = document.getElementById('serial').value == '' ? true : false
+            if(isEmpty){
+                document.getElementById('serial').value = value
+            }else if(!isEmpty){
+                document.getElementById('serial').value = document.getElementById('serial').value + "," + value
+            }
+            $('#serial1').val('')
+        }
+    }
+
+    function deleteInputText(e){
+        let value = e.parentElement.parentElement.parentElement.children[0].children[0].value
+        let values = document.getElementById('serial').value.split(",")
+        for(let cont=0;cont<values.length;cont++){ 
+            if(values[cont]==value){ 
+                values.splice(cont,1) 
+                document.getElementById('serial').value=values 
+                $(e).parents("#row").remove();
+            } 
+        }
+    }
+
+    function clearInputText(){
+        $("#serial").val('')
+        let parent = $("#serialForm")[0].children
+        for(let a=0;a<parent.length;a++){
+            $("#row").remove();
+        }
+    }
+
+    function downloadQRCode(e){
+        window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+location.protocol+'//'+location.host+'/scan/'+e.value, '_blank');
+    }
+    function editModalDownloadQRCode(e){
+        window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data='+location.protocol+'//'+location.host+'/scan/'+e.parentElement.parentElement.children[0].children[0].value, '_blank');
+    }
+</script>

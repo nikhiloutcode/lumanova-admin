@@ -1,0 +1,631 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {
+              "message": "Package name is required."
+            },
+            "core:minlength": {
+              "param": 3,
+              "message": "Please enter at least {0} characters in the package name."
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {
+              "message": "Amount is required."
+            }
+          }
+        },
+        "name": "amount"
+      },
+      {
+        "type": "number",
+        "name": "planId"
+      },
+      {
+        "type": "text",
+        "name": "description"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {
+              "message": "Package duration is required."
+            }
+          }
+        },
+        "name": "duration"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {
+              "message": "Package duration is required."
+            }
+          }
+        },
+        "name": "numberDuration"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "exists",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_POST.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "subscriptions"
+            },
+            "primary": "id",
+            "joins": [],
+            "query": "select * from \"subscriptions\" where \"subscriptions\".\"id\" = ?",
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "subscriptions.id",
+                  "field": "subscriptions.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_POST.id}}",
+                  "data": {
+                    "table": "subscriptions",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            }
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "amount"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "description"
+          },
+          {
+            "type": "text",
+            "name": "duration"
+          },
+          {
+            "type": "number",
+            "name": "numberDuration"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exists.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "updateSubscription",
+                "module": "dbupdater",
+                "action": "update",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "update",
+                    "values": [
+                      {
+                        "table": "subscriptions",
+                        "column": "name",
+                        "type": "text",
+                        "value": "{{$_POST.name}}"
+                      },
+                      {
+                        "table": "subscriptions",
+                        "column": "amount",
+                        "type": "text",
+                        "value": "{{$_POST.amount}}"
+                      },
+                      {
+                        "table": "subscriptions",
+                        "column": "updatedAt",
+                        "type": "datetime",
+                        "value": "{{NOW}}"
+                      },
+                      {
+                        "table": "subscriptions",
+                        "column": "description",
+                        "type": "text",
+                        "value": "{{$_POST.description}}"
+                      },
+                      {
+                        "table": "subscriptions",
+                        "column": "duration",
+                        "type": "text",
+                        "value": "{{$_POST.duration}}"
+                      },
+                      {
+                        "table": "subscriptions",
+                        "column": "numberDuration",
+                        "type": "text",
+                        "value": "{{$_POST.numberDuration}}"
+                      }
+                    ],
+                    "table": "subscriptions",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "id",
+                          "field": "id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_POST.id}}",
+                          "data": {
+                            "column": "id"
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "returning": "id",
+                    "query": "update \"subscriptions\" set \"name\" = ?, \"amount\" = ?, \"updatedAt\" = ?, \"description\" = ?, \"duration\" = ?, \"numberDuration\" = ? where \"id\" = ? returning \"id\"",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "type": "expression",
+                        "value": "{{$_POST.name}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P2",
+                        "type": "expression",
+                        "value": "{{$_POST.amount}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P3",
+                        "type": "expression",
+                        "value": "{{NOW}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P4",
+                        "type": "expression",
+                        "value": "{{$_POST.description}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P5",
+                        "type": "expression",
+                        "value": "{{$_POST.duration}}",
+                        "test": ""
+                      },
+                      {
+                        "name": ":P6",
+                        "type": "expression",
+                        "value": "{{$_POST.numberDuration}}",
+                        "test": ""
+                      },
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P7",
+                        "value": "{{$_POST.id}}",
+                        "test": ""
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "affected",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{$_POST.planId}}",
+                  "then": {
+                    "steps": [
+                      {
+                        "name": "detailsSubscriptions",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "select",
+                            "columns": [],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{$_POST.id}}",
+                                "test": ""
+                              }
+                            ],
+                            "table": {
+                              "name": "detailsSubscription"
+                            },
+                            "primary": "id",
+                            "joins": [],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "detailsSubscription.subscriptionId",
+                                  "field": "detailsSubscription.subscriptionId",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{$_POST.id}}",
+                                  "data": {
+                                    "table": "detailsSubscription",
+                                    "column": "subscriptionId",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "reference",
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "references": "id",
+                                      "inTable": "subscriptions",
+                                      "referenceType": "integer",
+                                      "onUpdate": "CASCADE",
+                                      "onDelete": "CASCADE",
+                                      "name": "subscriptionId"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "select * from \"detailsSubscription\" where \"detailsSubscription\".\"subscriptionId\" = ?"
+                          }
+                        },
+                        "output": false,
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "number",
+                            "name": "plansId"
+                          },
+                          {
+                            "type": "number",
+                            "name": "subscriptionId"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "createdAt"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "updatedAt"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{detailsSubscriptions.id}}",
+                          "then": {
+                            "steps": {
+                              "name": "updateSubscriptionDetails",
+                              "module": "dbupdater",
+                              "action": "update",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "update",
+                                  "values": [
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "plansId",
+                                      "type": "number",
+                                      "value": "{{$_POST.planId}}"
+                                    },
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "subscriptionId",
+                                      "type": "number",
+                                      "value": "{{$_POST.id}}"
+                                    },
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "updatedAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    }
+                                  ],
+                                  "table": "detailsSubscription",
+                                  "wheres": {
+                                    "condition": "AND",
+                                    "rules": [
+                                      {
+                                        "id": "subscriptionId",
+                                        "field": "subscriptionId",
+                                        "type": "double",
+                                        "operator": "equal",
+                                        "value": "{{$_POST.id}}",
+                                        "data": {
+                                          "column": "subscriptionId"
+                                        },
+                                        "operation": "="
+                                      }
+                                    ],
+                                    "conditional": null,
+                                    "valid": true
+                                  },
+                                  "returning": "id",
+                                  "query": "update \"detailsSubscription\" set \"plansId\" = ?, \"subscriptionId\" = ?, \"updatedAt\" = ? where \"subscriptionId\" = ? returning \"id\"",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{$_POST.planId}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{$_POST.id}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "operator": "equal",
+                                      "type": "expression",
+                                      "name": ":P4",
+                                      "value": "{{$_POST.id}}",
+                                      "test": ""
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "insertSubscriptionDetails",
+                              "module": "dbupdater",
+                              "action": "insert",
+                              "options": {
+                                "connection": "EnyrgyDB",
+                                "sql": {
+                                  "type": "insert",
+                                  "values": [
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "plansId",
+                                      "type": "number",
+                                      "value": "{{$_POST.planId}}"
+                                    },
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "subscriptionId",
+                                      "type": "number",
+                                      "value": "{{$_POST.id}}"
+                                    },
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "createdAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    },
+                                    {
+                                      "table": "detailsSubscription",
+                                      "column": "updatedAt",
+                                      "type": "datetime",
+                                      "value": "{{NOW}}"
+                                    }
+                                  ],
+                                  "table": "detailsSubscription",
+                                  "returning": "id",
+                                  "query": "insert into \"detailsSubscription\" (\"createdAt\", \"plansId\", \"subscriptionId\", \"updatedAt\") values (?, ?, ?, ?) returning \"id\"",
+                                  "params": [
+                                    {
+                                      "name": ":P1",
+                                      "type": "expression",
+                                      "value": "{{$_POST.planId}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P2",
+                                      "type": "expression",
+                                      "value": "{{$_POST.id}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P3",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    },
+                                    {
+                                      "name": ":P4",
+                                      "type": "expression",
+                                      "value": "{{NOW}}",
+                                      "test": ""
+                                    }
+                                  ]
+                                }
+                              },
+                              "meta": [
+                                {
+                                  "name": "identity",
+                                  "type": "text"
+                                },
+                                {
+                                  "name": "affected",
+                                  "type": "number"
+                                }
+                              ]
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "response",
+                "options": {
+                  "status": 200,
+                  "data": "{{messagesHandler.SUBSCRIPTION_UPDATE}}"
+                }
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_SUBSCRIPTION}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

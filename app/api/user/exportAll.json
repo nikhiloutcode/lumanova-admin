@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "jwt",
+      "module": "core",
+      "action": "exec",
+      "options": {
+        "exec": "utils/verifyJWT"
+      },
+      "output": true
+    }
+  }
+}

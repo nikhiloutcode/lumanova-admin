@@ -1,0 +1,187 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "name": "paymentId"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "detachPaymentMethod",
+      "module": "stripe",
+      "action": "detachPaymentMethod",
+      "options": {
+        "__extra": {
+          "api_key": "{{$_ENV.STRIPE_SECRET_KEY}}"
+        },
+        "payment_method": "{{$_PARAM.paymentId}}"
+      },
+      "outputType": "object",
+      "meta": [
+        {
+          "name": "acss_debit",
+          "type": "object",
+          "ref": "stripe_payment_method_acss_debit"
+        },
+        {
+          "name": "afterpay_clearpay",
+          "type": "object",
+          "ref": "stripe_payment_method_afterpay_clearpay"
+        },
+        {
+          "name": "alipay",
+          "type": "object",
+          "ref": "stripe_payment_flows_private_payment_methods_alipay"
+        },
+        {
+          "name": "au_becs_debit",
+          "type": "object",
+          "ref": "stripe_payment_method_au_becs_debit"
+        },
+        {
+          "name": "bacs_debit",
+          "type": "object",
+          "ref": "stripe_payment_method_bacs_debit"
+        },
+        {
+          "name": "bancontact",
+          "type": "object",
+          "ref": "stripe_payment_method_bancontact"
+        },
+        {
+          "name": "billing_details",
+          "type": "object",
+          "ref": "stripe_billing_details"
+        },
+        {
+          "name": "boleto",
+          "type": "object",
+          "ref": "stripe_payment_method_boleto"
+        },
+        {
+          "name": "card",
+          "type": "object",
+          "ref": "stripe_payment_method_card"
+        },
+        {
+          "name": "card_present",
+          "type": "object",
+          "ref": "stripe_payment_method_card_present"
+        },
+        {
+          "name": "created",
+          "type": "number"
+        },
+        {
+          "name": "customer",
+          "type": "text",
+          "expand": [
+            "stripe_customer"
+          ]
+        },
+        {
+          "name": "customer_balance",
+          "type": "object",
+          "ref": "stripe_payment_method_customer_balance"
+        },
+        {
+          "name": "eps",
+          "type": "object",
+          "ref": "stripe_payment_method_eps"
+        },
+        {
+          "name": "fpx",
+          "type": "object",
+          "ref": "stripe_payment_method_fpx"
+        },
+        {
+          "name": "giropay",
+          "type": "object",
+          "ref": "stripe_payment_method_giropay"
+        },
+        {
+          "name": "grabpay",
+          "type": "object",
+          "ref": "stripe_payment_method_grabpay"
+        },
+        {
+          "name": "id",
+          "type": "text"
+        },
+        {
+          "name": "ideal",
+          "type": "object",
+          "ref": "stripe_payment_method_ideal"
+        },
+        {
+          "name": "interac_present",
+          "type": "object",
+          "ref": "stripe_payment_method_interac_present"
+        },
+        {
+          "name": "klarna",
+          "type": "object",
+          "ref": "stripe_payment_method_klarna"
+        },
+        {
+          "name": "konbini",
+          "type": "object",
+          "ref": "stripe_payment_method_konbini"
+        },
+        {
+          "name": "livemode",
+          "type": "boolean"
+        },
+        {
+          "name": "metadata",
+          "type": "object"
+        },
+        {
+          "name": "object",
+          "type": "text"
+        },
+        {
+          "name": "oxxo",
+          "type": "object",
+          "ref": "stripe_payment_method_oxxo"
+        },
+        {
+          "name": "p24",
+          "type": "object",
+          "ref": "stripe_payment_method_p24"
+        },
+        {
+          "name": "paynow",
+          "type": "object",
+          "ref": "stripe_payment_method_paynow"
+        },
+        {
+          "name": "sepa_debit",
+          "type": "object",
+          "ref": "stripe_payment_method_sepa_debit"
+        },
+        {
+          "name": "sofort",
+          "type": "object",
+          "ref": "stripe_payment_method_sofort"
+        },
+        {
+          "name": "type",
+          "type": "text"
+        },
+        {
+          "name": "us_bank_account",
+          "type": "object",
+          "ref": "stripe_payment_method_us_bank_account"
+        },
+        {
+          "name": "wechat_pay",
+          "type": "object",
+          "ref": "stripe_payment_method_wechat_pay"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,291 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_PARAM.id}}",
+          "then": {
+            "steps": {
+              "name": "listProducts",
+              "module": "stripe",
+              "action": "listProducts",
+              "options": {
+                "active": true,
+                "__extra": {
+                  "api_key": "{{$_ENV.STRIPE_SECRET_KEY}}"
+                },
+                "ids": "{{$_PARAM.id}}"
+              },
+              "outputType": "object",
+              "meta": [
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "name": "active",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "attributes",
+                      "type": "array",
+                      "sub": []
+                    },
+                    {
+                      "name": "caption",
+                      "type": "text"
+                    },
+                    {
+                      "name": "created",
+                      "type": "number"
+                    },
+                    {
+                      "name": "deactivate_on",
+                      "type": "array",
+                      "sub": []
+                    },
+                    {
+                      "name": "default_price",
+                      "type": "text",
+                      "expand": [
+                        "stripe_price"
+                      ]
+                    },
+                    {
+                      "name": "description",
+                      "type": "text"
+                    },
+                    {
+                      "name": "id",
+                      "type": "text"
+                    },
+                    {
+                      "name": "images",
+                      "type": "array",
+                      "sub": []
+                    },
+                    {
+                      "name": "livemode",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "metadata",
+                      "type": "object"
+                    },
+                    {
+                      "name": "name",
+                      "type": "text"
+                    },
+                    {
+                      "name": "object",
+                      "type": "text"
+                    },
+                    {
+                      "name": "package_dimensions",
+                      "type": "object",
+                      "ref": "stripe_package_dimensions"
+                    },
+                    {
+                      "name": "shippable",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "statement_descriptor",
+                      "type": "text"
+                    },
+                    {
+                      "name": "tax_code",
+                      "type": "text",
+                      "expand": [
+                        "stripe_tax_code"
+                      ]
+                    },
+                    {
+                      "name": "type",
+                      "type": "text"
+                    },
+                    {
+                      "name": "unit_label",
+                      "type": "text"
+                    },
+                    {
+                      "name": "updated",
+                      "type": "number"
+                    },
+                    {
+                      "name": "url",
+                      "type": "text"
+                    }
+                  ]
+                },
+                {
+                  "name": "has_more",
+                  "type": "boolean"
+                },
+                {
+                  "name": "object",
+                  "type": "text"
+                },
+                {
+                  "name": "url",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "listProducts_copy",
+              "module": "stripe",
+              "action": "listProducts",
+              "options": {
+                "active": true,
+                "__extra": {
+                  "api_key": "{{$_ENV.STRIPE_SECRET_KEY}}"
+                }
+              },
+              "outputType": "object",
+              "meta": [
+                {
+                  "name": "data",
+                  "type": "array",
+                  "sub": [
+                    {
+                      "name": "active",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "attributes",
+                      "type": "array",
+                      "sub": []
+                    },
+                    {
+                      "name": "caption",
+                      "type": "text"
+                    },
+                    {
+                      "name": "created",
+                      "type": "number"
+                    },
+                    {
+                      "name": "deactivate_on",
+                      "type": "array",
+                      "sub": []
+                    },
+                    {
+                      "name": "default_price",
+                      "type": "text",
+                      "expand": [
+                        "stripe_price"
+                      ]
+                    },
+                    {
+                      "name": "description",
+                      "type": "text"
+                    },
+                    {
+                      "name": "id",
+                      "type": "text"
+                    },
+                    {
+                      "name": "images",
+                      "type": "array",
+                      "sub": []
+                    },
+                    {
+                      "name": "livemode",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "metadata",
+                      "type": "object"
+                    },
+                    {
+                      "name": "name",
+                      "type": "text"
+                    },
+                    {
+                      "name": "object",
+                      "type": "text"
+                    },
+                    {
+                      "name": "package_dimensions",
+                      "type": "object",
+                      "ref": "stripe_package_dimensions"
+                    },
+                    {
+                      "name": "shippable",
+                      "type": "boolean"
+                    },
+                    {
+                      "name": "statement_descriptor",
+                      "type": "text"
+                    },
+                    {
+                      "name": "tax_code",
+                      "type": "text",
+                      "expand": [
+                        "stripe_tax_code"
+                      ]
+                    },
+                    {
+                      "name": "type",
+                      "type": "text"
+                    },
+                    {
+                      "name": "unit_label",
+                      "type": "text"
+                    },
+                    {
+                      "name": "updated",
+                      "type": "number"
+                    },
+                    {
+                      "name": "url",
+                      "type": "text"
+                    }
+                  ]
+                },
+                {
+                  "name": "has_more",
+                  "type": "boolean"
+                },
+                {
+                  "name": "object",
+                  "type": "text"
+                },
+                {
+                  "name": "url",
+                  "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "plans",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{listProducts.data}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      }
+    ]
+  }
+}

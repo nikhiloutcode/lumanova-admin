@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "facility",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.id}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "facility"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "facility.id",
+                  "field": "facility.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.id}}",
+                  "data": {
+                    "table": "facility",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "=",
+                  "table": "facility"
+                },
+                {
+                  "id": "facility.disabled",
+                  "field": "facility.disabled",
+                  "type": "boolean",
+                  "operator": "equal",
+                  "value": false,
+                  "data": {
+                    "table": "facility",
+                    "column": "disabled",
+                    "type": "boolean",
+                    "columnObj": {
+                      "type": "boolean",
+                      "default": "false",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "name": "disabled"
+                    }
+                  },
+                  "operation": "=",
+                  "table": "facility"
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"facility\" where \"facility\".\"id\" = ? and \"facility\".\"disabled\" = ?"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "logo"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "city"
+          },
+          {
+            "type": "text",
+            "name": "state"
+          },
+          {
+            "type": "text",
+            "name": "zip"
+          },
+          {
+            "type": "text",
+            "name": "address1"
+          },
+          {
+            "type": "text",
+            "name": "address2"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      }
+    ]
+  }
+}

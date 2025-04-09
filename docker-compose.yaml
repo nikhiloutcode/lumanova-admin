@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    volumes:
+      - .:/app
+    environment:
+      - DB_HOST=
+      - DB_NAME=
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASS=
+      - PORT=80

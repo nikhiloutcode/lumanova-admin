@@ -1,0 +1,549 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "device"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "exist",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "user",
+                "column": "isGodMode"
+              },
+              {
+                "table": "client",
+                "column": "id"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [
+              {
+                "table": "client",
+                "column": "*",
+                "type": "INNER",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "client",
+                      "column": "userId",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "user",
+                        "column": "id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"user\".\"isGodMode\", \"client\".\"id\" from \"user\" inner join \"client\" on \"client\".\"userId\" = \"user\".\"id\" where \"user\".\"id\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "boolean",
+            "name": "isGodMode"
+          },
+          {
+            "type": "number",
+            "name": "id"
+          }
+        ],
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{exist.id}}",
+          "then": {
+            "steps": [
+              {
+                "name": "",
+                "module": "core",
+                "action": "exec",
+                "options": {
+                  "exec": "utils/getTimeTreatment",
+                  "params": {
+                    "userId": "{{jwt.userId}}",
+                    "serial": "{{$_POST.device}}",
+                    "fullAccess": "{{exist.isGodMode}}"
+                  }
+                }
+              },
+              {
+                "name": "clientId",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{exist.id}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "skinType",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{skinType}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "hasFacility",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{hasFacility}}"
+                },
+                "meta": [],
+                "outputType": "boolean",
+                "output": true
+              },
+              {
+                "name": "hasPlan",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{hasPlan}}"
+                },
+                "meta": [],
+                "outputType": "boolean",
+                "output": true
+              },
+              {
+                "name": "facilityId",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{facilityId}}"
+                },
+                "meta": [],
+                "outputType": "object",
+                "output": true
+              },
+              {
+                "name": "tooManyRedness",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{tooManyRedness}}"
+                },
+                "meta": [],
+                "outputType": "boolean",
+                "output": true
+              },
+              {
+                "name": "time",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{time}}"
+                },
+                "meta": [],
+                "outputType": "boolean",
+                "output": true
+              },
+              {
+                "name": "totalTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{totalTreatmentsValue}}"
+                },
+                "meta": [],
+                "outputType": "number",
+                "output": true
+              },
+              {
+                "name": "totalTreatmentsAfterRedness",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{totalTreatmentsAfterRedness}}",
+                  "key": "totalTreatmentsAfterRedness"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{exist.isGodMode}}",
+                  "then": {
+                    "steps": {
+                      "name": "hasTreatments",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  },
+                  "else": {
+                    "steps": [
+                      {
+                        "name": "hasTreatments",
+                        "module": "dbconnector",
+                        "action": "single",
+                        "options": {
+                          "connection": "EnyrgyDB",
+                          "sql": {
+                            "type": "select",
+                            "columns": [],
+                            "params": [
+                              {
+                                "operator": "equal",
+                                "type": "expression",
+                                "name": ":P1",
+                                "value": "{{jwt.userId}}",
+                                "test": "87"
+                              }
+                            ],
+                            "table": {
+                              "name": "client"
+                            },
+                            "primary": "id",
+                            "joins": [
+                              {
+                                "table": "user",
+                                "column": "*",
+                                "alias": "u",
+                                "type": "INNER",
+                                "clauses": {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "table": "u",
+                                      "column": "id",
+                                      "operator": "equal",
+                                      "operation": "=",
+                                      "value": {
+                                        "table": "client",
+                                        "column": "userId"
+                                      }
+                                    }
+                                  ]
+                                },
+                                "primary": "id"
+                              }
+                            ],
+                            "wheres": {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "client.userId",
+                                  "field": "client.userId",
+                                  "type": "double",
+                                  "operator": "equal",
+                                  "value": "{{jwt.userId}}",
+                                  "data": {
+                                    "table": "client",
+                                    "column": "userId",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "reference",
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "references": "id",
+                                      "inTable": "user",
+                                      "referenceType": "integer",
+                                      "onUpdate": "CASCADE",
+                                      "onDelete": "CASCADE",
+                                      "name": "userId"
+                                    }
+                                  },
+                                  "operation": "="
+                                },
+                                {
+                                  "id": "client.treatments",
+                                  "field": "client.treatments",
+                                  "type": "double",
+                                  "operator": "greater",
+                                  "value": 0,
+                                  "data": {
+                                    "table": "client",
+                                    "column": "treatments",
+                                    "type": "number",
+                                    "columnObj": {
+                                      "type": "integer",
+                                      "default": 0,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "treatments"
+                                    }
+                                  },
+                                  "operation": ">"
+                                }
+                              ],
+                              "conditional": null,
+                              "valid": true
+                            },
+                            "query": "select * from \"client\" inner join \"user\" as \"u\" on \"u\".\"id\" = \"client\".\"userId\" where \"client\".\"userId\" = ? and \"client\".\"treatments\" > ?"
+                          }
+                        },
+                        "meta": [
+                          {
+                            "type": "number",
+                            "name": "id"
+                          },
+                          {
+                            "type": "text",
+                            "name": "height"
+                          },
+                          {
+                            "type": "text",
+                            "name": "weight"
+                          },
+                          {
+                            "type": "text",
+                            "name": "sickDays"
+                          },
+                          {
+                            "type": "number",
+                            "name": "eyeColor"
+                          },
+                          {
+                            "type": "number",
+                            "name": "hairColor"
+                          },
+                          {
+                            "type": "number",
+                            "name": "skinColor"
+                          },
+                          {
+                            "type": "number",
+                            "name": "userId"
+                          },
+                          {
+                            "type": "text",
+                            "name": "birth"
+                          },
+                          {
+                            "type": "number",
+                            "name": "freckles"
+                          },
+                          {
+                            "type": "number",
+                            "name": "sunTooLong"
+                          },
+                          {
+                            "type": "number",
+                            "name": "degreeTurnBrown"
+                          },
+                          {
+                            "type": "number",
+                            "name": "brownSeveralHours"
+                          },
+                          {
+                            "type": "number",
+                            "name": "facialReactionSun"
+                          },
+                          {
+                            "type": "number",
+                            "name": "tanning"
+                          },
+                          {
+                            "type": "number",
+                            "name": "exposedArea"
+                          },
+                          {
+                            "type": "text",
+                            "name": "gender"
+                          },
+                          {
+                            "type": "datetime",
+                            "name": "consentTreatment"
+                          },
+                          {
+                            "type": "number",
+                            "name": "treatments"
+                          },
+                          {
+                            "type": "text",
+                            "name": "customerId"
+                          },
+                          {
+                            "type": "number",
+                            "name": "scoreGeneticDisposition"
+                          },
+                          {
+                            "type": "number",
+                            "name": "scoreReactionSun"
+                          },
+                          {
+                            "type": "number",
+                            "name": "scoreTanningHabits"
+                          },
+                          {
+                            "type": "number",
+                            "name": "skintype"
+                          },
+                          {
+                            "type": "boolean",
+                            "name": "hasFreeTrial"
+                          }
+                        ],
+                        "type": "dbconnector_single",
+                        "outputType": "object"
+                      },
+                      {
+                        "name": "",
+                        "module": "core",
+                        "action": "condition",
+                        "options": {
+                          "if": "{{hasTreatments.id}}",
+                          "then": {
+                            "steps": {
+                              "name": "hasTreatments",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": true
+                              },
+                              "meta": [],
+                              "output": true,
+                              "outputType": "text"
+                            }
+                          },
+                          "else": {
+                            "steps": {
+                              "name": "hasTreatments",
+                              "module": "core",
+                              "action": "setvalue",
+                              "options": {
+                                "value": false
+                              },
+                              "meta": [],
+                              "output": true,
+                              "outputType": "text"
+                            }
+                          }
+                        },
+                        "outputType": "boolean"
+                      }
+                    ]
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "response",
+              "options": {
+                "status": 400,
+                "data": "{{messagesHandler.ERROR_CLIENT}}"
+              }
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

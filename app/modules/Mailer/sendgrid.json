@@ -1,0 +1,11 @@
+{
+  "name": "sendgrid",
+  "module": "mail",
+  "action": "setup",
+  "options": {
+    "host": "smtp.sendgrid.net",
+    "port": 587,
+    "username": "apikey",
+    "password": "{{$_ENV.SENDGRID_KEY}}"
+  }
+}

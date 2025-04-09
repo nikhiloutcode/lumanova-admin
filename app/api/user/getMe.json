@@ -1,0 +1,1307 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "user",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "SELECT",
+            "distinct": false,
+            "columns": [
+              {
+                "table": "user",
+                "column": "*"
+              },
+              {
+                "table": "r",
+                "column": "*"
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "joins": [
+              {
+                "table": "detailsUser",
+                "column": "*",
+                "alias": "du",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "du",
+                      "column": "userId",
+                      "field": "du.userId",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "user",
+                        "column": "id",
+                        "field": "user.id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "roles",
+                "column": "*",
+                "alias": "r",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "r",
+                      "column": "id",
+                      "field": "r.id",
+                      "operation": "=",
+                      "operator": "equal",
+                      "value": {
+                        "table": "du",
+                        "column": "rolesId",
+                        "field": "du.rolesId"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "table": "user",
+                  "column": "id",
+                  "field": "user.id",
+                  "operation": "=",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}"
+                }
+              ]
+            },
+            "orders": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "91"
+              }
+            ],
+            "primary": "id",
+            "query": "select \"user\".*, \"r\".* from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"user\".\"id\" = ?"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "firstName"
+          },
+          {
+            "type": "text",
+            "name": "lastName"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "verificationCode"
+          },
+          {
+            "type": "datetime",
+            "name": "verificationCodeExpire"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "number",
+            "name": "userIdInvited"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "boolean",
+            "name": "isTester"
+          },
+          {
+            "type": "boolean",
+            "name": "isGodMode"
+          },
+          {
+            "type": "boolean",
+            "name": "isDebug"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "boolean",
+            "name": "sendEmail"
+          },
+          {
+            "type": "boolean",
+            "name": "sendSMS"
+          },
+          {
+            "type": "boolean",
+            "name": "users"
+          },
+          {
+            "type": "boolean",
+            "name": "packages"
+          },
+          {
+            "type": "boolean",
+            "name": "devices"
+          },
+          {
+            "type": "boolean",
+            "name": "clients"
+          },
+          {
+            "type": "boolean",
+            "name": "adminView"
+          },
+          {
+            "type": "text",
+            "name": "description"
+          },
+          {
+            "type": "boolean",
+            "name": "facilities"
+          },
+          {
+            "type": "boolean",
+            "name": "profile"
+          },
+          {
+            "type": "boolean",
+            "name": "mobileView"
+          },
+          {
+            "type": "boolean",
+            "name": "facilityView"
+          }
+        ],
+        "outputType": "object",
+        "type": "dbconnector_single"
+      },
+      {
+        "name": "initials",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{user.firstName.substr(0, 1)+user.lastName.substr(0, 1)}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": true
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{user.facilityView}}",
+          "then": {
+            "steps": [
+              {
+                "name": "facility",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [
+                      {
+                        "table": "f",
+                        "column": "logo"
+                      },
+                      {
+                        "table": "f",
+                        "column": "name"
+                      },
+                      {
+                        "table": "f",
+                        "column": "id"
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "113"
+                      }
+                    ],
+                    "table": {
+                      "name": "user"
+                    },
+                    "primary": "id",
+                    "joins": [
+                      {
+                        "table": "detailsUsersFacility",
+                        "column": "*",
+                        "alias": "duf",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "duf",
+                              "column": "userId",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "user",
+                                "column": "id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "*",
+                        "alias": "f",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "f",
+                              "column": "id",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "duf",
+                                "column": "facilityId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "query": "select \"f\".\"logo\", \"f\".\"name\", \"f\".\"id\" from \"user\" left join \"detailsUsersFacility\" as \"duf\" on \"duf\".\"userId\" = \"user\".\"id\" left join \"facility\" as \"f\" on \"f\".\"id\" = \"duf\".\"facilityId\" where \"user\".\"id\" = ?",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "user.id",
+                          "field": "user.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{jwt.userId}}",
+                          "data": {
+                            "table": "user",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "=",
+                          "table": "user"
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    }
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "logo"
+                  },
+                  {
+                    "type": "text",
+                    "name": "name"
+                  },
+                  {
+                    "type": "number",
+                    "name": "id"
+                  }
+                ],
+                "outputType": "object",
+                "type": "dbconnector_single"
+              },
+              {
+                "name": "devices",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{facility.id}}",
+                        "test": ""
+                      }
+                    ],
+                    "table": {
+                      "name": "device"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "query": "select * from \"device\" where \"device\".\"facilityId\" = ?",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "device.facilityId",
+                          "field": "device.facilityId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{facility.id}}",
+                          "data": {
+                            "table": "device",
+                            "column": "facilityId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "facility",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "facilityId"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    }
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "serial"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facilityId"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "contactName"
+                  },
+                  {
+                    "type": "text",
+                    "name": "contactPhone"
+                  },
+                  {
+                    "type": "text",
+                    "name": "contactEmail"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{devices[0].id}}",
+                  "then": {
+                    "steps": {
+                      "name": "hasDevice",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "hasDevice",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": false
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "packages",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{facility.id}}",
+                        "test": "21"
+                      }
+                    ],
+                    "table": {
+                      "name": "detailsFacility",
+                      "alias": "df"
+                    },
+                    "primary": "id",
+                    "joins": [
+                      {
+                        "table": "subscriptions",
+                        "column": "*",
+                        "alias": "s",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "s",
+                              "column": "id",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "df",
+                                "column": "subscriptionId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "query": "select * from \"detailsFacility\" as \"df\" left join \"subscriptions\" as \"s\" on \"s\".\"id\" = \"df\".\"subscriptionId\" where \"df\".\"facilityId\" = ?",
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "df.facilityId",
+                          "field": "df.facilityId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{facility.id}}",
+                          "data": {
+                            "table": "df",
+                            "column": "facilityId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "facility",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "facilityId"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    }
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facilityId"
+                  },
+                  {
+                    "type": "number",
+                    "name": "subscriptionId"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{packages[0].id}}",
+                  "then": {
+                    "steps": {
+                      "name": "hasPackage",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "hasPackage",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": false
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{user.mobileView}}",
+          "then": {
+            "steps": [
+              {
+                "name": "clientInfo",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "91"
+                      }
+                    ],
+                    "table": {
+                      "name": "user"
+                    },
+                    "primary": "id",
+                    "joins": [
+                      {
+                        "table": "client",
+                        "column": "*",
+                        "alias": "c",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "c",
+                              "column": "userId",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "user",
+                                "column": "id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "user.id",
+                          "field": "user.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{jwt.userId}}",
+                          "data": {
+                            "table": "user",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "=",
+                          "table": "user"
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select * from \"user\" left join \"client\" as \"c\" on \"c\".\"userId\" = \"user\".\"id\" where \"user\".\"id\" = ?"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "firstName"
+                  },
+                  {
+                    "type": "text",
+                    "name": "lastName"
+                  },
+                  {
+                    "type": "text",
+                    "name": "email"
+                  },
+                  {
+                    "type": "text",
+                    "name": "verificationCode"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "verificationCodeExpire"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "disabled"
+                  },
+                  {
+                    "type": "text",
+                    "name": "phone"
+                  },
+                  {
+                    "type": "number",
+                    "name": "userIdInvited"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "isTester"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "isGodMode"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "isDebug"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{clientInfo.hasFreeTrial}}",
+                  "then": {
+                    "steps": {
+                      "name": "hasFreeTrial",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "hasFreeTrial",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": false
+                      },
+                      "meta": [],
+                      "output": true,
+                      "outputType": "text"
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "currentSubscription",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "SELECT",
+                    "distinct": false,
+                    "columns": [],
+                    "table": {
+                      "name": "client",
+                      "alias": "c"
+                    },
+                    "joins": [
+                      {
+                        "table": "detailsClient",
+                        "column": "*",
+                        "alias": "dc",
+                        "type": "INNER",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "dc",
+                              "column": "clientId",
+                              "field": "dc.clientId",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "c",
+                                "column": "id",
+                                "field": "c.id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "subscriptions",
+                        "column": "*",
+                        "alias": "s",
+                        "type": "INNER",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "s",
+                              "column": "id",
+                              "field": "s.id",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "dc",
+                                "column": "subscriptionId",
+                                "field": "dc.subscriptionId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "table": "c",
+                          "column": "userId",
+                          "field": "c.userId",
+                          "operation": "=",
+                          "operator": "equal",
+                          "value": "{{jwt.userId}}"
+                        }
+                      ]
+                    },
+                    "orders": [
+                      {
+                        "table": "dc",
+                        "column": "createdAt",
+                        "field": "dc.createdAt",
+                        "direction": "DESC",
+                        "recid": 1
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "91"
+                      }
+                    ],
+                    "primary": "id",
+                    "query": "select * from \"client\" as \"c\" inner join \"detailsClient\" as \"dc\" on \"dc\".\"clientId\" = \"c\".\"id\" inner join \"subscriptions\" as \"s\" on \"s\".\"id\" = \"dc\".\"subscriptionId\" where \"c\".\"userId\" = ? order by \"dc\".\"createdAt\" DESC"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "height"
+                  },
+                  {
+                    "type": "text",
+                    "name": "weight"
+                  },
+                  {
+                    "type": "text",
+                    "name": "sickDays"
+                  },
+                  {
+                    "type": "number",
+                    "name": "eyeColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "hairColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skinColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "userId"
+                  },
+                  {
+                    "type": "text",
+                    "name": "birth"
+                  },
+                  {
+                    "type": "number",
+                    "name": "freckles"
+                  },
+                  {
+                    "type": "number",
+                    "name": "sunTooLong"
+                  },
+                  {
+                    "type": "number",
+                    "name": "degreeTurnBrown"
+                  },
+                  {
+                    "type": "number",
+                    "name": "brownSeveralHours"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facialReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "tanning"
+                  },
+                  {
+                    "type": "number",
+                    "name": "exposedArea"
+                  },
+                  {
+                    "type": "text",
+                    "name": "gender"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "consentTreatment"
+                  },
+                  {
+                    "type": "number",
+                    "name": "treatments"
+                  },
+                  {
+                    "type": "text",
+                    "name": "customerId"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreGeneticDisposition"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreTanningHabits"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skintype"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "hasFreeTrial"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "currentPlan",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "SELECT",
+                    "distinct": false,
+                    "columns": [],
+                    "table": {
+                      "name": "client",
+                      "alias": "c"
+                    },
+                    "joins": [
+                      {
+                        "table": "detailsPayment",
+                        "column": "*",
+                        "alias": "dp",
+                        "type": "INNER",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "dp",
+                              "column": "clientId",
+                              "field": "dp.clientId",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "c",
+                                "column": "id",
+                                "field": "c.id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "table": "c",
+                          "column": "userId",
+                          "field": "c.userId",
+                          "operation": "=",
+                          "operator": "equal",
+                          "value": "{{jwt.userId}}"
+                        }
+                      ]
+                    },
+                    "orders": [
+                      {
+                        "table": "dp",
+                        "column": "createdAt",
+                        "field": "dp.createdAt",
+                        "direction": "DESC",
+                        "recid": 1
+                      }
+                    ],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "101"
+                      }
+                    ],
+                    "primary": "id",
+                    "query": "select * from \"client\" as \"c\" inner join \"detailsPayment\" as \"dp\" on \"dp\".\"clientId\" = \"c\".\"id\" where \"c\".\"userId\" = ? order by \"dp\".\"createdAt\" DESC"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "height"
+                  },
+                  {
+                    "type": "text",
+                    "name": "weight"
+                  },
+                  {
+                    "type": "text",
+                    "name": "sickDays"
+                  },
+                  {
+                    "type": "number",
+                    "name": "eyeColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "hairColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skinColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "userId"
+                  },
+                  {
+                    "type": "text",
+                    "name": "birth"
+                  },
+                  {
+                    "type": "number",
+                    "name": "freckles"
+                  },
+                  {
+                    "type": "number",
+                    "name": "sunTooLong"
+                  },
+                  {
+                    "type": "number",
+                    "name": "degreeTurnBrown"
+                  },
+                  {
+                    "type": "number",
+                    "name": "brownSeveralHours"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facialReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "tanning"
+                  },
+                  {
+                    "type": "number",
+                    "name": "exposedArea"
+                  },
+                  {
+                    "type": "text",
+                    "name": "gender"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "consentTreatment"
+                  },
+                  {
+                    "type": "number",
+                    "name": "treatments"
+                  },
+                  {
+                    "type": "text",
+                    "name": "customerId"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreGeneticDisposition"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreTanningHabits"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skintype"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "hasFreeTrial"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object"
+              },
+              {
+                "name": "treatments",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT *\nFROM client AS c\nINNER JOIN treatments AS t ON t.\"clientId\" = c.id\nWHERE c.\"userId\" = :P1 AND t.complete = TRUE\nORDER BY t.id ASC",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "314"
+                      }
+                    ]
+                  }
+                },
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  }
+                ],
+                "output": false,
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "firstTreatment",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{treatments[0].lastTreatment.formatDate('dd/MM/yyyy', true)}}"
+                },
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  }
+                ],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "totalTreatments",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{treatments.length}}"
+                },
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  }
+                ],
+                "output": true,
+                "outputType": "text"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "deleteProduct",
+      "module": "api",
+      "action": "send",
+      "options": {
+        "headers": {
+          "Authorization": "{{'Bearer '+$_ENV.STRIPE_SECRET_KEY}}"
+        },
+        "method": "POST",
+        "url": "{{'https://api.stripe.com/v1/products/'+$_PARAM.id}}",
+        "data": {
+          "active": false
+        }
+      },
+      "output": false
+    }
+  }
+}

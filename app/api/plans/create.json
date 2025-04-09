@@ -1,0 +1,226 @@
+{
+  "meta": {
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {},
+            "core:minlength": {
+              "param": 3
+            }
+          }
+        },
+        "name": "name"
+      },
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "amount"
+      },
+      {
+        "type": "number",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "limitSessions"
+      },
+      {
+        "type": "text",
+        "name": "description"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      "lib/utils/messagesHandler",
+      {
+        "name": "messagesHandler",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{messagesHandler}}"
+        },
+        "meta": [],
+        "outputType": "object"
+      },
+      {
+        "name": "createStripeProduct",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "stripe/products/create",
+          "params": {
+            "amount": "{{$_POST.amount}}",
+            "title": "{{$_POST.name}}",
+            "description": "{{$_POST.description}}",
+            "limitSessions": "{{$_POST.limitSessions}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "id",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{createStripeProduct.createProduct.id}}"
+        },
+        "meta": [],
+        "outputType": "text",
+        "output": false
+      },
+      {
+        "name": "insertSubscription",
+        "module": "dbupdater",
+        "action": "insert",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "insert",
+            "values": [
+              {
+                "table": "plans",
+                "column": "name",
+                "type": "text",
+                "value": "{{$_POST.name}}"
+              },
+              {
+                "table": "plans",
+                "column": "amount",
+                "type": "text",
+                "value": "{{$_POST.amount}}"
+              },
+              {
+                "table": "plans",
+                "column": "createdAt",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              },
+              {
+                "table": "plans",
+                "column": "updatedAt",
+                "type": "datetime",
+                "value": "{{NOW}}"
+              },
+              {
+                "table": "plans",
+                "column": "limitSessions",
+                "type": "text",
+                "value": "{{$_POST.limitSessions}}"
+              },
+              {
+                "table": "plans",
+                "column": "productId",
+                "type": "text",
+                "value": "{{id}}"
+              },
+              {
+                "table": "plans",
+                "column": "active",
+                "type": "boolean",
+                "value": "true"
+              },
+              {
+                "table": "plans",
+                "column": "description",
+                "type": "text",
+                "value": "{{$_POST.description}}"
+              }
+            ],
+            "table": "plans",
+            "returning": "id",
+            "query": "insert into \"plans\" (\"active\", \"amount\", \"createdAt\", \"description\", \"limitSessions\", \"name\", \"productId\", \"updatedAt\") values (?, ?, ?, ?, ?, ?, ?, ?) returning \"id\"",
+            "params": [
+              {
+                "name": ":P1",
+                "type": "expression",
+                "value": "{{$_POST.name}}",
+                "test": ""
+              },
+              {
+                "name": ":P2",
+                "type": "expression",
+                "value": "{{$_POST.amount}}",
+                "test": ""
+              },
+              {
+                "name": ":P3",
+                "type": "expression",
+                "value": "{{NOW}}",
+                "test": ""
+              },
+              {
+                "name": ":P4",
+                "type": "expression",
+                "value": "{{NOW}}",
+                "test": ""
+              },
+              {
+                "name": ":P5",
+                "type": "expression",
+                "value": "{{$_POST.limitSessions}}",
+                "test": ""
+              },
+              {
+                "name": ":P6",
+                "type": "expression",
+                "value": "{{id}}",
+                "test": ""
+              },
+              {
+                "name": ":P7",
+                "type": "expression",
+                "value": "{{$_POST.description}}",
+                "test": ""
+              }
+            ]
+          }
+        },
+        "meta": [
+          {
+            "name": "identity",
+            "type": "text"
+          },
+          {
+            "name": "affected",
+            "type": "number"
+          }
+        ],
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "response",
+        "options": {
+          "status": 200,
+          "data": "{{messagesHandler.SUBSCRIPTION_CREATE}}"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script>
+      window.onload = function () {
+        window.location.href = 'enyrgy://{deeplink}'; // Your app's URL to open the app and then pageID to open specific page.
+        var userAgent = navigator.userAgent.toLowerCase();
+        if (userAgent.indexOf('android') > -1) {
+          setTimeout(function () {
+            window.location.href = 'https://play.google.com/store/apps/details?id=com.enyrgy.app'; //'YOUR_APP_STORE_LINK';
+          }, 5000);
+        } else {
+          setTimeout(function () {
+            window.location.href = 'https://apps.apple.com/us/app/enyrgy/id6450723326'; //'YOUR_APP_STORE_LINK';
+          }, 5000);
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+    <!-- <img
+      src="../assets/yourAppIcon.png"
+      style="width: 35%; border-radius: 15%; margin-left: 34%; margin-top: 48%"
+      alt=""
+    />
+    <br />
+    <a
+      href="https://itunes.apple.com/us/app/booster-dev/1610419232"
+      style="
+        display: inline-block;
+        overflow: hidden;
+        width: 65%;
+        background-image: url('../assets/icon.svg');
+        background-repeat: no-repeat;
+        height: 111px;
+        background-size: contain;
+        margin-left: 32%;
+        margin-top: 26%;
+      "
+      >Go to the store</a
+    > -->
+  </body>
+</html>

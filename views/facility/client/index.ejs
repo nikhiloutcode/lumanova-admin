@@ -1,0 +1,336 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxBootstrap5Navigation:{},dmxDataTraversal:{},dmxStateManagement:{},dmxBootstrap5Modal:{},dmxBootbox5:{},dmxDatePicker:{}}" jquery_slim_35="cdn" moment_2="cdn" -->
+<meta name="ac:route" content="/facility/:id/client/:clientId/">
+
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/client/getClient" dmx-param:id="query.clientId" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:error="notifies.danger('Error getting information')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<dmx-api-datasource id="getPackages" is="dmx-fetch" url="/api/subscriptions/getInformation" dmx-header:authorization="'Bearer '+session.data.jwt"></dmx-api-datasource>
+
+<header>
+
+    <div class="row ps-1">
+        <div class="row bg-header pt-4">
+            <div class="col-3 ps-4">
+                <h1 class="title-section">
+                    <p>Client</p>
+                </h1>
+            </div>
+        </div>
+        <div class="col-12 bg-facility-title">
+
+            <div class="nav w-100" dmx-show="getMe.data.user.adminView">
+                <a class="nav-item nav-link go-back" dmx-on:click.prevent="browser.goto('/facility/'+query.id+'/')" dmx-on:href="/facility/{{query.id}}/"><img src="/assets/images/back.png"> Go back</a>
+            </div>
+            <div class="nav w-100" dmx-show="getMe.data.user.facilityView">
+                <a class="nav-item nav-link go-back" dmx-on:click.prevent="browser.goto('/facility/'+query.id+'/clients/')" dmx-on:href="/facility/{{query.id}}/clients/"><img src="/assets/images/back.png"> Go back</a>
+            </div>
+        </div>
+    </div>
+</header>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <h1 class="facility-name">
+                <p>{{getInformation.data.client.firstName}} {{getInformation.data.client.lastName}}</p>
+            </h1>
+        </div>
+        <div class="col-4">
+            <div class="card-columns h-100">
+                <div class="card card-header h-100">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-11">
+                                <small class="text-muted label-card">Email</small>
+                            </div>
+
+                            <div class="col-1">
+                                <button dmx-show="getMe.data.user.packages" id="actions" class="btn details-data" type="button" data-bs-toggle="modal" aria-haspopup="true" aria-expanded="false" data-bs-target="#userUpdateModal"></button>
+                            </div>
+                        </div>
+                        <h5 class="card-title name-card">{{getInformation.data.client.email}}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card-columns h-100">
+                <div class="card card-header h-100">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-11">
+                                <small class="text-muted label-card">Phone</small>
+                            </div>
+                            <div class="col-1">
+                                <button dmx-show="getMe.data.user.packages" id="actions" class="btn details-data" type="button" data-bs-toggle="modal" aria-haspopup="true" aria-expanded="false" data-bs-target="#userUpdateModal"></button>
+                            </div>
+                        </div>
+                        <h5 class="card-title name-card" dmx-show="getInformation.data.client.phone">{{getInformation.data.client.countryCode}} {{'('+getInformation.data.client.phone.substr(0,3)+') '+getInformation.data.client.phone.substr(3, 3)+'-'+getInformation.data.client.phone.substr(6, 4)}}</h5>
+                        <h5 class="card-title name-card" dmx-hide="getInformation.data.client.phone">-</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row justify-content-end">
+
+
+        <div class="col-4">
+            <div class="card-columns h-100">
+                <div class="card card-header h-100">
+                    <div class="card-body">
+                        <div class="row" style="display: flex;align-items: center;">
+
+                            <div class="col-8">
+                                <small class="text-muted label-card">Active package</small>
+                                <h5 class="card-title name-card">{{getInformation.data.client.name}}</h5>
+                                <h5 class="card-title client-non-package" dmx-hide="getInformation.data.client.name">No active package</h5>
+                            </div>
+                            <div class="col-4"><button id="selectPackage" class="btn bg-button" data-bs-toggle="modal" data-bs-target="#packageModal" dmx-hide="getInformation.data.client.name">Select</button></div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <header>
+            <ul class="nav nav-tabs" id="navbarClientHeader" role="tablist">
+                <li class="nav-item nav-header">
+                    <a class="nav-link active" id="navbarPurchaseHistory" data-bs-toggle="tab" href="#" data-bs-target="#purchaseHistoryContent" role="tab" aria-controls="purchaseHistoryContent" aria-selected="true">Purchase History</a>
+                </li>
+            </ul>
+            <div class="tab-content" id="navbarClientBody">
+                <div class="tab-pane fade show active" id="purchaseHistoryContent" role="tabpanel">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col">
+
+                                <br>
+                                <div class="row">
+                                    <div class="col-10">
+                                        <p style="" class="results-data">Showing <b class="results-data-bold">{{getInformation.data.historyClient.length}}</b> results</p>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="row">
+                                    <div class="col">
+                                        <table class="table rowAlternate">
+                                            <thead>
+                                                <tr>
+
+                                                    <th scope="col" class="table-header">Package</th>
+                                                    <th scope="col" class="table-header">Energy plan</th>
+                                                    <th scope="col" class="table-header">Purchase date</th>
+                                                    <th scope="col" class="table-header">Expiration date</th>
+                                                    <th scope="row"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody is="dmx-repeat" id="historyPackageData" dmx-bind:repeat="getInformation.data.historyClient" key="id">
+                                                <tr>
+
+                                                    <td class="table-content">{{name}}</td>
+                                                    <td class="table-content">{{plan}}</td>
+                                                    <td class="table-content">{{purchase}}</td>
+                                                    <td class="table-content">{{expiration}}</td>
+                                                    <td style="">
+                                                        <div class="dropdown" dmx-show="getMe.data.user.clients">
+                                                            <button id="actions" class="btn details-data" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                                            <div class="dropdown-menu" aria-labelledby="dropdown1">
+
+                                                                <a class="dropdown-item" href="#" dmx-on:click="SubscriptionModal.show();SubscriptionModal.data_package.select(id)" id="editAction">Edit</a>
+                                                                <a class="dropdown-item" href="#" dmx-on:click="run({'bootbox.confirm':{message:'Are you sure that you would like to delete and end this package for this user?',title:'Confirm',buttons:{confirm:{label:'Yes, confirm',className:'btn-primary'},cancel:{label:'Cancel'}},then:{steps:{run:{action:`deleteSubscription.submit();getInformation.load({})`,name:'submit',outputType:'text'}}},name:'Confirmation'}})" id="deleteAction">Delete</a><a class="dropdown-item" href="#" id="cancelAction" dmx-on:click="cancelSubscription.submit()">Cancel</a>
+                                                            </div>
+                                                        </div>
+                                                        <form id="deleteSubscription" method="post" is="dmx-api-form" action="/api/subscriptions/deleteByClient" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="getInformation.load({});notifies.success('Package deleted')" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error deleting package')">
+
+                                                            <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.historyClient[$index].subscriptionId" type="hidden"><button id="delete" class="btn visually-hidden" type="submit"></button>
+                                                        </form>
+                                                        <form id="cancelSubscription" method="post" is="dmx-api-form" action="/api/subscriptions/cancelByClient" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error deleting package')" dmx-on:success="getInformation.load({});notifies.success('Package cancelled')">
+
+                                                            <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.historyClient[$index].subscriptionId" type="hidden"><button id="cancel" class="btn visually-hidden" type="submit"></button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <div class="modal" id="packageModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Select a package</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" id="close" dmx-on:click="packageForm.reset();packageModal.hide()"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                    <br>
+                    <br>
+                    <small class="text-muted label-modal">Package information</small>
+                    <div class="container">
+                        <form id="packageForm" method="post" is="dmx-api-form" action="/api/client/addPackage" novalidate="" dmx-on:success="facilityUpdateModal.hide();getInformation.load({});notifies.success('Package added')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error adding package')">
+                            <input class="form-control" id="subscriptionId" name="subscriptionId" aria-describedby="input1_help" type="hidden">
+                            <input class="form-control" id="userId" name="userId" aria-describedby="input1_help" type="hidden">
+                            <input class="form-control" id="facilityId" name="facilityId" aria-describedby="input1_help" type="hidden">
+                            <div class="row" is="dmx-repeat" id="packageData" dmx-bind:repeat="getPackages.data.packages">
+                                <div class="col-6 pt-2" dmx-on:click.prevent="userId.setValue(query.clientId);facilityId.setValue(query.id);subscriptionId.setValue($value.id)" onclick="setBGPlans(this)">
+                                    <div class="card card-plans h-100">
+                                        <div class="card-body h-100">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h2 class="card-title card-plans-title">{{name}}</h2>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex">
+                                                <h2 class="card-title card-package-secondary_text">{{description}}</h2>
+                                            </div>
+                                            <div class="d-flex align-items-baseline mt-2">
+                                                <h3 class="card-text card-package-secondary_text">Enyrgy plan related:</h3>
+                                                <p class="card-text card-package-plan">&nbsp; {{plan}}</p>
+                                            </div>
+                                            <div class="d-flex card-plans-bg_amount mt-2">
+                                                <div>
+                                                    <p class="card-text card-plans-title_amount">Duration</p>
+                                                    <p class="card-text card-plans-duration">{{numberDuration}} {{duration}}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="card-text card-plans-title_amount">Price</p>
+                                                    <p class="card-text card-plans-amount">$ {{amount}}</p>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer bg-footer-modal">
+                    <button class="btn btn-primary bg-button" is="dmx-button" value="" data-bs-target="#userModal" dmx-on:click.prevent="run({condition:{if:`!packageForm.subscriptionId.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`packageForm.submit()`,outputType:'text'}},{run:{action:`packageForm.reset()`,outputType:'text'}},{run:{action:`packageModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})" id="save">Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="SubscriptionModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Update a subscription</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" id="close" dmx-on:click="packageForm.reset();packageModal.hide()"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields: </small>
+                    <br>
+                    <br>
+                    <div class="container" is="dmx-data-detail" id="data_package" dmx-bind:data="getInformation.data.historyClient" key="id">
+                        <form id="subscriptionForm" method="post" is="dmx-api-form" action="/api/client/updatePackage" novalidate="" dmx-on:success="SubscriptionModal.hide();getInformation.load({});notifies.success('Subscription updated')" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error updating package')">
+                            <div class="form-group md-3">
+                                <div class="row">
+
+                                    <input id="id" name="id" class="form-control" dmx-bind:value="data_package.data.subscriptionId" type="hidden">
+                                    <div class="col-sm-6">
+                                        <small class="text-muted">Purchase date</small>
+                                        <input id="purchase" name="purchase" is="dmx-date-picker" dmx-bind:value="data_package.data.purchase" format="MM/DD/YYYY">
+
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <small class="text-muted">Expiration date</small>
+                                        <input id="expiration" name="expiration" is="dmx-date-picker" dmx-bind:value="data_package.data.expiration" format="MM/DD/YYYY">
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <br>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer bg-footer-modal">
+                    <button class="btn btn-primary bg-button" is="dmx-button" value="" data-bs-target="#userModal" dmx-on:click.prevent="run({condition:{if:`!data_package.subscriptionForm.purchase.value||!data_package.subscriptionForm.expiration.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_package.subscriptionForm.submit()`,outputType:'text'}},{run:{action:`data_package.subscriptionForm.reset()`,outputType:'text'}},{run:{action:`SubscriptionModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})" id="save">Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="userUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Update a client</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container" is="dmx-data-detail" id="data_user">
+                        <form id="userForm" method="post" is="dmx-api-form" action="/api/user/updateClient" novalidate="" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Client already exists\')`,outputType:'text'}}},else:{steps:[{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Client updated\')`,outputType:'text'}}]},outputType:'boolean'}})" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error updating client')">
+                            <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                            <br>
+                            <br>
+
+                            <div class="form-group md-3" id="idForm">
+                                <input type="hidden" class="form-control" id="id" name="id" aria-describedby="input1_help" placeholder="" dmx-bind:value="getInformation.data.client.userId">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group md-3" id="firstNameForm">
+                                        <input type="text" class="form-control input-text" id="firstName" name="firstName" aria-describedby="emailLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" required="" dmx-bind:value="getInformation.data.client.firstName">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group md-3" id="lastNameForm">
+                                        <input type="text" class="form-control input-text" id="lastName" name="lastName" aria-describedby="emailLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" required="" dmx-bind:value="getInformation.data.client.lastName">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="form-group md-3" id="emailForm">
+                                        <input type="email" class="form-control input-text" id="email" name="email" aria-describedby="emailLabel" placeholder="Email" is="dmx-input" value="" required="" dmx-bind:value="getInformation.data.client.email">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group md-3" id="phoneForm">
+                                        <input type="tel" class="form-control input-text" id="phone" name="phone" aria-describedby="emailLabel" placeholder="Phone" is="dmx-input" value="" required="" dmx-bind:value="getInformation.data.client.phone" onkeyup="validatePhone(this)">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-footer-modal">
+                    <button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run({condition:{if:`!data_user.userForm.email.value||!data_user.userForm.phone.value||!data_user.userForm.firstName.value||!data_user.userForm.lastName.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_user.userForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`data_user.userForm.invite.setValue(false)`,outputType:'text'}},{run:{action:`data_user.userForm.submit()`,outputType:'text'}},{run:{action:`data_user.userForm.reset()`,outputType:'text'}},{run:{action:`userUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function setBGPlans(e){
+        let parent = e.parentNode.children
+        
+        for(let cont=0;cont<parent.length;cont++) 
+            parent[cont].children[0].classList.remove("card-package-button_active") 
+        
+        e.children[0].classList.add("card-package-button_active");
+    }
+</script>

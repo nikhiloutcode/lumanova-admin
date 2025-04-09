@@ -1,0 +1,263 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "facilityId"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "userId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{jwt.userId}}"
+        },
+        "meta": [],
+        "outputType": "text"
+      },
+      {
+        "name": "facilityId",
+        "module": "core",
+        "action": "setvalue",
+        "options": {
+          "value": "{{$_POST.facilityId}}"
+        },
+        "meta": [],
+        "outputType": "number"
+      },
+      {
+        "name": "existsUserInFacility",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{userId}}",
+                "test": ""
+              },
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P2",
+                "value": "{{facilityId}}",
+                "test": ""
+              }
+            ],
+            "table": {
+              "name": "detailsUsersFacility"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "detailsUsersFacility.userId",
+                  "field": "detailsUsersFacility.userId",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{userId}}",
+                  "data": {
+                    "table": "detailsUsersFacility",
+                    "column": "userId",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "reference",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "references": "id",
+                      "inTable": "user",
+                      "referenceType": "integer",
+                      "onUpdate": "CASCADE",
+                      "onDelete": "CASCADE",
+                      "name": "userId"
+                    }
+                  },
+                  "operation": "="
+                },
+                {
+                  "id": "detailsUsersFacility.facilityId",
+                  "field": "detailsUsersFacility.facilityId",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{facilityId}}",
+                  "data": {
+                    "table": "detailsUsersFacility",
+                    "column": "facilityId",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "reference",
+                      "primary": false,
+                      "unique": false,
+                      "nullable": true,
+                      "references": "id",
+                      "inTable": "facility",
+                      "referenceType": "integer",
+                      "onUpdate": "CASCADE",
+                      "onDelete": "CASCADE",
+                      "name": "facilityId"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"detailsUsersFacility\" where \"detailsUsersFacility\".\"userId\" = ? and \"detailsUsersFacility\".\"facilityId\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "number",
+            "name": "userId"
+          },
+          {
+            "type": "number",
+            "name": "facilityId"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{!existsUserInFacility.id}}",
+          "then": {
+            "steps": {
+              "name": "insertUserInFacility",
+              "module": "dbupdater",
+              "action": "insert",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "insert",
+                  "values": [
+                    {
+                      "table": "detailsUsersFacility",
+                      "column": "userId",
+                      "type": "number",
+                      "value": "{{userId}}"
+                    },
+                    {
+                      "table": "detailsUsersFacility",
+                      "column": "facilityId",
+                      "type": "number",
+                      "value": "{{facilityId}}"
+                    },
+                    {
+                      "table": "detailsUsersFacility",
+                      "column": "createdAt",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    },
+                    {
+                      "table": "detailsUsersFacility",
+                      "column": "updatedAt",
+                      "type": "datetime",
+                      "value": "{{NOW}}"
+                    }
+                  ],
+                  "table": "detailsUsersFacility",
+                  "returning": "id",
+                  "query": "insert into \"detailsUsersFacility\" (\"createdAt\", \"facilityId\", \"updatedAt\", \"userId\") values (?, ?, ?, ?)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "type": "expression",
+                      "value": "{{userId}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P2",
+                      "type": "expression",
+                      "value": "{{facilityId}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P3",
+                      "type": "expression",
+                      "value": "{{NOW}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P4",
+                      "type": "expression",
+                      "value": "{{NOW}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "meta": [
+                {
+                  "name": "identity",
+                  "type": "text"
+                },
+                {
+                  "name": "affected",
+                  "type": "number"
+                }
+              ]
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

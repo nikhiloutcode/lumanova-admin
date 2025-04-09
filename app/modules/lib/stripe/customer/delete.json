@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ]
+  },
+  "exec": {
+    "steps": {
+      "name": "deleteCustomer",
+      "module": "stripe",
+      "action": "deleteCustomer",
+      "options": {
+        "__extra": {
+          "api_key": "{{$_ENV.STRIPE_SECRET_KEY}}"
+        },
+        "customer": "{{$_PARAM.id}}"
+      },
+      "outputType": "object",
+      "meta": [
+        {
+          "name": "deleted",
+          "type": "boolean"
+        },
+        {
+          "name": "id",
+          "type": "text"
+        },
+        {
+          "name": "object",
+          "type": "text"
+        }
+      ]
+    }
+  }
+}

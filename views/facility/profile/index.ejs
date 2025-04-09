@@ -1,0 +1,157 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxStateManagement:{},dmxDataTraversal:{},dmxBootstrap5Modal:{}}" -->
+
+
+<meta name="ac:route" content="/facility/:id/profile/">
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="getFacility" is="dmx-fetch" url="/api/facility/getFacility" dmx-param:id="query.id" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error getting information')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="row bg-header pt-4">
+                <div class="col-10">
+                    <h1 class="title-section">
+                        <p>Profile</p>
+                    </h1>
+                </div>
+                <div class="col-2">
+                    <button id="editProfile" class="btn add-button" data-bs-target="#facilityUpdateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.profile" data-bs-toggle="modal">Edit</button>
+                </div>
+            </div>
+            <div class="row pb-3">
+                <div class="col-8">
+                    <div class="card-columns h-100">
+                        <div class="card card-header h-100">
+                            <div class="card-body">
+                                <small class="text-muted label-card-profile">Facility name</small>
+                                <h1 class="card-title name-card-profile">{{getFacility.data.facility.name}}</h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card-columns h-100">
+                        <div class="card card-header h-100">
+                            <div class="card-body">
+                                <small class="text-muted label-card-profile">Logo</small>
+                                <br>
+                                <img src="" width="100px" dmx-bind:src="getFacility.data.facility.logo">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4">
+                    <div class="card-columns h-100">
+                        <div class="card card-header h-100">
+                            <div class="card-body">
+                                <small class="text-muted label-card-profile">Physical address</small>
+                                <p class="card-title content-card-profile">{{getFacility.data.facility.address1}} {{getFacility.data.facility.address2}}</p>
+                                <p class="card-title content-card-profile2">{{getFacility.data.facility.city}} {{getFacility.data.facility.state}} {{getFacility.data.facility.zip}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card-columns h-100">
+                        <div class="card card-header h-100">
+                            <div class="card-body">
+                                <small class="text-muted label-card-profile">Email</small>
+                                <p class="card-title content-card-profile">{{getFacility.data.facility.email}}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card-columns h-100">
+                        <div class="card card-header h-100">
+                            <div class="card-body">
+                                <small class="text-muted label-card-profile">Phone</small>
+                                <p class="card-title content-card-profile" dmx-show="getFacility.data.facility.phone">
+                                    {{'('+getFacility.data.facility.phone.substr(0,3)+') '+getFacility.data.facility.phone.substr(3, 3)+'-'+getFacility.data.facility.phone.substr(6, 4)}}
+                                </p>
+                                <p class="card-title content-card-profile" dmx-hide="getFacility.data.facility.phone">
+                                    -
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="modal" id="facilityUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Edit profile</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button" id="close" dmx-on:click="data_facility.facilityForm.reset();facilityUpdateModal.hide()"></button>
+                </div>
+                <div class="modal-body">
+
+
+                    <div class="container" id="data_facility" is="dmx-data-detail">
+                        <form id="facilityForm" method="post" is="dmx-api-form" action="/api/facility/updateProfile" novalidate="" dmx-on:success="facilityUpdateModal.hide();getInformation.load({});notifies.success('Facility updated');browser.reload()" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error updating facility')" dmx-on:invalid="run([{condition:{if:`lastError.response.data.name`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.name)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.phone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.phone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.zip`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.zip)`,outputType:'text'}}},outputType:'boolean'}}])">
+                            <div class="form-group md-3" id="idForm">
+                                <input type="hidden" class="form-control input-text" id="id" name="id" aria-describedby="logoLabel" placeholder="id" is="dmx-input" value="" required="" dmx-bind:value="getFacility.data.facility.id" />
+                            </div>
+                            <div class="form-group md-3" id="facilityInformationForm">
+                                <p class="text-muted label-modal-profile">Please complete facility info:</p>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="text" class="form-control input-text" id="name" name="name" aria-describedby="logoLabel" placeholder="Facility Name" is="dmx-input" value="" minlength="3" maxlength="50" required dmx-bind:value="getFacility.data.facility.name" />
+                                    </div>
+                                    <div class="col-6 d-flex position-relative">
+                                        <input id="logo" name="logo" type="file" class="form-control input-file" accept="image/png, image/gif, image/jpeg, image/svg" />
+                                        <img id="upload" class="image-upload" src="/assets/images/upload.svg" width="20px">
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="form-group md-3" id="facilityContactForm">
+                                <div class="row">
+                                    <p class="text-muted label-modal-profile">Please complete contact info:</p>
+                                    <div class="col">
+                                        <input type="email" class="form-control input-text" id="email" name="email" aria-describedby="logoLabel" placeholder="Email" is="dmx-input" value="" required="" dmx-bind:value="getFacility.data.facility.email">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="tel" class="form-control input-text" id="phone" name="phone" aria-describedby="logoLabel" placeholder="Phone" is="dmx-input" value="" required="" dmx-bind:value="getFacility.data.facility.phone" onkeyup="validatePhone(this)">
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                            <p class="text-muted label-modal-profile">Please complete physical address:</p>
+                            <div class="form-group md-3" id="addressForm">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input id="address1" name="address1" class="form-control input-text" placeholder="Address 1" dmx-bind:value="getFacility.data.facility.address1" minlength="3" maxlength="50" required>
+                                    </div>
+                                    <div class="col-6">
+                                        <input id="address2" name="address2" type="text" class="form-control input-text" placeholder="Address 2" dmx-bind:value="getFacility.data.facility.address2" minlength="3" maxlength="50">
+                                    </div>
+                                    <div class="col-6">
+                                        <input id="city" name="city" type="text" class="form-control input-text" placeholder="City" dmx-bind:value="getFacility.data.facility.city" minlength="3" maxlength="50" required>
+                                    </div>
+                                    <div class="col-3">
+                                        <input id="state" name="state" type="text" class="form-control input-text" placeholder="State" dmx-bind:value="getFacility.data.facility.state" minlength="3" maxlength="50" required>
+                                    </div>
+                                    <div class="col-3">
+                                        <input id="zip" name="zip" type="text" class="form-control input-text" placeholder="ZIP" dmx-bind:value="getFacility.data.facility.zip" required="">
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer bg-footer-modal">
+                    <button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click.prevent="run({condition:{if:`!data_facility.facilityForm.name.value||!data_facility.facilityForm.email.value||!data_facility.facilityForm.phone.value||!data_facility.facilityForm.address1.value||!data_facility.facilityForm.city.value||!data_facility.facilityForm.state.value||!data_facility.facilityForm.zip.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_facility.facilityForm.submit()`,outputType:'text'}},{run:{action:`data_facility.facilityForm.reset()`,outputType:'text'}},{run:{action:`facilityUpdateModal.hide()`,outputType:'text'}}]},outputType:'boolean'}})">
+                        Save
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

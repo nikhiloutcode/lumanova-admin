@@ -1,0 +1,274 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "client",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    }
+                  ],
+                  "table": {
+                    "name": "client"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "client.id",
+                        "field": "client.id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}",
+                        "data": {
+                          "table": "client",
+                          "column": "id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "increments",
+                            "default": "",
+                            "primary": true,
+                            "unique": true,
+                            "nullable": false,
+                            "name": "id"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "select * from \"client\" where \"client\".\"id\" = ?"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "height"
+                },
+                {
+                  "type": "text",
+                  "name": "weight"
+                },
+                {
+                  "type": "text",
+                  "name": "sickDays"
+                },
+                {
+                  "type": "text",
+                  "name": "eyeColor"
+                },
+                {
+                  "type": "text",
+                  "name": "hairColor"
+                },
+                {
+                  "type": "text",
+                  "name": "skinColor"
+                },
+                {
+                  "type": "number",
+                  "name": "userId"
+                },
+                {
+                  "type": "text",
+                  "name": "birth"
+                },
+                {
+                  "type": "number",
+                  "name": "freckles"
+                },
+                {
+                  "type": "number",
+                  "name": "sunTooLong"
+                },
+                {
+                  "type": "number",
+                  "name": "degreeTurnBrown"
+                },
+                {
+                  "type": "number",
+                  "name": "brownSeveralHours"
+                },
+                {
+                  "type": "number",
+                  "name": "facialReactionSun"
+                },
+                {
+                  "type": "number",
+                  "name": "tanning"
+                },
+                {
+                  "type": "number",
+                  "name": "abdomenLowerBack"
+                },
+                {
+                  "type": "number",
+                  "name": "sunburn"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "clients",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [],
+                  "table": {
+                    "name": "client"
+                  },
+                  "joins": [],
+                  "query": "select * from \"client\"",
+                  "primary": "id"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "height"
+                },
+                {
+                  "type": "text",
+                  "name": "weight"
+                },
+                {
+                  "type": "text",
+                  "name": "sickDays"
+                },
+                {
+                  "type": "text",
+                  "name": "eyeColor"
+                },
+                {
+                  "type": "text",
+                  "name": "hairColor"
+                },
+                {
+                  "type": "text",
+                  "name": "skinColor"
+                },
+                {
+                  "type": "number",
+                  "name": "userId"
+                },
+                {
+                  "type": "text",
+                  "name": "birth"
+                },
+                {
+                  "type": "number",
+                  "name": "freckles"
+                },
+                {
+                  "type": "number",
+                  "name": "sunTooLong"
+                },
+                {
+                  "type": "number",
+                  "name": "degreeTurnBrown"
+                },
+                {
+                  "type": "number",
+                  "name": "brownSeveralHours"
+                },
+                {
+                  "type": "number",
+                  "name": "facialReactionSun"
+                },
+                {
+                  "type": "number",
+                  "name": "tanning"
+                },
+                {
+                  "type": "number",
+                  "name": "abdomenLowerBack"
+                },
+                {
+                  "type": "number",
+                  "name": "sunburn"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

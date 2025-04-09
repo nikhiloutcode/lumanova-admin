@@ -1,0 +1,38 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appconnect="local" components="{dmxTyped:{},dmxStateManagement:{}}" style="" -->
+
+<div class="bg-login h-100">
+    <div class="container center-login">
+
+
+        <div class="row d-flex justify-content-center">
+            <img class="center-image-login" src="/assets/images/logo.svg">
+        </div>
+        <br>
+        <div class="row">
+            <span class="text-sidebar-title1">Fuel your immunity</span>
+            <span class="text-sidebar-title2">Naturally</span>
+        </div>
+        <br>
+        <div class="row">
+            <p class="text-login">Boost Your Wellness with Enyrgy's Light Therapy Device and Mobile App</p>
+        </div>
+        <div class="row">
+            <div class="col">
+                <form id="Login" method="post" is="dmx-api-form" action="/api/auth/signInEmail" dmx-on:success="browser.goto('/message/')" dmx-on:error="notifies.danger('Unregistered user');Login.reset()" dmx-on:invalid="run([{condition:{if:`lastError.response.data.email`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.email)`,outputType:'text'}}},else:{steps:{run:{action:`notifies.danger(\'Unregistered user\')`,outputType:'text'}}},outputType:'boolean'}},{run:{action:`Login.reset()`,outputType:'text'}}])">
+
+
+
+                    <div class="form-group mb-3">
+                        <input type="text" class="form-control input-text" id="email" name="email" aria-describedby="UsernameLabel" placeholder="Email Address">
+                    </div>
+                    <br>
+                    <button id="LoginButton" class="btn btn-success bg-button" type="submit">Sign In</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <meta name="ac:route" content="/">
+</div>

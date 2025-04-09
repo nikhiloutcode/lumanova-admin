@@ -1,0 +1,64 @@
+[
+  {
+    "name": "codeArray",
+    "module": "core",
+    "action": "setvalue",
+    "options": {
+      "value": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "meta": [],
+    "outputType": "array"
+  },
+  {
+    "name": "repeat",
+    "module": "core",
+    "action": "repeat",
+    "options": {
+      "repeat": 6,
+      "outputFields": [],
+      "exec": {
+        "steps": {
+          "name": "g_code",
+          "module": "core",
+          "action": "setvalue",
+          "options": {
+            "key": "g_code",
+            "value": "{{g_code}}{{codeArray.randomize()[0].toString()}}"
+          },
+          "meta": [],
+          "outputType": "text"
+        }
+      }
+    },
+    "meta": [
+      {
+        "name": "$index",
+        "type": "number"
+      },
+      {
+        "name": "$number",
+        "type": "number"
+      },
+      {
+        "name": "$name",
+        "type": "text"
+      },
+      {
+        "name": "$value",
+        "type": "object"
+      }
+    ],
+    "outputType": "array"
+  }
+]

@@ -1,0 +1,223 @@
+{
+  "meta": {
+    "$_PARAM": [
+      {
+        "type": "text",
+        "name": "customerId"
+      },
+      {
+        "type": "text",
+        "name": "productId"
+      },
+      {
+        "type": "boolean",
+        "name": "hasFreeTrial"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "listPrices",
+        "module": "stripe",
+        "action": "listPrices",
+        "options": {
+          "active": true,
+          "__extra": {
+            "api_key": "{{$_ENV.STRIPE_SECRET_KEY}}"
+          },
+          "product": "{{$_PARAM.productId}}"
+        },
+        "outputType": "object",
+        "meta": [
+          {
+            "name": "data",
+            "type": "array",
+            "sub": [
+              {
+                "name": "active",
+                "type": "boolean"
+              },
+              {
+                "name": "billing_scheme",
+                "type": "text"
+              },
+              {
+                "name": "created",
+                "type": "number"
+              },
+              {
+                "name": "currency",
+                "type": "text"
+              },
+              {
+                "name": "id",
+                "type": "text"
+              },
+              {
+                "name": "livemode",
+                "type": "boolean"
+              },
+              {
+                "name": "lookup_key",
+                "type": "text"
+              },
+              {
+                "name": "metadata",
+                "type": "object"
+              },
+              {
+                "name": "nickname",
+                "type": "text"
+              },
+              {
+                "name": "object",
+                "type": "text"
+              },
+              {
+                "name": "product",
+                "type": "text",
+                "expand": [
+                  "stripe_product",
+                  "stripe_deleted_product"
+                ]
+              },
+              {
+                "name": "recurring",
+                "type": "object",
+                "ref": "stripe_recurring"
+              },
+              {
+                "name": "tax_behavior",
+                "type": "text"
+              },
+              {
+                "name": "tiers",
+                "type": "array",
+                "sub": [
+                  {
+                    "name": "flat_amount",
+                    "type": "number"
+                  },
+                  {
+                    "name": "flat_amount_decimal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "unit_amount",
+                    "type": "number"
+                  },
+                  {
+                    "name": "unit_amount_decimal",
+                    "type": "text"
+                  },
+                  {
+                    "name": "up_to",
+                    "type": "number"
+                  }
+                ]
+              },
+              {
+                "name": "tiers_mode",
+                "type": "text"
+              },
+              {
+                "name": "transform_quantity",
+                "type": "object",
+                "ref": "stripe_transform_quantity"
+              },
+              {
+                "name": "type",
+                "type": "text"
+              },
+              {
+                "name": "unit_amount",
+                "type": "number"
+              },
+              {
+                "name": "unit_amount_decimal",
+                "type": "text"
+              }
+            ]
+          },
+          {
+            "name": "has_more",
+            "type": "boolean"
+          },
+          {
+            "name": "object",
+            "type": "text"
+          },
+          {
+            "name": "url",
+            "type": "text"
+          }
+        ],
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_PARAM.hasFreeTrial}}",
+          "then": {
+            "steps": [
+              {
+                "name": "freeTrial",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{NOW.dateAdd(\"days\",30).toTimestamp()}}"
+                },
+                "meta": [],
+                "outputType": "text",
+                "output": true
+              },
+              {
+                "name": "createSubscription",
+                "module": "api",
+                "action": "send",
+                "options": {
+                  "url": "https://api.stripe.com/v1/subscriptions",
+                  "method": "POST",
+                  "headers": {
+                    "Authorization": "{{'Bearer '+$_ENV.STRIPE_SECRET_KEY}}"
+                  },
+                  "data": {
+                    "customer": "{{$_PARAM.customerId}}",
+                    "items[0][price]": "{{listPrices.data[0].id}}",
+                    "payment_settings[save_default_payment_method]": "{{'on_subscription'}}",
+                    "trial_end": "{{freeTrial}}"
+                  }
+                },
+                "output": true
+              }
+            ]
+          },
+          "else": {
+            "steps": {
+              "name": "createSubscription",
+              "module": "api",
+              "action": "send",
+              "options": {
+                "url": "https://api.stripe.com/v1/subscriptions",
+                "method": "POST",
+                "headers": {
+                  "Authorization": "{{'Bearer '+$_ENV.STRIPE_SECRET_KEY}}"
+                },
+                "data": {
+                  "customer": "{{$_PARAM.customerId}}",
+                  "items[0][price]": "{{listPrices.data[0].id}}",
+                  "payment_settings[save_default_payment_method]": "{{'on_subscription'}}"
+                }
+              },
+              "output": true
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

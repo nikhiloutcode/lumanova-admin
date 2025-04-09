@@ -1,0 +1,421 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "number",
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "treatment",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    }
+                  ],
+                  "table": {
+                    "name": "treatments",
+                    "alias": "t"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "query": "select * from \"treatments\" as \"t\" where \"t\".\"id\" = ?",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "t.id",
+                        "field": "t.id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}",
+                        "data": {
+                          "table": "t",
+                          "column": "id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "increments",
+                            "default": "",
+                            "primary": true,
+                            "unique": true,
+                            "nullable": false,
+                            "name": "id"
+                          }
+                        },
+                        "operation": "=",
+                        "table": "treatments"
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "number",
+                  "name": "duration"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "boolean",
+                  "name": "complete"
+                },
+                {
+                  "type": "number",
+                  "name": "clientId"
+                },
+                {
+                  "type": "datetime",
+                  "name": "lastTreatment"
+                },
+                {
+                  "type": "boolean",
+                  "name": "redness"
+                },
+                {
+                  "type": "number",
+                  "name": "detailsFitzpatrickSkinTypeId"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "client",
+                "module": "dbconnector",
+                "action": "single",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{jwt.userId}}",
+                        "test": "94"
+                      }
+                    ],
+                    "table": {
+                      "name": "client"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "client.userId",
+                          "field": "client.userId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{jwt.userId}}",
+                          "data": {
+                            "table": "client",
+                            "column": "userId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "user",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "userId"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select * from \"client\" where \"client\".\"userId\" = ?"
+                  }
+                },
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "height"
+                  },
+                  {
+                    "type": "text",
+                    "name": "weight"
+                  },
+                  {
+                    "type": "text",
+                    "name": "sickDays"
+                  },
+                  {
+                    "type": "number",
+                    "name": "eyeColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "hairColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "skinColor"
+                  },
+                  {
+                    "type": "number",
+                    "name": "userId"
+                  },
+                  {
+                    "type": "text",
+                    "name": "birth"
+                  },
+                  {
+                    "type": "number",
+                    "name": "freckles"
+                  },
+                  {
+                    "type": "number",
+                    "name": "sunTooLong"
+                  },
+                  {
+                    "type": "number",
+                    "name": "degreeTurnBrown"
+                  },
+                  {
+                    "type": "number",
+                    "name": "brownSeveralHours"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facialReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "tanning"
+                  },
+                  {
+                    "type": "number",
+                    "name": "exposedArea"
+                  },
+                  {
+                    "type": "text",
+                    "name": "gender"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "consentTreatment"
+                  },
+                  {
+                    "type": "number",
+                    "name": "treatments"
+                  },
+                  {
+                    "type": "text",
+                    "name": "customerId"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreGeneticDisposition"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreReactionSun"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreTanningHabits"
+                  },
+                  {
+                    "type": "number",
+                    "name": "scoreSkinType"
+                  }
+                ],
+                "type": "dbconnector_single",
+                "outputType": "object",
+                "output": false
+              },
+              {
+                "name": "treatments",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{client.id}}",
+                        "test": ""
+                      }
+                    ],
+                    "table": {
+                      "name": "treatments"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "treatments.clientId",
+                          "field": "treatments.clientId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{client.id}}",
+                          "data": {
+                            "table": "treatments",
+                            "column": "clientId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "client",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "clientId"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "orders": [
+                      {
+                        "table": "treatments",
+                        "column": "createdAt",
+                        "direction": "DESC"
+                      }
+                    ],
+                    "query": "select * from \"treatments\" where \"treatments\".\"clientId\" = ? order by \"createdAt\" DESC"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "number",
+                    "name": "duration"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "complete"
+                  },
+                  {
+                    "type": "number",
+                    "name": "clientId"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "lastTreatment"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "redness"
+                  },
+                  {
+                    "type": "number",
+                    "name": "detailsFitzpatrickSkinTypeId"
+                  }
+                ],
+                "outputType": "array"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

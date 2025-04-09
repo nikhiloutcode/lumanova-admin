@@ -1,0 +1,343 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.sort}}",
+          "then": {
+            "steps": {
+              "name": "packages",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "SELECT",
+                  "distinct": false,
+                  "columns": [
+                    {
+                      "table": "plans",
+                      "column": "*",
+                      "field": "*"
+                    }
+                  ],
+                  "table": {
+                    "name": "plans"
+                  },
+                  "joins": [],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "condition": "OR",
+                        "rules": [
+                          {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "plans.name",
+                                "field": "plans.name",
+                                "type": "string",
+                                "operator": "equal",
+                                "value": "{{$_GET.sort}}",
+                                "data": {
+                                  "table": "plans",
+                                  "column": "name",
+                                  "type": "text",
+                                  "columnObj": {
+                                    "type": "string",
+                                    "maxLength": 255,
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "name": "name"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null
+                          },
+                          {
+                            "condition": "AND",
+                            "rules": [
+                              {
+                                "id": "plans.amount",
+                                "field": "plans.amount",
+                                "type": "string",
+                                "operator": "equal",
+                                "value": "{{$_GET.sort}}",
+                                "data": {
+                                  "table": "plans",
+                                  "column": "amount",
+                                  "type": "text",
+                                  "columnObj": {
+                                    "type": "string",
+                                    "maxLength": 255,
+                                    "primary": false,
+                                    "unique": false,
+                                    "nullable": true,
+                                    "name": "amount"
+                                  }
+                                },
+                                "operation": "="
+                              }
+                            ],
+                            "conditional": null
+                          }
+                        ],
+                        "conditional": null
+                      },
+                      {
+                        "id": "plans.active",
+                        "field": "plans.active",
+                        "type": "boolean",
+                        "operator": "equal",
+                        "value": true,
+                        "data": {
+                          "table": "plans",
+                          "column": "active",
+                          "type": "boolean",
+                          "columnObj": {
+                            "type": "boolean",
+                            "default": "true",
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "active"
+                          }
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "plans.amount",
+                        "field": "plans.amount",
+                        "type": "string",
+                        "operator": "not_equal",
+                        "value": "0.00",
+                        "data": {
+                          "table": "plans",
+                          "column": "amount",
+                          "type": "text",
+                          "columnObj": {
+                            "type": "string",
+                            "maxLength": 255,
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "amount"
+                          }
+                        },
+                        "operation": "<>"
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "orders": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_GET.sort}}",
+                      "test": ""
+                    },
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P2",
+                      "value": "{{$_GET.sort}}",
+                      "test": ""
+                    }
+                  ],
+                  "primary": "id",
+                  "query": "select * from \"plans\" where ((\"plans\".\"name\" = ?) or (\"plans\".\"amount\" = ?)) and \"plans\".\"active\" = ? and \"plans\".\"amount\" <> ?"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "limitSessions"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "text",
+                  "name": "productId"
+                },
+                {
+                  "type": "boolean",
+                  "name": "active"
+                }
+              ],
+              "outputType": "array",
+              "type": "dbconnector_select"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "packages",
+              "module": "dbconnector",
+              "action": "select",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [],
+                  "table": {
+                    "name": "plans"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "query": "select * from \"plans\" where \"plans\".\"active\" = ? and \"plans\".\"amount\" <> ?",
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "plans.active",
+                        "field": "plans.active",
+                        "type": "boolean",
+                        "operator": "equal",
+                        "value": true,
+                        "data": {
+                          "table": "plans",
+                          "column": "active",
+                          "type": "boolean",
+                          "columnObj": {
+                            "type": "boolean",
+                            "default": "true",
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "active"
+                          }
+                        },
+                        "operation": "=",
+                        "table": "plans"
+                      },
+                      {
+                        "id": "plans.amount",
+                        "field": "plans.amount",
+                        "type": "string",
+                        "operator": "not_equal",
+                        "value": "0.00",
+                        "data": {
+                          "table": "plans",
+                          "column": "amount",
+                          "type": "text",
+                          "columnObj": {
+                            "type": "string",
+                            "maxLength": 255,
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "amount"
+                          }
+                        },
+                        "operation": "<>",
+                        "table": "plans"
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  }
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "limitSessions"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "text",
+                  "name": "productId"
+                },
+                {
+                  "type": "boolean",
+                  "name": "active"
+                }
+              ],
+              "outputType": "array"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

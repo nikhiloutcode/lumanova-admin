@@ -1,0 +1,97 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appconnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{},dmxSmoothScroll:{}}" style="" -->
+
+<div class="bg-login h-100">
+    <div class="container center-delete-account">
+
+
+
+
+
+        <div class="row d-flex justify-content-center">
+            <img class="center-image-login" src="/assets/images/logo.svg">
+        </div>
+        <br>
+        <div class="row">
+            <span class="text-sidebar-title1">Fuel your immunity</span>
+            <span class="text-sidebar-title2">Naturally</span>
+        </div>
+        <br>
+        <div class="row">
+            <p class="text-login">Boost Your Wellness with Enyrgy's Light Therapy Device and Mobile App</p>
+        </div>
+        <div id="question" class="row">
+
+            <div class="col">
+                <p>Are you sure you would like to delete your Enyrgy profile?</p>
+            </div>
+        </div>
+        <div id="selections" class="row">
+            <div class="col-12 col-sm-6">
+                <button id="noDeleteProfile" class="btn btn-primary save-button" onclick="showThankYou()" dmx-on:click="run([{wait:{delay:2500}},{run:{action:`browser.reload()`,outputType:'text'}}])">No, keep using Enyrgy</button>
+            </div>
+            <div class="d-block d-sm-none">
+                <br>
+            </div>
+            <div class="col-12 col-sm-6">
+                <button id=" deleteProfile" class="btn btn-primary bg-button" data-bs-toggle="button" data-bs-target="undefined" onclick="showValidatePhone()">Yes, delete my profile</button>
+            </div>
+        </div>
+        <br>
+        <div id="thankYou" class="row d-none">
+            <div class="col">
+                <p class="btn btn-primary save-button">Thank you!</p>
+            </div>
+        </div>
+        <br>
+        <div id="validatePhone" class="row d-none">
+            <div class="col">
+                <form id="formPhone" method="post" is="dmx-api-form" action="/api/auth/deleteAccount" dmx-on:success="run({condition:{if:`data.notExists`,then:{steps:{run:{action:`notifies.warning(\'User doesn\\\'t exist\')`,outputType:'text'}}},else:{steps:[{runJS:{function:'validateDeletePhoneNumber',outputType:'text'}},{run:{action:`notifies.success(\'Verification code sent\')`,outputType:'text'}}]},outputType:'boolean'}})" dmx-on:error="notifies.danger('Error sending verification code')">
+                    <div class="form-group md-3">
+                        <input type="tel" class="form-control" id="phone" minlength="10" maxlength="10" name="phone" aria-describedby="input1_help" placeholder="Enter your phone number" required><br>
+                        <button id="validate" class="btn btn-primary bg-button" onclick="()" type="submit">Validate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <br><br>
+        <div id="validateCode" class="row d-none">
+            <div class="col">
+                <form id="formValidate" method="post" is="dmx-serverconnect-form" action="/api/auth/verifyDeleteAccount" dmx-on:success="run([{runJS:{function:'disabledForm',outputType:'text'}},{run:{action:`notifies.success(\'Account deleted\')`,outputType:'text'}},{wait:{delay:2500}},{run:{action:`browser.reload()`,outputType:'text'}}])" dmx-on:error="notifies.danger('Invalid code')">
+                    <div class="form-group md-3">
+                        <input class="form-control" id="code" name="code" aria-describedby="input1_help" placeholder="Enter code number" minlength="6" maxlength="6" required=""><br>
+                        <button id="delete" class="btn btn-primary bg-button" type="submit">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <br>
+
+    </div>
+
+
+    <meta name="ac:route" content="/delete-request/">
+</div>
+<script>
+    function showValidatePhone(){
+        $("#validatePhone").removeClass("d-none")
+        $("#thankYou").addClass("d-none")
+        $("#selections").addClass("d-none")
+        $("#question").addClass("d-none")
+    }
+    function showThankYou(){
+        $("#thankYou").removeClass("d-none")
+        $("#validatePhone").addClass("d-none")
+        $("#validateCode").addClass("d-none")
+        $("#selections").addClass("d-none")
+        $("#question").addClass("d-none")
+    }
+    function validateDeletePhoneNumber(){
+        if($("#phone").val().length == 10){
+            $("#validatePhone").addClass("disabled-form")
+            $("#validateCode").removeClass("d-none")
+        }
+    }
+    function disabledForm(){
+        $("#validateCode").addClass("disabled-form")
+    }
+</script>

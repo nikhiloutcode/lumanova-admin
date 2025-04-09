@@ -1,0 +1,1788 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "id"
+      },
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.sort}}",
+          "then": {
+            "steps": [
+              {
+                "name": "sort",
+                "module": "core",
+                "action": "setvalue",
+                "options": {
+                  "value": "{{$_GET.sort.lowercase()}}"
+                },
+                "meta": [],
+                "outputType": "text"
+              },
+              {
+                "name": "clients",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "select\nr.id as \"roleId\", r.description as \"roleName\",\nu.*,\ns.id as \"subscriptionId\", s.name as \"subscription\",\np.name as \"plan\",\nu.\"verificationCodeExpire\",\ncase when u.\"verificationCodeExpire\" < now() then 'Expired' else case when u.\"verificationCode\" = '' then 'Active' else 'Invited' end end as status\nfrom \"detailsUsersFacility\" duf\ninner join \"user\" u on u.id = duf.\"userId\"\ninner join \"detailsUser\" du on du.\"userId\" = u.id\ninner join roles r on r.id = du.\"rolesId\"\ninner join client c on c.\"userId\" = u.id\nleft join \"detailsClient\" dc on dc.\"clientId\" = c.id\nleft join subscriptions s on s.id = dc.\"subscriptionId\"\nleft join \"detailsFacility\" df on df.\"subscriptionId\" = s.id\nleft join \"detailsSubscription\" ds on ds.\"subscriptionId\" = s.id\nleft join plans p on p.id = ds.\"plansId\"\nleft join facility f on f.id = duf.\"facilityId\" and df.\"facilityId\" = f.id\nwhere r.name = 'clients' and duf.\"facilityId\" = :P1\norder by duf.id desc",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "26"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{sort}}",
+                        "test": "a"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "roleId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "roleName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "firstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "lastName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCodeExpire",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "disabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "userIdInvited",
+                    "type": "number"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "isTester",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isGodMode",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isDebug",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "subscriptionId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "subscription",
+                    "type": "text"
+                  },
+                  {
+                    "name": "plan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCodeExpire",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  }
+                ],
+                "type": "dbcustom_query",
+                "outputType": "array"
+              },
+              {
+                "name": "employees",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT r.description AS \"roleName\", u.*, r.id AS \"roleId\"\nFROM \"user\" AS u\nLEFT JOIN \"detailsUsersFacility\" AS duf ON duf.\"userId\" = u.id LEFT JOIN facility AS f ON f.id = duf.\"facilityId\" \nLEFT JOIN \"detailsUser\" AS du ON u.id = du.\"userId\" LEFT JOIN roles AS r ON r.id = du.\"rolesId\"\nWHERE f.id = :P1 /* {{$_GET.id}} */ AND (r.name = 'ownerFacility' OR r.name = 'adminFacility' OR r.name = 'facilitatorFacility') and \n(LOWER(u.\"firstName\") LIKE '%' || :P2 || '%' /* {{sort}} */ \nor LOWER(u.\"lastName\") LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(u.email) LIKE '%' || :P2 || '%' /* {{sort}} */ \nor LOWER(u.phone) LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(r.description) LIKE '%' || :P2 || '%' /* {{sort}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "21"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{sort}}",
+                        "test": "1"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "roleName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "firstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "lastName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCodeExpire",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "disabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "userIdInvited",
+                    "type": "number"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "isTester",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isGodMode",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "roleId",
+                    "type": "number"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "packages",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT f.*, s.*, p.name AS plan, p.id AS \"planId\"\nFROM facility AS f\nINNER JOIN \"detailsFacility\" AS df ON df.\"facilityId\" = f.id \nINNER JOIN subscriptions AS s ON s.id = df.\"subscriptionId\"\nleft JOIN \"detailsSubscription\" as ds ON ds.\"subscriptionId\" = s.id\nleft JOIN \"plans\" AS p ON p.id = ds.\"plansId\"\nWHERE f.id = :P1 /* {{$_POST.facilityId}} */ and \n(LOWER(p.name) LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(s.name) LIKE '%' || :P2 || '%' /* {{sort}} */ \nor LOWER(s.duration) LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(s.amount) LIKE '%' || :P2 || '%' /* {{sort}} */\nor LOWER(s.description) LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(p.name) LIKE '%' || :P2 || '%' /* {{sort}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "21"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{sort}}",
+                        "test": "e"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "logo",
+                    "type": "text"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "disabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "city",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "zip",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address1",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address2",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesFirstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesLastName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesEmail",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesPhone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "text"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "description",
+                    "type": "text"
+                  },
+                  {
+                    "name": "duration",
+                    "type": "text"
+                  },
+                  {
+                    "name": "numberDuration",
+                    "type": "number"
+                  },
+                  {
+                    "name": "plan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "devices",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT d.id,d.serial, TO_CHAR(d.\"createdAt\"::date, 'mm/dd/yyyy') as \"createdAt\", d.\"updatedAt\", d.\"contactName\",d.\"contactPhone\",d.\"contactEmail\", f.name, f.phone, (select \nu.\"firstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM facility AS f\nINNER JOIN device AS d ON d.\"facilityId\" = f.id\nWHERE f.id = :P1 /* {{$_GET.id}} */ and \n(LOWER(d.serial) LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(d.\"contactName\") LIKE '%' || :P2 || '%' /* {{sort}} */ \nor LOWER(d.\"contactPhone\") LIKE '%' || :P2 || '%' /* {{sort}} */ or LOWER(d.\"contactEmail\") LIKE '%' || :P2 || '%' /* {{sort}} */)",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "21"
+                      },
+                      {
+                        "name": ":P2",
+                        "value": "{{sort}}",
+                        "test": "1"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "serial",
+                    "type": "text"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "contactName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "contactPhone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "contactEmail",
+                    "type": "text"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "firstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "lastName",
+                    "type": "text"
+                  }
+                ],
+                "type": "dbcustom_query"
+              }
+            ]
+          },
+          "else": {
+            "steps": [
+              {
+                "name": "clients",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "select\nr.id as \"roleId\", r.description as \"roleName\",\nu.*,\ns.id as \"subscriptionId\", s.name as \"subscription\",\np.name as \"plan\",\nu.\"verificationCodeExpire\",\ncase when u.\"verificationCodeExpire\" < now() then 'Expired' else case when u.\"verificationCode\" = '' then 'Active' else 'Invited' end end as status\nfrom \"detailsUsersFacility\" duf\ninner join \"user\" u on u.id = duf.\"userId\"\ninner join \"detailsUser\" du on du.\"userId\" = u.id\ninner join roles r on r.id = du.\"rolesId\"\ninner join client c on c.\"userId\" = u.id\nleft join \"detailsClient\" dc on dc.\"clientId\" = c.id\nleft join subscriptions s on s.id = dc.\"subscriptionId\"\nleft join \"detailsFacility\" df on df.\"subscriptionId\" = s.id\nleft join \"detailsSubscription\" ds on ds.\"subscriptionId\" = s.id\nleft join plans p on p.id = ds.\"plansId\"\nleft join facility f on f.id = duf.\"facilityId\" and df.\"facilityId\" = f.id\nwhere r.name = 'clients' and duf.\"facilityId\" = :P1\norder by duf.id desc",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "26"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "roleId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "roleName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "firstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "lastName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCode",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCodeExpire",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "disabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "userIdInvited",
+                    "type": "number"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "isTester",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isGodMode",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "isDebug",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "subscriptionId",
+                    "type": "number"
+                  },
+                  {
+                    "name": "subscription",
+                    "type": "text"
+                  },
+                  {
+                    "name": "plan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "verificationCodeExpire",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "status",
+                    "type": "text"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "employees",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "SELECT",
+                    "distinct": false,
+                    "columns": [
+                      {
+                        "table": "r",
+                        "column": "description",
+                        "field": "r.description",
+                        "alias": "roleName"
+                      },
+                      {
+                        "table": "u",
+                        "column": "*",
+                        "field": "u.*"
+                      },
+                      {
+                        "table": "r",
+                        "column": "id",
+                        "field": "r.id",
+                        "alias": "roleId"
+                      }
+                    ],
+                    "table": {
+                      "name": "user",
+                      "alias": "u"
+                    },
+                    "joins": [
+                      {
+                        "table": "detailsUsersFacility",
+                        "column": "*",
+                        "alias": "duf",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "duf",
+                              "column": "userId",
+                              "field": "duf.userId",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "u",
+                                "column": "id",
+                                "field": "u.id"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "facility",
+                        "column": "*",
+                        "alias": "f",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "f",
+                              "column": "id",
+                              "field": "f.id",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "duf",
+                                "column": "facilityId",
+                                "field": "duf.facilityId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "detailsUser",
+                        "column": "*",
+                        "alias": "du",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "u",
+                              "column": "id",
+                              "field": "u.id",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "du",
+                                "column": "userId",
+                                "field": "du.userId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      },
+                      {
+                        "table": "roles",
+                        "column": "*",
+                        "alias": "r",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "r",
+                              "column": "id",
+                              "field": "r.id",
+                              "operation": "=",
+                              "operator": "equal",
+                              "value": {
+                                "table": "du",
+                                "column": "rolesId",
+                                "field": "du.rolesId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "f.id",
+                          "field": "f.id",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_GET.id}}",
+                          "data": {
+                            "table": "f",
+                            "column": "id",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "increments",
+                              "default": "",
+                              "primary": true,
+                              "unique": true,
+                              "nullable": false,
+                              "name": "id"
+                            }
+                          },
+                          "operation": "="
+                        },
+                        {
+                          "condition": "OR",
+                          "rules": [
+                            {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "r.name",
+                                  "field": "r.name",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "ownerFacility",
+                                  "data": {
+                                    "table": "r",
+                                    "column": "name",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "name"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null
+                            },
+                            {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "r.name",
+                                  "field": "r.name",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "adminFacility",
+                                  "data": {
+                                    "table": "r",
+                                    "column": "name",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "name"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null
+                            },
+                            {
+                              "condition": "AND",
+                              "rules": [
+                                {
+                                  "id": "r.name",
+                                  "field": "r.name",
+                                  "type": "string",
+                                  "operator": "equal",
+                                  "value": "facilitatorFacility",
+                                  "data": {
+                                    "table": "r",
+                                    "column": "name",
+                                    "type": "text",
+                                    "columnObj": {
+                                      "type": "string",
+                                      "maxLength": 255,
+                                      "primary": false,
+                                      "unique": false,
+                                      "nullable": true,
+                                      "name": "name"
+                                    }
+                                  },
+                                  "operation": "="
+                                }
+                              ],
+                              "conditional": null
+                            }
+                          ],
+                          "conditional": null
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "orders": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "21"
+                      }
+                    ],
+                    "primary": "id",
+                    "query": "select \"r\".\"description\" as \"roleName\", \"u\".*, \"r\".\"id\" as \"roleId\" from \"user\" as \"u\" left join \"detailsUsersFacility\" as \"duf\" on \"duf\".\"userId\" = \"u\".\"id\" left join \"facility\" as \"f\" on \"f\".\"id\" = \"duf\".\"facilityId\" left join \"detailsUser\" as \"du\" on \"u\".\"id\" = \"du\".\"userId\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"f\".\"id\" = ? and ((\"r\".\"name\" = ?) or (\"r\".\"name\" = ?) or (\"r\".\"name\" = ?))"
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "type": "text",
+                    "name": "roleName"
+                  },
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "firstName"
+                  },
+                  {
+                    "type": "text",
+                    "name": "lastName"
+                  },
+                  {
+                    "type": "text",
+                    "name": "email"
+                  },
+                  {
+                    "type": "text",
+                    "name": "verificationCode"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "verificationCodeExpire"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "disabled"
+                  },
+                  {
+                    "type": "text",
+                    "name": "phone"
+                  },
+                  {
+                    "type": "number",
+                    "name": "userIdInvited"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "isTester"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "isGodMode"
+                  },
+                  {
+                    "type": "boolean",
+                    "name": "isDebug"
+                  },
+                  {
+                    "type": "number",
+                    "name": "roleId"
+                  }
+                ],
+                "outputType": "array",
+                "type": "dbconnector_select"
+              },
+              {
+                "name": "packages",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT f.*, s.*, p.name AS plan, p.id AS \"planId\"\nFROM facility AS f\nINNER JOIN \"detailsFacility\" AS df ON df.\"facilityId\" = f.id \nINNER JOIN subscriptions AS s ON s.id = df.\"subscriptionId\"\nleft JOIN \"detailsSubscription\" as ds ON ds.\"subscriptionId\" = s.id\nleft JOIN \"plans\" AS p ON p.id = ds.\"plansId\"\nWHERE f.id = :P1 /* {{$_POST.facilityId}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "21"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "logo",
+                    "type": "text"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "disabled",
+                    "type": "boolean"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "email",
+                    "type": "text"
+                  },
+                  {
+                    "name": "city",
+                    "type": "text"
+                  },
+                  {
+                    "name": "state",
+                    "type": "text"
+                  },
+                  {
+                    "name": "zip",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address1",
+                    "type": "text"
+                  },
+                  {
+                    "name": "address2",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesFirstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesLastName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesEmail",
+                    "type": "text"
+                  },
+                  {
+                    "name": "salesPhone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "amount",
+                    "type": "text"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "description",
+                    "type": "text"
+                  },
+                  {
+                    "name": "duration",
+                    "type": "text"
+                  },
+                  {
+                    "name": "numberDuration",
+                    "type": "number"
+                  },
+                  {
+                    "name": "plan",
+                    "type": "text"
+                  },
+                  {
+                    "name": "planId",
+                    "type": "number"
+                  }
+                ],
+                "type": "dbcustom_query"
+              },
+              {
+                "name": "devices",
+                "module": "dbupdater",
+                "action": "custom",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "query": "SELECT d.id,d.serial, TO_CHAR(d.\"createdAt\"::date, 'mm/dd/yyyy') as \"createdAt\", d.\"updatedAt\", d.\"contactName\",d.\"contactPhone\",d.\"contactEmail\", f.name, f.phone, (select \nu.\"firstName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 ),\n(select \nu.\"lastName\" from facility f2 \nleft join \"detailsUsersFacility\" duf on f2.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f2.id = f.id and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1 )\nFROM facility AS f\nINNER JOIN device AS d ON d.\"facilityId\" = f.id\nWHERE f.id = :P1 /* {{$_GET.id}} */",
+                    "params": [
+                      {
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "21"
+                      }
+                    ]
+                  }
+                },
+                "output": true,
+                "meta": [
+                  {
+                    "name": "id",
+                    "type": "number"
+                  },
+                  {
+                    "name": "serial",
+                    "type": "text"
+                  },
+                  {
+                    "name": "createdAt",
+                    "type": "text"
+                  },
+                  {
+                    "name": "updatedAt",
+                    "type": "datetime"
+                  },
+                  {
+                    "name": "contactName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "contactPhone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "contactEmail",
+                    "type": "text"
+                  },
+                  {
+                    "name": "name",
+                    "type": "text"
+                  },
+                  {
+                    "name": "phone",
+                    "type": "text"
+                  },
+                  {
+                    "name": "firstName",
+                    "type": "text"
+                  },
+                  {
+                    "name": "lastName",
+                    "type": "text"
+                  }
+                ],
+                "type": "dbcustom_query"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      },
+      {
+        "name": "facilityAdmin",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "select \nu.* from facility f \nleft join \"detailsUsersFacility\" duf on f.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f.id = :P1 /* {{$_GET.id}} */ and r.name = 'adminFacility' order by duf.\"createdAt\" desc limit 1",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{$_GET.id}}",
+                "test": "21"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "firstName",
+            "type": "text"
+          },
+          {
+            "name": "lastName",
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "type": "text"
+          },
+          {
+            "name": "verificationCode",
+            "type": "text"
+          },
+          {
+            "name": "verificationCodeExpire",
+            "type": "datetime"
+          },
+          {
+            "name": "disabled",
+            "type": "boolean"
+          },
+          {
+            "name": "phone",
+            "type": "text"
+          },
+          {
+            "name": "userIdInvited",
+            "type": "number"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "updatedAt",
+            "type": "datetime"
+          }
+        ],
+        "type": "dbcustom_query"
+      },
+      {
+        "name": "facilityOwner",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "select \nu.* from facility f \nleft join \"detailsUsersFacility\" duf on f.id  = duf.\"facilityId\" \nleft join \"user\" u on u.id = duf.\"userId\"\nleft join \"detailsUser\" du on u.id = du.\"userId\"\nleft join roles r on r.id = du.\"rolesId\"\nwhere f.id = :P1 /* {{$_GET.id}} */ and r.name = 'ownerFacility' order by duf.\"createdAt\" desc limit 1",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{$_GET.id}}",
+                "test": "21"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "id",
+            "type": "number"
+          },
+          {
+            "name": "firstName",
+            "type": "text"
+          },
+          {
+            "name": "lastName",
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "type": "text"
+          },
+          {
+            "name": "verificationCode",
+            "type": "text"
+          },
+          {
+            "name": "verificationCodeExpire",
+            "type": "datetime"
+          },
+          {
+            "name": "disabled",
+            "type": "boolean"
+          },
+          {
+            "name": "phone",
+            "type": "text"
+          },
+          {
+            "name": "userIdInvited",
+            "type": "number"
+          },
+          {
+            "name": "createdAt",
+            "type": "datetime"
+          },
+          {
+            "name": "updatedAt",
+            "type": "datetime"
+          }
+        ],
+        "type": "dbcustom_query"
+      },
+      {
+        "name": "facility",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{$_GET.id}}",
+                "test": "21"
+              }
+            ],
+            "table": {
+              "name": "facility"
+            },
+            "primary": "id",
+            "joins": [],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "facility.id",
+                  "field": "facility.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{$_GET.id}}",
+                  "data": {
+                    "table": "facility",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "="
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select * from \"facility\" where \"facility\".\"id\" = ?"
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "type": "number",
+            "name": "id"
+          },
+          {
+            "type": "text",
+            "name": "logo"
+          },
+          {
+            "type": "text",
+            "name": "phone"
+          },
+          {
+            "type": "boolean",
+            "name": "disabled"
+          },
+          {
+            "type": "datetime",
+            "name": "createdAt"
+          },
+          {
+            "type": "datetime",
+            "name": "updatedAt"
+          },
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "text",
+            "name": "email"
+          },
+          {
+            "type": "text",
+            "name": "city"
+          },
+          {
+            "type": "text",
+            "name": "state"
+          },
+          {
+            "type": "text",
+            "name": "zip"
+          },
+          {
+            "type": "text",
+            "name": "address1"
+          },
+          {
+            "type": "text",
+            "name": "address2"
+          },
+          {
+            "type": "text",
+            "name": "salesFirstName"
+          },
+          {
+            "type": "text",
+            "name": "salesLastName"
+          },
+          {
+            "type": "text",
+            "name": "salesEmail"
+          },
+          {
+            "type": "text",
+            "name": "salesPhone"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "user",
+        "module": "dbconnector",
+        "action": "single",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "type": "select",
+            "columns": [
+              {
+                "table": "r",
+                "column": "name"
+              },
+              {
+                "table": "r",
+                "column": "adminView"
+              },
+              {
+                "table": "r",
+                "column": "mobileView"
+              },
+              {
+                "table": "r",
+                "column": "facilityView"
+              }
+            ],
+            "params": [
+              {
+                "operator": "equal",
+                "type": "expression",
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "1"
+              }
+            ],
+            "table": {
+              "name": "user"
+            },
+            "primary": "id",
+            "joins": [
+              {
+                "table": "detailsUser",
+                "column": "*",
+                "alias": "du",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "du",
+                      "column": "userId",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "user",
+                        "column": "id"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              },
+              {
+                "table": "roles",
+                "column": "*",
+                "alias": "r",
+                "type": "LEFT",
+                "clauses": {
+                  "condition": "AND",
+                  "rules": [
+                    {
+                      "table": "r",
+                      "column": "id",
+                      "operator": "equal",
+                      "operation": "=",
+                      "value": {
+                        "table": "du",
+                        "column": "rolesId"
+                      }
+                    }
+                  ]
+                },
+                "primary": "id"
+              }
+            ],
+            "wheres": {
+              "condition": "AND",
+              "rules": [
+                {
+                  "id": "user.id",
+                  "field": "user.id",
+                  "type": "double",
+                  "operator": "equal",
+                  "value": "{{jwt.userId}}",
+                  "data": {
+                    "table": "user",
+                    "column": "id",
+                    "type": "number",
+                    "columnObj": {
+                      "type": "increments",
+                      "default": "",
+                      "primary": true,
+                      "unique": true,
+                      "nullable": false,
+                      "name": "id"
+                    }
+                  },
+                  "operation": "=",
+                  "table": "user"
+                }
+              ],
+              "conditional": null,
+              "valid": true
+            },
+            "query": "select \"r\".\"name\", \"r\".\"adminView\", \"r\".\"mobileView\", \"r\".\"facilityView\" from \"user\" left join \"detailsUser\" as \"du\" on \"du\".\"userId\" = \"user\".\"id\" left join \"roles\" as \"r\" on \"r\".\"id\" = \"du\".\"rolesId\" where \"user\".\"id\" = ?"
+          }
+        },
+        "meta": [
+          {
+            "type": "text",
+            "name": "name"
+          },
+          {
+            "type": "boolean",
+            "name": "adminView"
+          },
+          {
+            "type": "boolean",
+            "name": "mobileView"
+          },
+          {
+            "type": "boolean",
+            "name": "facilityView"
+          }
+        ],
+        "type": "dbconnector_single",
+        "outputType": "object"
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{user.adminView}}",
+          "then": {
+            "steps": [
+              {
+                "name": "devices",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": ""
+                      }
+                    ],
+                    "table": {
+                      "name": "device"
+                    },
+                    "primary": "id",
+                    "joins": [],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "device.facilityId",
+                          "field": "device.facilityId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_GET.id}}",
+                          "data": {
+                            "table": "device",
+                            "column": "facilityId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "facility",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "facilityId"
+                            }
+                          },
+                          "operation": "="
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select * from \"device\" where \"device\".\"facilityId\" = ?"
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "text",
+                    "name": "serial"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facilityId"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  },
+                  {
+                    "type": "text",
+                    "name": "contactName"
+                  },
+                  {
+                    "type": "text",
+                    "name": "contactPhone"
+                  },
+                  {
+                    "type": "text",
+                    "name": "contactEmail"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{devices[0].id}}",
+                  "then": {
+                    "steps": {
+                      "name": "hasDevice",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "hasDevice",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": false
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              },
+              {
+                "name": "package",
+                "module": "dbconnector",
+                "action": "select",
+                "options": {
+                  "connection": "EnyrgyDB",
+                  "sql": {
+                    "type": "select",
+                    "columns": [],
+                    "params": [
+                      {
+                        "operator": "equal",
+                        "type": "expression",
+                        "name": ":P1",
+                        "value": "{{$_GET.id}}",
+                        "test": "22"
+                      }
+                    ],
+                    "table": {
+                      "name": "detailsFacility"
+                    },
+                    "primary": "id",
+                    "joins": [
+                      {
+                        "table": "subscriptions",
+                        "column": "*",
+                        "type": "LEFT",
+                        "clauses": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "table": "subscriptions",
+                              "column": "id",
+                              "operator": "equal",
+                              "operation": "=",
+                              "value": {
+                                "table": "detailsFacility",
+                                "column": "subscriptionId"
+                              }
+                            }
+                          ]
+                        },
+                        "primary": "id"
+                      }
+                    ],
+                    "wheres": {
+                      "condition": "AND",
+                      "rules": [
+                        {
+                          "id": "detailsFacility.facilityId",
+                          "field": "detailsFacility.facilityId",
+                          "type": "double",
+                          "operator": "equal",
+                          "value": "{{$_GET.id}}",
+                          "data": {
+                            "table": "detailsFacility",
+                            "column": "facilityId",
+                            "type": "number",
+                            "columnObj": {
+                              "type": "reference",
+                              "primary": false,
+                              "unique": false,
+                              "nullable": true,
+                              "references": "id",
+                              "inTable": "facility",
+                              "referenceType": "integer",
+                              "onUpdate": "CASCADE",
+                              "onDelete": "CASCADE",
+                              "name": "facilityId"
+                            }
+                          },
+                          "operation": "=",
+                          "table": "detailsFacility"
+                        }
+                      ],
+                      "conditional": null,
+                      "valid": true
+                    },
+                    "query": "select * from \"detailsFacility\" left join \"subscriptions\" on \"subscriptions\".\"id\" = \"detailsFacility\".\"subscriptionId\" where \"detailsFacility\".\"facilityId\" = ?"
+                  }
+                },
+                "output": false,
+                "meta": [
+                  {
+                    "type": "number",
+                    "name": "id"
+                  },
+                  {
+                    "type": "number",
+                    "name": "facilityId"
+                  },
+                  {
+                    "type": "number",
+                    "name": "subscriptionId"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "createdAt"
+                  },
+                  {
+                    "type": "datetime",
+                    "name": "updatedAt"
+                  }
+                ],
+                "outputType": "array"
+              },
+              {
+                "name": "",
+                "module": "core",
+                "action": "condition",
+                "options": {
+                  "if": "{{package[0].id}}",
+                  "then": {
+                    "steps": {
+                      "name": "hasPackage",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": true
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    }
+                  },
+                  "else": {
+                    "steps": {
+                      "name": "hasPackage",
+                      "module": "core",
+                      "action": "setvalue",
+                      "options": {
+                        "value": false
+                      },
+                      "meta": [],
+                      "outputType": "text",
+                      "output": true
+                    }
+                  }
+                },
+                "outputType": "boolean"
+              }
+            ]
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

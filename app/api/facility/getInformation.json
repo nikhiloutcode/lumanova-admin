@@ -1,0 +1,546 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      },
+      {
+        "type": "text",
+        "name": "id"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {}
+        },
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_POST.id}}",
+          "then": {
+            "steps": {
+              "name": "facility",
+              "module": "dbconnector",
+              "action": "single",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "type": "select",
+                  "columns": [],
+                  "params": [
+                    {
+                      "operator": "equal",
+                      "type": "expression",
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    }
+                  ],
+                  "table": {
+                    "name": "facility"
+                  },
+                  "primary": "id",
+                  "joins": [],
+                  "wheres": {
+                    "condition": "AND",
+                    "rules": [
+                      {
+                        "id": "facility.id",
+                        "field": "facility.id",
+                        "type": "double",
+                        "operator": "equal",
+                        "value": "{{$_POST.id}}",
+                        "data": {
+                          "table": "facility",
+                          "column": "id",
+                          "type": "number",
+                          "columnObj": {
+                            "type": "increments",
+                            "default": "",
+                            "primary": true,
+                            "unique": true,
+                            "nullable": false,
+                            "name": "id"
+                          }
+                        },
+                        "operation": "="
+                      },
+                      {
+                        "id": "facility.disabled",
+                        "field": "facility.disabled",
+                        "type": "boolean",
+                        "operator": "equal",
+                        "value": false,
+                        "data": {
+                          "table": "facility",
+                          "column": "disabled",
+                          "type": "boolean",
+                          "columnObj": {
+                            "type": "boolean",
+                            "default": "false",
+                            "primary": false,
+                            "unique": false,
+                            "nullable": true,
+                            "name": "disabled"
+                          }
+                        },
+                        "operation": "="
+                      }
+                    ],
+                    "conditional": null,
+                    "valid": true
+                  },
+                  "query": "select * from \"facility\" where \"facility\".\"id\" = ? and \"facility\".\"disabled\" = ?"
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "logo"
+                },
+                {
+                  "type": "text",
+                  "name": "phone"
+                },
+                {
+                  "type": "boolean",
+                  "name": "disabled"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "email"
+                },
+                {
+                  "type": "text",
+                  "name": "city"
+                },
+                {
+                  "type": "text",
+                  "name": "state"
+                },
+                {
+                  "type": "text",
+                  "name": "zip"
+                },
+                {
+                  "type": "text",
+                  "name": "address1"
+                },
+                {
+                  "type": "text",
+                  "name": "address2"
+                },
+                {
+                  "type": "text",
+                  "name": "salesFirstName"
+                },
+                {
+                  "type": "text",
+                  "name": "salesLastName"
+                },
+                {
+                  "type": "text",
+                  "name": "salesEmail"
+                },
+                {
+                  "type": "text",
+                  "name": "salesPhone"
+                }
+              ],
+              "type": "dbconnector_single",
+              "outputType": "object"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "",
+              "module": "core",
+              "action": "condition",
+              "options": {
+                "if": "{{$_GET.sort}}",
+                "then": {
+                  "steps": {
+                    "name": "facilities",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "SELECT",
+                        "distinct": false,
+                        "columns": [
+                          {
+                            "table": "facility",
+                            "column": "*",
+                            "field": "*"
+                          }
+                        ],
+                        "table": {
+                          "name": "facility"
+                        },
+                        "joins": [],
+                        "wheres": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "condition": "OR",
+                              "rules": [
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "id": "facility.name",
+                                      "field": "facility.name",
+                                      "type": "string",
+                                      "operator": "contains",
+                                      "value": "{{$_GET.sort}}",
+                                      "data": {
+                                        "table": "facility",
+                                        "column": "name",
+                                        "type": "text",
+                                        "columnObj": {
+                                          "type": "string",
+                                          "maxLength": 255,
+                                          "primary": false,
+                                          "unique": false,
+                                          "nullable": true,
+                                          "name": "name"
+                                        }
+                                      },
+                                      "operation": "LIKE"
+                                    }
+                                  ],
+                                  "conditional": null
+                                },
+                                {
+                                  "condition": "AND",
+                                  "rules": [
+                                    {
+                                      "id": "facility.phone",
+                                      "field": "facility.phone",
+                                      "type": "string",
+                                      "operator": "contains",
+                                      "value": "{{$_GET.sort}}",
+                                      "data": {
+                                        "table": "facility",
+                                        "column": "phone",
+                                        "type": "text",
+                                        "columnObj": {
+                                          "type": "string",
+                                          "maxLength": 255,
+                                          "primary": false,
+                                          "unique": false,
+                                          "nullable": true,
+                                          "name": "phone"
+                                        }
+                                      },
+                                      "operation": "LIKE"
+                                    }
+                                  ],
+                                  "conditional": null
+                                }
+                              ],
+                              "conditional": null
+                            },
+                            {
+                              "id": "facility.disabled",
+                              "field": "facility.disabled",
+                              "type": "boolean",
+                              "operator": "equal",
+                              "value": false,
+                              "data": {
+                                "table": "facility",
+                                "column": "disabled",
+                                "type": "boolean",
+                                "columnObj": {
+                                  "type": "boolean",
+                                  "default": "false",
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "disabled"
+                                }
+                              },
+                              "operation": "="
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        },
+                        "orders": [],
+                        "params": [
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P1",
+                            "value": "{{$_GET.sort}}",
+                            "test": "j"
+                          },
+                          {
+                            "operator": "contains",
+                            "type": "expression",
+                            "name": ":P2",
+                            "value": "{{$_GET.sort}}",
+                            "test": "j"
+                          }
+                        ],
+                        "primary": "id",
+                        "query": "select * from \"facility\" where ((\"facility\".\"name\" like ?) or (\"facility\".\"phone\" like ?)) and \"facility\".\"disabled\" = ?"
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "logo"
+                      },
+                      {
+                        "type": "text",
+                        "name": "phone"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "disabled"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "email"
+                      },
+                      {
+                        "type": "text",
+                        "name": "city"
+                      },
+                      {
+                        "type": "text",
+                        "name": "state"
+                      },
+                      {
+                        "type": "text",
+                        "name": "zip"
+                      },
+                      {
+                        "type": "text",
+                        "name": "address1"
+                      },
+                      {
+                        "type": "text",
+                        "name": "address2"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesFirstName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesLastName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesEmail"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesPhone"
+                      }
+                    ],
+                    "outputType": "array",
+                    "type": "dbconnector_select"
+                  }
+                },
+                "else": {
+                  "steps": {
+                    "name": "facilities",
+                    "module": "dbconnector",
+                    "action": "select",
+                    "options": {
+                      "connection": "EnyrgyDB",
+                      "sql": {
+                        "type": "select",
+                        "columns": [],
+                        "params": [],
+                        "table": {
+                          "name": "facility"
+                        },
+                        "primary": "id",
+                        "joins": [],
+                        "query": "select * from \"facility\" where \"facility\".\"disabled\" = ?",
+                        "wheres": {
+                          "condition": "AND",
+                          "rules": [
+                            {
+                              "id": "facility.disabled",
+                              "field": "facility.disabled",
+                              "type": "boolean",
+                              "operator": "equal",
+                              "value": false,
+                              "data": {
+                                "table": "facility",
+                                "column": "disabled",
+                                "type": "boolean",
+                                "columnObj": {
+                                  "type": "boolean",
+                                  "default": "false",
+                                  "primary": false,
+                                  "unique": false,
+                                  "nullable": true,
+                                  "name": "disabled"
+                                }
+                              },
+                              "operation": "="
+                            }
+                          ],
+                          "conditional": null,
+                          "valid": true
+                        }
+                      }
+                    },
+                    "output": true,
+                    "meta": [
+                      {
+                        "type": "number",
+                        "name": "id"
+                      },
+                      {
+                        "type": "text",
+                        "name": "logo"
+                      },
+                      {
+                        "type": "text",
+                        "name": "phone"
+                      },
+                      {
+                        "type": "boolean",
+                        "name": "disabled"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "createdAt"
+                      },
+                      {
+                        "type": "datetime",
+                        "name": "updatedAt"
+                      },
+                      {
+                        "type": "text",
+                        "name": "name"
+                      },
+                      {
+                        "type": "text",
+                        "name": "email"
+                      },
+                      {
+                        "type": "text",
+                        "name": "city"
+                      },
+                      {
+                        "type": "text",
+                        "name": "state"
+                      },
+                      {
+                        "type": "text",
+                        "name": "zip"
+                      },
+                      {
+                        "type": "text",
+                        "name": "address1"
+                      },
+                      {
+                        "type": "text",
+                        "name": "address2"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesFirstName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesLastName"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesEmail"
+                      },
+                      {
+                        "type": "text",
+                        "name": "salesPhone"
+                      }
+                    ],
+                    "outputType": "array"
+                  }
+                }
+              },
+              "outputType": "boolean"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

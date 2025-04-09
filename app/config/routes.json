@@ -1,0 +1,131 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "page": "index",
+      "routeType": "page",
+      "layout": "main",
+      "exec": "",
+      "name": "login"
+    },
+    {
+      "path": "/facilities/",
+      "page": "facilities/index",
+      "name": "facilities",
+      "layout": "main",
+      "exec": "/api/auth/validateSession"
+    },
+    {
+      "path": "/facility/:id/",
+      "name": "facilityDetails",
+      "layout": "main",
+      "page": "facility/index",
+      "exec": "/api/auth/validateSession"
+    },
+    {
+      "path": "/users/",
+      "page": "users/index",
+      "layout": "main",
+      "name": "users",
+      "exec": ""
+    },
+    {
+      "path": "/devices/",
+      "page": "devices/index",
+      "layout": "main",
+      "exec": "/api/auth/validateSession",
+      "name": "devices"
+    },
+    {
+      "path": "/packages/",
+      "page": "packages/index",
+      "layout": "main",
+      "exec": "/api/auth/validateSession",
+      "name": "packages"
+    },
+    {
+      "path": "/message/",
+      "page": "message",
+      "layout": "main",
+      "name": "message"
+    },
+    {
+      "path": "/welcome/",
+      "name": "welcome",
+      "layout": "main",
+      "page": "welcome",
+      "exec": ""
+    },
+    {
+      "path": "/facility/:id/clients/",
+      "page": "facility/clients/index",
+      "layout": "main",
+      "name": "facilityClients"
+    },
+    {
+      "path": "/facility/:id/devices/",
+      "page": "facility/devices/index",
+      "layout": "main",
+      "name": "facilityDevices"
+    },
+    {
+      "path": "/facility/:id/packages/",
+      "page": "facility/packages/index",
+      "layout": "main",
+      "name": "facilityPackages"
+    },
+    {
+      "path": "/facility/:id/users/",
+      "page": "facility/users/index",
+      "layout": "main",
+      "name": "facilityUsers"
+    },
+    {
+      "path": "/facility/:id/client/:clientId/",
+      "page": "facility/client/index",
+      "layout": "main",
+      "name": "clientDetails"
+    },
+    {
+      "path": "/facility/:id/profile/",
+      "page": "facility/profile/index",
+      "layout": "main",
+      "name": "facilityProfile"
+    },
+    {
+      "path": "/reports/:month/:year",
+      "page": "reports/index",
+      "layout": "main",
+      "name": "reports"
+    },
+    {
+      "path": "/reports/payable/:month/:year",
+      "name": "reports",
+      "page": "reports/payable",
+      "layout": "main"
+    },
+    {
+      "path": "/reports/",
+      "name": "reports",
+      "page": "reports/index",
+      "layout": "main"
+    },
+    {
+      "path": "/reports/facility/:facilityId/:month/:year",
+      "page": "reports/facility",
+      "layout": "main",
+      "name": "facilityReports"
+    },
+    {
+      "path": "/delete-request/",
+      "page": "deleteAccount",
+      "layout": "main",
+      "name": "deleteAccount"
+    }
+  ],
+  "layouts": {
+    "main": {
+      "exec": ""
+    }
+  }
+}

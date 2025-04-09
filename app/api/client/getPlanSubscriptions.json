@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        }
+      },
+      {
+        "name": "planSubscriptions",
+        "module": "dbupdater",
+        "action": "custom",
+        "options": {
+          "connection": "EnyrgyDB",
+          "sql": {
+            "query": "SELECT dp.id as \"paymentId\", dp.\"planId\", p.\"limitSessions\"\nFROM client c\nLEFT JOIN \"user\" u ON u.id = c.\"userId\"\nINNER JOIN \"detailsPayment\" dp ON dp.\"clientId\" = c.id\nLEFT JOIN plans p on p.id = dp.\"planId\"\nWHERE c.\"userId\" = :P1\nORDER BY dp.id ASC",
+            "params": [
+              {
+                "name": ":P1",
+                "value": "{{jwt.userId}}",
+                "test": "232"
+              }
+            ]
+          }
+        },
+        "output": true,
+        "meta": [
+          {
+            "name": "paymentId",
+            "type": "number"
+          },
+          {
+            "name": "planId",
+            "type": "number"
+          },
+          {
+            "name": "limitSessions",
+            "type": "text"
+          }
+        ]
+      }
+    ]
+  }
+}

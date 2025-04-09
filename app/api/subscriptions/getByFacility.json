@@ -1,0 +1,244 @@
+{
+  "meta": {
+    "$_GET": [
+      {
+        "type": "text",
+        "name": "sort"
+      },
+      {
+        "type": "text",
+        "name": "dir"
+      }
+    ],
+    "$_POST": [
+      {
+        "type": "text",
+        "options": {
+          "rules": {
+            "core:required": {}
+          }
+        },
+        "name": "id"
+      }
+    ],
+    "$_SERVER": [
+      {
+        "type": "text",
+        "name": "HTTP_AUTHORIZATION"
+      }
+    ]
+  },
+  "exec": {
+    "steps": [
+      {
+        "name": "jwt",
+        "module": "core",
+        "action": "exec",
+        "options": {
+          "exec": "utils/verifyJWT",
+          "params": {
+            "token": "{{$_SERVER.HTTP_AUTHORIZATION}}"
+          }
+        },
+        "output": false
+      },
+      {
+        "name": "",
+        "module": "core",
+        "action": "condition",
+        "options": {
+          "if": "{{$_GET.sort}}",
+          "then": {
+            "steps": {
+              "name": "packages",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "query": "SELECT s.*, p.name AS plan, p.id AS \"planId\",p.amount AS \"amountPlan\",p.\"limitSessions\" as treatments\nFROM facility AS f\nINNER JOIN \"detailsFacility\" AS df ON df.\"facilityId\" = f.id \nINNER JOIN subscriptions AS s ON s.id = df.\"subscriptionId\"\nleft JOIN \"detailsSubscription\" as ds ON ds.\"subscriptionId\" = s.id\nleft JOIN \"plans\" AS p ON p.id = ds.\"plansId\"\nWHERE f.id = :P1 /* {{$_POST.id}} */ AND (f.name = :P2 /* {{$_GET.sort}} */ OR s.name = :P3 /* {{$_GET.sort}} */ OR s.amount = :P4 /* {{$_GET.sort}} */)",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P2",
+                      "value": "{{$_GET.sort}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P3",
+                      "value": "{{$_GET.sort}}",
+                      "test": ""
+                    },
+                    {
+                      "name": ":P4",
+                      "value": "{{$_GET.sort}}",
+                      "test": ""
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "type": "number",
+                  "name": "id"
+                },
+                {
+                  "type": "text",
+                  "name": "logo"
+                },
+                {
+                  "type": "text",
+                  "name": "phone"
+                },
+                {
+                  "type": "boolean",
+                  "name": "disabled"
+                },
+                {
+                  "type": "datetime",
+                  "name": "createdAt"
+                },
+                {
+                  "type": "datetime",
+                  "name": "updatedAt"
+                },
+                {
+                  "type": "text",
+                  "name": "name"
+                },
+                {
+                  "type": "text",
+                  "name": "email"
+                },
+                {
+                  "type": "text",
+                  "name": "city"
+                },
+                {
+                  "type": "text",
+                  "name": "state"
+                },
+                {
+                  "type": "text",
+                  "name": "zip"
+                },
+                {
+                  "type": "text",
+                  "name": "address1"
+                },
+                {
+                  "type": "text",
+                  "name": "address2"
+                },
+                {
+                  "type": "text",
+                  "name": "amount"
+                },
+                {
+                  "type": "text",
+                  "name": "description"
+                },
+                {
+                  "type": "text",
+                  "name": "duration"
+                },
+                {
+                  "type": "number",
+                  "name": "numberDuration"
+                },
+                {
+                  "type": "text",
+                  "name": "plan"
+                },
+                {
+                  "type": "number",
+                  "name": "planId"
+                }
+              ],
+              "outputType": "array",
+              "type": "dbcustom_query"
+            }
+          },
+          "else": {
+            "steps": {
+              "name": "packages",
+              "module": "dbupdater",
+              "action": "custom",
+              "options": {
+                "connection": "EnyrgyDB",
+                "sql": {
+                  "query": "SELECT s.*, p.name AS plan, p.id AS \"planId\",p.amount AS \"amountPlan\",p.\"limitSessions\" as treatments\nFROM facility AS f\nINNER JOIN \"detailsFacility\" AS df ON df.\"facilityId\" = f.id \nINNER JOIN subscriptions AS s ON s.id = df.\"subscriptionId\"\nleft JOIN \"detailsSubscription\" as ds ON ds.\"subscriptionId\" = s.id\nleft JOIN \"plans\" AS p ON p.id = ds.\"plansId\"\nWHERE f.id = :P1 /* {{$_POST.facilityId}} */",
+                  "params": [
+                    {
+                      "name": ":P1",
+                      "value": "{{$_POST.id}}",
+                      "test": "21"
+                    }
+                  ]
+                }
+              },
+              "output": true,
+              "meta": [
+                {
+                  "name": "id",
+                  "type": "number"
+                },
+                {
+                  "name": "name",
+                  "type": "text"
+                },
+                {
+                  "name": "amount",
+                  "type": "text"
+                },
+                {
+                  "name": "createdAt",
+                  "type": "datetime"
+                },
+                {
+                  "name": "updatedAt",
+                  "type": "datetime"
+                },
+                {
+                  "name": "description",
+                  "type": "text"
+                },
+                {
+                  "name": "duration",
+                  "type": "text"
+                },
+                {
+                  "name": "numberDuration",
+                  "type": "number"
+                },
+                {
+                  "name": "plan",
+                  "type": "text"
+                },
+                {
+                  "name": "planId",
+                  "type": "number"
+                },
+                {
+                  "name": "amountPlan",
+                  "type": "text"
+                },
+                {
+                  "name": "treatments",
+                  "type": "text"
+                }
+              ],
+              "type": "dbcustom_query"
+            }
+          }
+        },
+        "outputType": "boolean"
+      }
+    ]
+  }
+}

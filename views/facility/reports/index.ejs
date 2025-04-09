@@ -1,0 +1,130 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxBootstrap5Navigation:{}}" -->
+<meta name="ac:route" content="/facility/:id/reports/">
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/reports/getInformationFacility" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value" dmx-param:id="query.id"></dmx-api-datasource>
+
+<header>
+    <div class="row">
+        <div class="row bg-header ps-4 pt-4">
+            <div class="col-3">
+                <h1 class="title-section">
+                    <p>Reports</p>
+                </h1>
+            </div>
+
+            <div class="col-5">
+                <input id="search" name="search" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+            </div>
+            <div class="col-2">
+                <div class="d-flex position-relative">
+                    <select id="month" class="form-select input-select-date">
+                        <option selected="" value="0">Select month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <img id="uploadMonth" class="image-upload" src="/assets/images/down.svg" width="20px">
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="d-flex position-relative">
+                    <select id="year" class="form-select input-select-date">
+                        <option value="0">Select year</option>
+                        <option value="2023">2023</option>
+                    </select>
+                    <img id="uploadYear" class="image-upload" src="/assets/images/down.svg" width="20px">
+                </div>
+            </div>
+        </div>
+        <div class="col-12 bg-facility-title" dmx-show="getMe.data.user.adminView">
+
+            <div class="nav w-100">
+                <a class="nav-item nav-link go-back" href="/reports/"><img src="/assets/images/back.png"> Go back</a>
+            </div>
+        </div>
+    </div>
+</header>
+<br>
+<div class="container">
+    <div class="row" dmx-show="getMe.data.user.adminView">
+        <div class="col-10">
+            <h1 class="facility-name">
+                <p>{{getInformation.data.name}}</p>
+            </h1>
+        </div>
+        <div class="col-2">
+            <img src="" width="175px" dmx-bind:src="getInformation.data.logo">
+        </div>
+    </div>
+    <div class="row position-relative" dmx-class:height-reports-admin="getMe.data.user.adminView" dmx-class:height-reports-facility="getMe.data.user.name!='adminEnyrgy'&amp;&amp;getMe.data.user.name!='shipperEnyrgy'">
+        <div class="row">
+            <br>
+            <br>
+            <div class="col">
+                <div class="row">
+                    <div class="col-10">
+                        <p style="" class="results-data">Showing <b class="results-data-bold">{{getInformation.data.array.data.length}}</b> results</p>
+                    </div>
+                    <div class="col-2 d-flex justify-content-end">
+                        <button id="csv" class="btn export-csv-button">Export CSV</button>
+                    </div>
+                </div>
+                <br>
+                <div class="row">
+                    <div class="col">
+                        <table class="table rowAlternate">
+                            <thead>
+                                <tr>
+
+                                    <th scope="col" class="table-header">Date</th>
+                                    <th scope="col" class="table-header">Client name</th>
+                                    <th scope="col" class="table-header">Plan</th>
+                                    <th scope="col" class="table-header">Treatments</th>
+                                    <th scope="col" class="table-header">Facility total</th>
+                                    <th scope="col" class="table-header">Energy total</th>
+                                    <th scope="col" class="table-header">Commission</th>
+                                </tr>
+                            </thead>
+                            <tbody is="dmx-repeat" id="reportsData" dmx-bind:repeat="getInformation.data.array.data" key="id">
+                                <tr>
+
+                                    <td class="table-content">{{date}}</td>
+                                    <td class="table-content title-client-table">{{name}}</td>
+                                    <td class="table-content">{{plan}}</td>
+                                    <td class="table-content">{{treatments}}</td>
+                                    <td class="table-content">{{facilityTotal}}</td>
+                                    <td class="table-content">{{enyrgyTotal}}</td>
+                                    <td class="table-content">{{commission}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row footer-reports d-flex justify-content-between">
+            <div class="d-flex col-7">
+                <h3 class="footer-reports-total">Total</h3>
+            </div>
+            <div class="d-flex col-5 justify-content-between">
+                <div>
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">$1,021.95</h3>
+                </div>
+                <div>
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">$799.40</h3>
+                </div>
+                <div>
+                    <h3 class="footer-reports-amount footer-reports-amount-bg">$28.42</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

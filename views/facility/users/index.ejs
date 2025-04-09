@@ -1,0 +1,200 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appConnect="local" components="{dmxDataTraversal:{}}" components="{dmxDataTraversal:{},dmxStateManagement:{}}" components="{dmxDataTraversal:{},dmxStateManagement:{}}" -->
+<dmx-session-manager id="session"></dmx-session-manager>
+<dmx-api-datasource id="getRoles" is="dmx-fetch" url="/api/roles/getFacility" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value" dmx-on:unauthorized="browser.goto('/')"></dmx-api-datasource>
+<dmx-api-datasource id="getInformation" is="dmx-fetch" url="/api/facility/getFacilityDetails" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-param:sort="search.value" dmx-param:id="query.id" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error getting information')" dmx-on:success="notifies.success('Information Read')"></dmx-api-datasource>
+<meta name="ac:route" content="/facility/:id/users/">
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+
+            <div class="row bg-header pt-4">
+
+                <div class="col-3">
+                    <h1 class="title-section">
+                        <p>Users</p>
+                    </h1>
+                </div>
+                <div class="col">
+                    <input id="search" name="search" type="text" class="form-control" placeholder="Search" is="dmx-input" value="" dmx-on:changed="">
+                </div>
+                <div class="col-2">
+                    <button id="createUser" class="btn add-button" data-bs-toggle="modal" data-bs-target="#userCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.users">Add</button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <p style="" class="results-data">Showing <b class="results-data-bold">{{getInformation.data.employees.length}}</b> results</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <table class="table rowAlternate">
+                        <thead>
+                            <tr>
+
+                                <th scope="col" class="table-header">User type</th>
+                                <th scope="col" class="table-header">Name</th>
+                                <th scope="col" class="table-header">Email</th>
+                                <th scope="col" class="table-header">Phone</th>
+                                <th scope="row"></th>
+                            </tr>
+                        </thead>
+                        <tbody is="dmx-repeat" id="usersData" dmx-bind:repeat="getInformation.data.employees" key="id">
+                            <tr>
+
+                                <td class="table-content">{{roleName}}</td>
+                                <td class="table-content">{{firstName + " " + lastName}}</td>
+                                <td class="table-content">{{email}}</td>
+                                <td class="table-content" dmx-show="phone">{{countryCode}} {{'('+phone.substr(0,3)+') '+phone.substr(3, 3)+'-'+phone.substr(6, 4)}}</td>
+                                <td class="table-content" dmx-hide="phone">-</td>
+                                <td style="">
+                                    <div class="dropdown" dmx-show="getMe.data.user.users&amp;&amp;getInformation.data.employees[$index].roleName!=='Owner'">
+                                        <button id="actions" class="btn details-data" type="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdown1">
+
+                                            <a class="dropdown-item" href="#" dmx-on:click="userUpdateModal.show();userUpdateModal.data_user.select(id)" id="editAction">Edit</a>
+                                            <a class="dropdown-item" href="#" dmx-on:click="run({'bootbox.confirm':{message:'Are you sure you want to delete?',title:'Confirm',buttons:{confirm:{label:'Yes, confirm',className:'btn-primary'},cancel:{label:'Cancel'}},then:{steps:{run:{action:`deleteUser.submit();getInformation.load({})`,name:'submit',outputType:'text'}}},name:'Confirmation'}})" id="deleteAction">Delete</a><a class="dropdown-item" href="#" id="inviteAction" dmx-on:click="invitationUser.submit()">Invite</a>
+                                        </div>
+                                    </div>
+                                    <form id="deleteUser" method="post" is="dmx-api-form" action="/api/user/delete" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="getInformation.load({});notifies.success('User deleted')" dmx-on:unauthorized="browser.goto('/')" dmx-on:error="notifies.danger('Error deleting user')">
+
+                                        <input id="id" name="id" class="form-control" dmx-bind:value="getInformation.data.employees[$index].id" type="hidden"><button id="delete" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+                                    <form id="invitationUser" method="post" is="dmx-api-form" action="/api/auth/invitation" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" dmx-on:success="notifies.success('User invited')" dmx-on:error="notifies.danger('Error inviting user')">
+
+                                        <input id="userId" name="userId" class="form-control" dmx-bind:value="getInformation.data.employees[$index].id" type="hidden"><button id="invitation" class="btn visually-hidden" type="submit"></button>
+                                    </form>
+
+
+
+
+
+
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="userCreateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header bg-header-modal">
+                    <h2 class="modal-title title-modal">Add an employee</h2>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                    <br><br>
+                    <form id="userForm" method="post" is="dmx-api-form" action="/api/user/create" novalidate="" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'User already exists\')`,outputType:'text'}}},else:{steps:[{run:{action:`userCreateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({},true)`,outputType:'text'}},{run:{action:`notifies.success(\'User created\')`,outputType:'text'}}]},outputType:'boolean'}})" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error creating user')" dmx-on:invalid="run([{condition:{if:`lastError.response.data.email`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.email)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.phone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.phone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.firstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.firstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.lastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.lastName)`,outputType:'text'}}},outputType:'boolean'}}])">
+                        <div class="row">
+                            <div class="form-group md-3 col-6" id="firstNameForm">
+                                <input type="text" class="form-control input-text" id="firstName" name="firstName" aria-describedby="emailLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return /[a-z]/i.test(event.key)" required>
+                            </div>
+                            <div class="form-group md-3 col-6" id="lastNameForm">
+                                <input type="text" class="form-control input-text" id="lastName" name="lastName" aria-describedby="emailLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return /[a-z]/i.test(event.key)" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group md-3 col-6" id="roleIdForm">
+                                <select id="role" class="form-select input-select" name="role" is="dmx-select" dmx-bind:options="getRoles.data.roles" optiontext="description" optionvalue="id" dmx-on:changed.prevent="roleId.setValue(value)">
+                                    <option value="0">User type</option>
+                                </select>
+                                <input id="roleId" name="roleId" type="hidden" class="form-control">
+                            </div>
+                            <div class="form-group md-3 col-6 d-flex gap-2 mb-2" id="phoneForm">
+                                <input name="isValidNumber" type="hidden" class="form-control validate-input">
+                                <input type="tel" class="form-control input-text intl-phone" placeholder="Phone">
+                            </div>
+                        </div>
+                        <div class="form-group md-3" id="emailForm">
+                            <input type="email" class="form-control input-text" id="email" name="email" aria-describedby="emailLabel" placeholder="Email" is="dmx-input" value="" required>
+                        </div>
+                        <div class="form-group md-3">
+                            <input id="facility" name="facility" type="hidden" class="form-control" value="true">
+                            <input id="invite" name="invite" type="hidden" class="form-control">
+                            <input id="facilityId" name="facilityId" type="hidden" class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary save-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run({condition:{if:`!userForm.firstName.value||!userForm.lastName.value||!userForm.roleId.value||!userForm.email.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:{condition:{if:`userForm.isValidNumber.value==0`,then:{steps:{run:{action:`notifies.warning(\'Invalid Phone Number\')`,outputType:'text'}}},else:{steps:[{run:{action:`userForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`userForm.invite.setValue(false)`,outputType:'text'}},{run:{action:`userForm.submit()`,outputType:'text'}},{run:{action:`userForm.reset()`,outputType:'text'}},{run:{action:`userCreateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})">Add
+                    </button>
+                    <button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="saveInvite" dmx-on:click="run({condition:{if:`!userForm.firstName.value||!userForm.lastName.value||!userForm.roleId.value||!userForm.email.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:{condition:{if:`userForm.isValidNumber.value===0`,then:{steps:{run:{action:`notifies.warning(\'Invalid Phone Number\')`,outputType:'text'}}},else:{steps:[{run:{action:`userForm.invite.setValue(true)`,outputType:'text'}},{run:{action:`userForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`userForm.submit()`,outputType:'text'}},{run:{action:`userForm.reset()`,outputType:'text'}},{run:{action:`userCreateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})">Add & invite
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="userUpdateModal" is="dmx-bs5-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+
+                <div class="modal-header bg-header-modal">
+                    <h5 class="modal-title title-modal">Edit a employee</h5>
+                    <button class="btn-close" data-bs-dismiss="modal" aria-label="Close" is="dmx-button" value="" type="button"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="container" is="dmx-data-detail" id="data_user" dmx-bind:data="getInformation.data.employees" key="id">
+                        <form id="userForm" method="post" is="dmx-api-form" action="/api/user/update" novalidate="" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'User already exists\')`,outputType:'text'}}},else:{steps:[{run:{action:`userUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({},true)`,outputType:'text'}},{run:{action:`notifies.success(\'User updated\')`,outputType:'text'}}]},outputType:'boolean'}})" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error updating user')" dmx-on:invalid="run([{condition:{if:`lastError.response.data.email`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.email)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.phone`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.phone)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.firstName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.firstName)`,outputType:'text'}}},outputType:'boolean'}},{condition:{if:`lastError.response.data.lastName`,then:{steps:{run:{action:`notifies.danger(lastError.response.data.lastName)`,outputType:'text'}}},outputType:'boolean'}}])">
+                            <small class="text-muted fill-inputs-modal">Please complete following fields:</small>
+                            <br>
+                            <br>
+
+                            <div class="form-group md-3" id="idForm">
+                                <input type="hidden" class="form-control" id="id" name="id" aria-describedby="input1_help" placeholder="" dmx-bind:value="data_user.data.id">
+                            </div>
+                            <div class="row">
+                                <div class="form-group md-3 col-6" id="firstNameForm">
+                                    <input type="text" class="form-control input-text" id="firstName" name="firstName" aria-describedby="emailLabel" placeholder="First Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return /[a-z]/i.test(event.key)" required dmx-bind:value="data_user.data.firstName">
+                                </div>
+                                <div class="form-group md-3 col-6" id="lastNameForm">
+                                    <input type="text" class="form-control input-text" id="lastName" name="lastName" aria-describedby="emailLabel" placeholder="Last Name" is="dmx-input" value="" minlength="3" maxlength="50" onkeydown="return /[a-z]/i.test(event.key)" required dmx-bind:value="data_user.data.lastName">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group md-3 col-6" id="roleIdForm">
+                                    <select id="role" class="form-select input-select" name="role" is="dmx-select" dmx-bind:value="data_user.data.roleId" dmx-bind:options="getRoles.data.roles" optiontext="description" optionvalue="id" dmx-on:changed.prevent="roleId.setValue(value)">
+                                    </select>
+                                    <input id="roleId" name="roleId" type="hidden" class="form-control" dmx-bind:value="data_user.data.roleId">
+                                </div>
+                                <div class="form-group md-3 col-6 d-flex gap-2" id="phoneForm">
+                                    <input id="countryCode" name="countryCode" type="hidden" class="form-control">
+                                    <select id="select10" class="form-select form-control" style="max-width:100px;height:38px;" dmx-on:changed.prevent="countryCode.setValue(value)" dmx-bind:value="data_user.data.countryCode">
+                                        <option value="">Select Code</option>
+                                        <option value="+1">+1</option>
+                                        <option value="+64">+64</option>
+                                    </select>
+                                    <input type="tel" class="form-control input-text" id="phone" name="phone" aria-describedby="emailLabel" placeholder="Phone" is="dmx-input" value="" required="" dmx-bind:value="data_user.data.phone" onkeyup="validatePhone(this)">
+                                </div>
+                            </div>
+                            <div class="form-group md-3" id="emailForm">
+                                <input type="email" class="form-control input-text" id="email" name="email" aria-describedby="emailLabel" placeholder="Email" is="dmx-input" value="" required dmx-bind:value="data_user.data.email">
+                            </div>
+
+
+
+
+                            <div class="form-group md-3">
+                                <input id="invite" name="invite" type="hidden" class="form-control">
+                                <input id="facilityId" name="facilityId" type="hidden" class="form-control">
+                                <input id="facility" name="facility" type="hidden" class="form-control" value="true">
+
+
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-footer-modal"><button class="btn btn-primary save-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="save" dmx-on:click="run({condition:{if:`!data_user.userForm.firstName.value||!data_user.userForm.lastName.value||!data_user.userForm.roleId.value||!data_user.userForm.phone.value||!data_user.userForm.email.value||!data_user.userForm.countryCode.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_user.userForm.invite.setValue(false)`,outputType:'text'}},{run:{action:`data_user.userForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`data_user.userForm.submit()`,outputType:'text'}},{run:{action:`data_user.userForm.reset()`,outputType:'text'}},{run:{action:`userUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Add</button>
+                    <button class="btn btn-primary bg-button" is="dmx-button" value="" type="submit" data-bs-target="#userModal" id="saveInvite" dmx-on:click="run({condition:{if:`!data_user.userForm.firstName.value||!data_user.userForm.lastName.value||!data_user.userForm.roleId.value||!data_user.userForm.phone.value||!data_user.userForm.email.value||!data_user.userForm.countryCode.value`,then:{steps:{run:{action:`notifies.warning(\'Fill all data\')`,outputType:'text'}}},else:{steps:[{run:{action:`data_user.userForm.invite.setValue(true)`,outputType:'text'}},{run:{action:`data_user.userForm.facilityId.setValue(query.id)`,outputType:'text'}},{run:{action:`data_user.userForm.submit()`,outputType:'text'}},{run:{action:`data_user.userForm.reset()`,outputType:'text'}},{run:{action:`userUpdateModal.hide()`,outputType:'text'}},{run:{action:`getInformation.load({})`,outputType:'text'}}]},outputType:'boolean'}})">Add & invite</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
