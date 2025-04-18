@@ -5,7 +5,7 @@
   <base href="/">
   <script src="/dmxAppConnect/dmxAppConnect.js"></script>
   <meta charset="UTF-8">
-  <title>Enyrgy</title>
+  <title>Lumanova</title>
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.14.0/css/all.css" integrity="sha384-HzLeBuhoNPvSl5KYnjx0BT+WB0QEEqLprO+NBkkk5gbc67FTaL7XIGa2w1L0Xbgc" crossorigin="anonymous" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -56,21 +56,21 @@
   <dmx-api-datasource id="getMe" is="dmx-fetch" url="/api/user/getMe" dmx-header:authorization="'Bearer '+session.data.jwt"></dmx-api-datasource>
 
 
-  <div class="wappler-block h-100">
+  <div class="wappler-block  h-100">
     <div class="row h-100">
       <div class="col-12 col-lg-2 bg-sidebar col-sm-2 row" id="sidebar">
         <div class="col-12">
-          <img class="p-4" src="/assets/images/logo.svg">
+          <img class="p-4" width="220" src="/assets/images/logo.png">
           <br>
-          <span class="text-sidebar-title1 p-4">Fuel your immunity</span>
-          <p class="text-sidebar-title2 ps-4">Naturally</p>
+          <span class="text-sidebar-title1 p-4"></span>
+          <p class="text-sidebar-title2 ps-4"></p>
 
 
           <div id="adminSidebar" class="nav w-100 flex-column" dmx-show="getMe.data.user.adminView">
             <br>
             <a id="facilities" class="nav-item nav-link text-sidebar ps-4" href="/facilities/">Locations</a>
             <a id="users" class="nav-item nav-link text-sidebar ps-4" href="/users/">Users</a>
-            <a id="packages" class="nav-item nav-link text-sidebar ps-4" href="/packages/">Plans</a>
+            <!-- <a id="packages" class="nav-item nav-link text-sidebar ps-4" href="/packages/">Plans</a> -->
             <a id="devices" class="nav-item nav-link text-sidebar ps-4" href="/devices/">Devices</a>
             <a id="reports" class="nav-item nav-link text-sidebar ps-4" href="/reports/">Reports</a>
           </div>
