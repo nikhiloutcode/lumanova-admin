@@ -393,7 +393,7 @@
                                 "subject": "Your invitation link",
                                 "fromName": "Enyrgy Invitation Link",
                                 "fromEmail": "{{$_ENV.SENDGRID_EMAIL}}",
-                                "body": "<p>You've been invited to Enyrgy</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.enyrgy.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/us/app/enyrgy/id6450723326\" target=\"_blank\">iOS</a>",
+                                "body": "<p>You've been invited to Lumanova</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"{{PLAYSTORE_APP}}\" target=\"_blank\">Android</a>\n<br />\n<a href=\"{{APPSTORE_APP}}\" target=\"_blank\">iOS</a>",
                                 "toEmail": "{{user.email}}",
                                 "contentType": "html"
                               }
@@ -409,7 +409,7 @@
                                 "subject": "Your invitation link",
                                 "fromName": "Enyrgy Invitation Link",
                                 "fromEmail": "{{$_ENV.SENDGRID_EMAIL}}",
-                                "body": "<p>You've been invited to Enyrgy</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.enyrgy.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/us/app/enyrgy/id6450723326\" target=\"_blank\">iOS</a>",
+                                "body": "<p>You've been invited to Lumanova</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.enyrgy.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/us/app/enyrgy/id6450723326\" target=\"_blank\">iOS</a>",
                                 "toEmail": "{{user.email}}",
                                 "contentType": "html"
                               }

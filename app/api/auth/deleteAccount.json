@@ -490,7 +490,7 @@
                                 "exec": "utils/sendSMS",
                                 "params": {
                                   "to": "{{phone}}",
-                                  "body": "{{'Enyrgy invites you to sign in: '+$_ENV.HOST+'/sms/'+code}}"
+                                  "body": "{{'Lumanova invites you to sign in: '+$_ENV.HOST+'/sms/'+code}}"
                                 }
                               }
                             }
