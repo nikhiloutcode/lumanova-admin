@@ -1482,7 +1482,7 @@
                                 "exec": "utils/sendSMS",
                                 "params": {
                                   "to": "{{$_POST.countryCode+phone}}",
-                                  "body": "{{'Enyrgy invites you to sign in: '+$_ENV.HOST+'/sms/'+code}}"
+                                  "body": "{{'Lumanova invites you to sign in: '+$_ENV.HOST+'/sms/'+code}}"
                                 }
                               }
                             }
@@ -2182,7 +2182,7 @@
                                 "exec": "utils/sendSMS",
                                 "params": {
                                   "to": "{{$_POST.countryCode+phone}}",
-                                  "body": "{{'Enyrgy invites you to sign in:  '+$_ENV.HOST+'/sms/'+code}}"
+                                  "body": "{{'Lumanova invites you to sign in:  '+$_ENV.HOST+'/sms/'+code}}"
                                 }
                               }
                             }
