@@ -321,10 +321,10 @@
                 "options": {
                   "instance": "sendgrid",
                   "subject": "Your authentication link",
-                  "fromName": "Enyrgy Authentication Link",
+                  "fromName": "Lumanova Authentication Link",
                   "fromEmail": "{{$_ENV.SENDGRID_EMAIL}}",
                   "toEmail": "{{$_POST.email}}",
-                  "body": "<p>Welcome to the Enyrgy Admin. Please click the link below to log in.<br>  <a href={{$_ENV.HOST}}/api/auth/verify?code={{code}}>Click here to login</a></p>",
+                  "body": "<p>Welcome to the Lumanova Admin. Please click the link below to log in.<br>  <a href={{$_ENV.HOST}}/api/auth/verify?code={{code}}>Click here to login</a></p>",
                   "contentType": "html"
                 }
               }
