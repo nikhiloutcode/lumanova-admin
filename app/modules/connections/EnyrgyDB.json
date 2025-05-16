@@ -9,7 +9,10 @@
       "port": "{{$_ENV.DB_PORT}}",
       "user": "{{$_ENV.DB_USER}}",
       "password": "{{$_ENV.DB_PASS}}",
-      "database": "{{$_ENV.DB_NAME}}"
+      "database": "{{$_ENV.DB_NAME}}",
+      "ssl": {
+        "rejectUnauthorized": false
+      }
     },
     "meta": {}
   },
