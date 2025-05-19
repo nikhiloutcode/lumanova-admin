@@ -2,10 +2,10 @@
   {
     "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
-      "namespace": "com.enyrgy.app",
-      "package_name": "com.enyrgy.app",
+      "namespace": "com.lumanova.app",
+      "package_name": "com.lumanova.app",
       "sha256_cert_fingerprints": [
-        "83:74:61:AD:36:9C:04:6A:E9:DC:2D:BC:AE:E9:D6:3E:7A:08:F7:1B:BE:D6:5E:E1:E0:B8:25:04:04:13:E5:01"
+        "93:33:D3:E4:D5:10:F7:F6:C3:6D:59:B8:81:49:B5:83:21:83:29:04:16:3A:20:2C:B6:79:3F:17:E5:05:5B:0A"
       ]
     }
   }
