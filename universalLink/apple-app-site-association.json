@@ -1,24 +1,19 @@
 {
-    "applinks": {
-        "apps": [],
-        "details": [
-            {
-                "appID": "9897Q4TT78.com.enyrgy.app",
-                "components": [
-                    {
-                        "/": "/sms/*"
-                    },
-                    {
-                        "/": "/scan/*"
-                    }
-                ],
-                "paths": [
-                    "/sms/",
-                    "/sms/*",
-                    "/scan/",
-                    "/scan/*"
-                ]
-            }
-        ]
-    }
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "9897Q4TT78.com.lumanova.app",
+        "components": [
+          {
+            "/": "/sms/*"
+          },
+          {
+            "/": "/scan/*"
+          }
+        ],
+        "paths": ["/sms/", "/sms/*", "/scan/", "/scan/*"]
+      }
+    ]
+  }
 }
