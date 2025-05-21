@@ -3,9 +3,9 @@
   "module": "mail",
   "action": "setup",
   "options": {
-    "host": "smtp.sendgrid.net",
+    "host": "smtp-broadcasts.postmarkapp.com",
     "port": 587,
-    "username": "apikey",
+    "username": "43096975-e761-496d-abdc-2b3f5f57e269",
     "password": "{{$_ENV.SENDGRID_KEY}}"
   }
 }
