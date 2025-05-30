@@ -54,8 +54,8 @@
                                     <th scope="col" class="table-header" style="width: 30%">Location name</th>
                                     <th scope="col" class="table-header text-center" style="width: 17.5%">Treatments</th>
                                     <th scope="col" class="table-header text-center" style="width: 17.5%">Locations</th>
-                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Lumanova balance</th>
-                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Lumanova profit</th>
+                                    <!-- <th scope="col" class="table-header text-center" style="width: 17.5%">Lumanova balance</th>
+                                    <th scope="col" class="table-header text-center" style="width: 17.5%">Lumanova profit</th> -->
                                 </tr>
                             </thead>
                             <tbody is="dmx-repeat" key="id" dmx-bind:repeat="getMonthlyEarnings.data.facilitiesLoop" id="monthlyEarnings">
@@ -64,8 +64,8 @@
                                     <td class="table-content title-facility-table p-auto" dmx-on:click="browser.goto('/reports/facility/'+$value.id+'/'+query.month+'/'+query.year+'/')">{{name}}</td>
                                     <td class="table-content text-center">{{totalTreatments}}</td>
                                     <td class="table-content text-center">{{'$'+totalFacility}}</td>
-                                    <td class="table-content text-center">{{'$'+enyrgyBalance}}</td>
-                                    <td class="table-content text-center">{{'$'+enyrgyProfit}}</td>
+                                    <!-- <td class="table-content text-center">{{'$'+enyrgyBalance}}</td>
+                                    <td class="table-content text-center">{{'$'+enyrgyProfit}}</td> -->
                                 </tr>
                             </tbody>
                         </table>
