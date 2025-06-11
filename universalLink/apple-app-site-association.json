@@ -1,17 +1,21 @@
 {
   "applinks": {
     "apps": [],
+
     "details": [
       {
-        "appID": "9897Q4TT78.com.lumanova.app",
+        "appID": "C3FR6T7NUL.com.lumanova.app.prod",
+
         "components": [
           {
             "/": "/sms/*"
           },
+
           {
             "/": "/scan/*"
           }
         ],
+
         "paths": ["/sms/", "/sms/*", "/scan/", "/scan/*"]
       }
     ]
