@@ -1,11 +1,14 @@
 [
   {
     "relation": ["delegate_permission/common.handle_all_urls"],
+
     "target": {
-      "namespace": "com.lumanova.app",
+      "namespace": "android_app",
+
       "package_name": "com.lumanova.app",
+
       "sha256_cert_fingerprints": [
-        "93:33:D3:E4:D5:10:F7:F6:C3:6D:59:B8:81:49:B5:83:21:83:29:04:16:3A:20:2C:B6:79:3F:17:E5:05:5B:0A"
+        "87:00:2C:F4:CF:68:59:3D:85:73:5F:46:DD:3A:55:59:B7:78:CC:E4:D6:88:C5:3C:5D:10:06:8F:7B:90:B5:3F"
       ]
     }
   }
