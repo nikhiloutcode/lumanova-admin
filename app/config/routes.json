@@ -121,6 +121,12 @@
       "page": "deleteAccount",
       "layout": "main",
       "name": "deleteAccount"
+    },
+    {
+      "path": "/account-deletion/",
+      "page": "deleteAccountSteps",
+      "layout": "main",
+      "name": "deleteAccountSteps"
     }
   ],
   "layouts": {

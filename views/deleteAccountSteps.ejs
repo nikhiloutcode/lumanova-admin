@@ -1,0 +1,76 @@
+<!-- Wappler include head-page="layouts/main" fontawesome_5="cdn" bootstrap5="local" is="dmx-app" id="index" appconnect="local" components="{dmxTyped:{},dmxBootstrap5Modal:{},dmxSmoothScroll:{}}" style="" -->
+
+<div class="">
+    <div class="container ">
+        <div id="question" class="row my-4">
+            <h1>Account Deletion Steps</h1>
+        </div>
+
+        <div>
+        <h2>Log in to app</h2>
+        <ul class="my-5">
+        <li class="col">Open App</li>
+        <li class="col">Enter your registered phone number.</li>
+        <li class="col">You will receive an OTP link via SMS.</li>
+        <li class="col">Tap the OTP link. The app will open and automatically log you in using deep linking.</li>
+        </ul>
+        </div>
+
+        <div>
+        <h2>Access Account Deletion Option</h2>
+        <ul class="my-5">
+        <li class="col">Once logged in, go to the top-right corner of the app.</li>
+        <li class="col">Tap the three-dot (⋮) menu icon in the header.</li>
+        </ul>
+        </div>
+
+        <div>
+            <h2>Select "Delete Profile"</h2>
+            <ul class="my-5">
+            <li class="col">From the menu options, tap on "Delete Profile".</li>
+            </ul>
+        </div>
+
+        <div>
+            <h2>Confirm Account Deletion"</h2>
+                <ul class="my-5">
+                    <li class="col">A confirmation dialog will appear: “Are you sure you want to permanently delete your profile?”</li>
+                    <li class="col">Tap "Delete" to permanently delete your account.</li>
+                    <li class="col">Tap "Cancel" if you do not wish to proceed.</li>
+                </ul>
+        </div>
+
+        <div class="my-4">
+            The following information will be deleted: username, password, user's name including first name, last name and preferred name, contact information including email addresses and phone numbers.
+            Note: This action is permanent. Once deleted, your profile and all associated data will be removed from our system and cannot be recovered.
+        </div>
+
+    </div>
+
+
+    <meta name="ac:route" content="/delete-request/">
+</div>
+<script>
+    function showValidatePhone(){
+        $("#validatePhone").removeClass("d-none")
+        $("#thankYou").addClass("d-none")
+        $("#selections").addClass("d-none")
+        $("#question").addClass("d-none")
+    }
+    function showThankYou(){
+        $("#thankYou").removeClass("d-none")
+        $("#validatePhone").addClass("d-none")
+        $("#validateCode").addClass("d-none")
+        $("#selections").addClass("d-none")
+        $("#question").addClass("d-none")
+    }
+    function validateDeletePhoneNumber(){
+        if($("#phone").val().length == 10){
+            $("#validatePhone").addClass("disabled-form")
+            $("#validateCode").removeClass("d-none")
+        }
+    }
+    function disabledForm(){
+        $("#validateCode").addClass("disabled-form")
+    }
+</script>
