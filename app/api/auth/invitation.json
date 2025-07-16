@@ -409,7 +409,7 @@
                                 "subject": "Your invitation link",
                                 "fromName": "Lumanova Invitation Link",
                                 "fromEmail": "{{$_ENV.SENDGRID_EMAIL}}",
-                                "body": "<p>You've been invited to Lumanova</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.enyrgy.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/us/app/enyrgy/id6450723326\" target=\"_blank\">iOS</a>",
+                                "body": "<p>You've been invited to Lumanova</p>\n<p>Download the app from the stores:</p>\n<br />\n<a href=\"https://play.google.com/store/apps/details?id=com.lumanova.app\" target=\"_blank\">Android</a>\n<br />\n<a href=\"https://apps.apple.com/np/app/luma-d-light/id6747105940\" target=\"_blank\">iOS</a>",
                                 "toEmail": "{{user.email}}",
                                 "contentType": "html"
                               }
@@ -436,7 +436,7 @@
                         "module": "core",
                         "action": "setvalue",
                         "options": {
-                          "value": "{{'Your link is: '+$_ENV.HOST+'/sms/'+code}}"
+                          "value": "{{'Lumanova invites you to join : '+$_ENV.HOST+'/sms/'+code}}"
                         },
                         "meta": [],
                         "outputType": "text"

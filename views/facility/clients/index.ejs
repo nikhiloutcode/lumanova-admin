@@ -24,7 +24,7 @@
                     <button id="createUser" class="btn add-button" data-bs-toggle="modal" data-bs-target="#userCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.clients" onclick="clearStyles()">Add</button>
                 </div>
                 <div class="col-2" dmx-show="getMe.data.hasDevice==false||getMe.data.hasPackage==false">
-                    <button id="createUser" class="btn add-button" data-bs-target="#userCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.clients" dmx-on:click="run({condition:{if:`getMe.data.hasDevice==false`,then:{steps:{run:{action:`notifies.warning(\'An Enyrgy device is required to add a client. Please contact your Enyrgy representative to add a device to your account.\')`,outputType:'text'}}},else:{steps:{run:{action:`notifies.warning(\'Please create a package for your Facility before adding a client\')`,outputType:'text'}}},outputType:'boolean'}})">Add</button>
+                    <button id="createUser" class="btn add-button" data-bs-target="#userCreateModal" is="dmx-button" value="" type="button" dmx-show="getMe.data.user.clients" dmx-on:click="run({condition:{if:`getMe.data.hasDevice==false`,then:{steps:{run:{action:`notifies.warning(\'An Lumanova device is required to add a client. Please contact your lumanova representative to add a device to your account.\')`,outputType:'text'}}},else:{steps:{run:{action:`notifies.warning(\'Please create a package for your Facility before adding a client\')`,outputType:'text'}}},outputType:'boolean'}})">Add</button>
                 </div>
             </div>
             <div class="row">
@@ -102,7 +102,7 @@
                     <small class="text-muted fill-inputs-modal">Please complete client data:</small>
                     <br>
                     <br>
-                    <form id="userForm" method="post" is="dmx-api-form" action="/api/user/createClient" novalidate="" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Client already exists\')`,outputType:'text'}}},else:{steps:{condition:{if:`data.isEmployee`,then:{steps:{run:{action:`notifies.danger(\'As an Enyrgy Employee, the user already has access to Facility\')`,outputType:'text'}}},else:{steps:[{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Client created\')`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error creating client')">
+                    <form id="userForm" method="post" is="dmx-api-form" action="/api/user/createClient" novalidate="" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Client already exists\')`,outputType:'text'}}},else:{steps:{condition:{if:`data.isEmployee`,then:{steps:{run:{action:`notifies.danger(\'As an Lumanova Employee, the user already has access to Facility\')`,outputType:'text'}}},else:{steps:[{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Client created\')`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error creating client')">
                         <div class="row">
                             <div class="col-6">
                                 <div class="form-group md-3" id="firstNameForm">
@@ -148,7 +148,7 @@
                                             <h2 class="card-title card-package-secondary_text">{{description}}</h2>
                                         </div>
                                         <div class="d-flex align-items-baseline mt-2">
-                                            <h3 class="card-text card-package-secondary_text">Enyrgy plan related:</h3>
+                                            <h3 class="card-text card-package-secondary_text">Lumanova plan related:</h3>
                                             <p class="card-text card-package-plan">&nbsp; {{plan}}</p>
                                         </div>
                                         <div class="d-flex card-plans-bg_amount mt-2">
@@ -190,7 +190,7 @@
                     <br>
                     <br>
                     <div class="container" is="dmx-data-detail" id="data_user" dmx-bind:data="getInformation.data.clients" key="id">
-                        <form id="userForm" method="post" is="dmx-api-form" action="/api/user/updateClient" novalidate="" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Client already exists\')`,outputType:'text'}}},else:{steps:{condition:{if:`data.isEmployee`,then:{steps:{run:{action:`notifies.danger(\'As an Enyrgy Employee, the user already has access to Facility\')`,outputType:'text'}}},else:{steps:[{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Client updated\')`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error updating client')">
+                        <form id="userForm" method="post" is="dmx-api-form" action="/api/user/updateClient" novalidate="" dmx-header:authorization="'Bearer '+session.data.jwt" dmx-on:success="run({condition:{if:`data.exists`,then:{steps:{run:{action:`notifies.danger(\'Client already exists\')`,outputType:'text'}}},else:{steps:{condition:{if:`data.isEmployee`,then:{steps:{run:{action:`notifies.danger(\'As an Lumanova Employee, the user already has access to Facility\')`,outputType:'text'}}},else:{steps:[{run:{action:`getInformation.load({})`,outputType:'text'}},{run:{action:`notifies.success(\'Client updated\')`,outputType:'text'}}]},outputType:'boolean'}}},outputType:'boolean'}})" dmx-on:unauthorized="browser.goto('/')" autocomplete="off" dmx-on:error="notifies.danger('Error updating client')">
                             <div class="form-group md-3" id="idForm">
                                 <input type="hidden" class="form-control" id="id" name="id" aria-describedby="input1_help" placeholder="" dmx-bind:value="data_user.data.id">
                             </div>
